@@ -111,6 +111,27 @@ précédent, et applique une sanction :
 > `confinements.json` : la libération est **automatiquement reprise au démarrage**
 > du bot (libération immédiate si l'échéance est déjà passée).
 
+### Automodération
+
+Active en permanence, ignore les bots et les modérateurs (permission *Gérer les
+messages* ou *Administrateur*).
+
+- **Anti-majuscules** : un message contenant **plus de 75 %** de lettres
+  majuscules (au moins 8 lettres) est supprimé.
+- **Anti-emojis** : un message composé à **plus de 75 %** d'emojis (au moins 5)
+  est supprimé.
+
+Escalation par utilisateur et par type d'infraction :
+
+| Infraction | Sanction |
+|------------|----------|
+| 1re | Suppression + message d'avertissement |
+| 2e | Suppression + avertissement officiel |
+| 3e et + | Suppression + mute (timeout) de 5, 10, 15... minutes |
+
+> Les compteurs d'automodération sont conservés en mémoire (réinitialisés au
+> redémarrage du bot).
+
 > Le salon de log n'est visible que par les administrateurs et le bot.
 > La surveillance persiste entre les redémarrages (`watched.json`).
 
