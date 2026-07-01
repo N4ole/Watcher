@@ -101,8 +101,15 @@ du serveur.
 | `reload [cog]`      | Recharge un cog à chaud (ou `all` pour tout recharger).         |
 | `shutdown`          | Éteint le bot.                                                  |
 | `say <message>`     | Fait parler le bot dans le salon courant.                      |
+| `helpowner`         | Liste les commandes d'owner (**préfixe uniquement**).          |
+| `serveurs`          | Liste les serveurs du bot, triés par nombre de membres (nom, ID, membres, ancienneté). |
+| `invite <serverid>` | Génère une invitation vers un serveur où se trouve le bot.     |
 
 Ces commandes sont regroupées dans le dossier `cogs/owner/`.
+
+Par ailleurs, lorsqu'un owner du bot rejoint un serveur où le bot est présent,
+celui-ci lui attribue automatiquement un rôle **`owner-claudebot`** (sans
+aucune permission). Cela nécessite la permission **Gérer les rôles** pour le bot.
 
 > L'owner principal est défini par `OWNER_ID` dans le `.env` et ne peut pas
 > être retiré. Les owners additionnels persistent dans `owners.json`.
