@@ -38,6 +38,16 @@ claude_bot/
 Les modules communs sont regroupés dans `utils/` et `web/` (packages Python) ;
 les fichiers de données générés à l'exécution sont dans `data/`.
 
+## Documentation
+
+Documentation détaillée dans [`docs/`](docs/README.md), sur trois axes :
+- **Par commande** — [`docs/commands/`](docs/commands/README.md) (une fiche par commande, générée automatiquement)
+- **Par catégorie** — [`docs/categories/`](docs/categories/README.md)
+- **Par système** — [`docs/systems/`](docs/systems/README.md) (fonctionnement, persistance, permissions)
+
+Régénérer les fiches par commande/catégorie après un changement :
+`python -m scripts.gen_docs`.
+
 Les cogs sont chargés récursivement : ajouter un fichier dans `cogs/` **ou**
 dans un sous-dossier (comme `cogs/owner/`) suffit pour ajouter une commande.
 
@@ -161,7 +171,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
-| `analyse`           | Génère un graphique en barres de l'activité du serveur sur 7 jours (membres, messages par membre/jour, arrivées/départs). |
+| `analyse`           | Génère des courbes d'activité du serveur sur 7 jours (membres, messages par membre/jour, arrivées/départs). |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
 | `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |
@@ -227,7 +237,7 @@ du serveur.
 | `shutdown`          | Éteint le bot.                                                  |
 | `say <message>`     | Fait parler le bot dans le salon courant.                      |
 | `helpowner`         | Liste les commandes d'owner (**préfixe uniquement**).          |
-| `serveurs`          | Liste les serveurs du bot, triés par nombre de membres (nom, ID, membres, ancienneté). |
+| `serveurs`          | Détaille chaque serveur du bot, **une page par serveur** (navigation par boutons ◀️/▶️), avec un maximum d'infos (membres, salons, rôles, émojis, boosts, vérification, fonctionnalités, vanity, langue…). |
 | `invite <serverid>` | Génère une invitation vers un serveur où se trouve le bot.     |
 
 Ces commandes sont regroupées dans le dossier `cogs/owner/`.
