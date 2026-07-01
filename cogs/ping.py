@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class Ping(commands.Cog):
     """Vérifie que le bot répond et mesure sa latence."""
@@ -13,8 +15,7 @@ class Ping(commands.Cog):
     async def ping(self, ctx: commands.Context) -> None:
         latency_ms = round(self.bot.latency * 1000)
         embed = discord.Embed(
-            title="🏓 Pong !",
-            description=f"Latence : **{latency_ms} ms**",
+            description=t(ctx, "ping.result", ms=latency_ms),
             color=discord.Color.green(),
         )
         await ctx.send(embed=embed)

@@ -38,6 +38,10 @@ claude_bot/
 Les modules communs sont regroupés dans `utils/` et `web/` (packages Python) ;
 les fichiers de données générés à l'exécution sont dans `data/`.
 
+Le bot est **bilingue** (français par défaut, anglais). La commande
+`langue <fr/en>` change la langue **par serveur** ; les messages passent par le
+catalogue centralisé [`utils/i18n.py`](utils/i18n.py) (fonction `t(ctx, clé)`).
+
 ## Documentation
 
 Documentation détaillée dans [`docs/`](docs/README.md), sur trois axes :
@@ -174,6 +178,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antipub <on/off>`  | Quand activé, supprime les messages contenant une invitation Discord et prévient l'auteur. |
 | `antispam <on/off>` | Quand activé, mute temporairement un membre qui envoie trop de messages en peu de temps. |
 | `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
+| `langue <fr/en>`    | Choisit la langue du bot pour ce serveur (français par défaut). |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
 | `analyse`           | Génère des courbes d'activité du serveur sur 7 jours (membres, messages par membre/jour, arrivées/départs). |

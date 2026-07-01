@@ -11,6 +11,7 @@ from discord.ext import commands
 
 from utils import storage
 from utils.duration import parse_duration
+from utils.i18n import t
 
 # Durée maximale d'un timeout Discord.
 MAX_TIMEOUT = timedelta(days=28)
@@ -33,23 +34,19 @@ class Mute(commands.Cog):
     ) -> None:
         delta = parse_duration(duree)
         if delta is None:
-            await ctx.send(
-                "❌ Durée invalide. Exemples : `30s`, `5m`, `2h`, `1d`, `1h30m`."
-            )
+            await ctx.send(t(ctx, "mute.bad_duration"))
             return
         if delta > MAX_TIMEOUT:
-            await ctx.send("❌ La durée maximale d'un mute est de 28 jours.")
+            await ctx.send(t(ctx, "mute.too_long"))
             return
 
         try:
             await member.timeout(delta, reason=f"Mute par {ctx.author}")
         except discord.Forbidden:
-            await ctx.send(
-                "⛔ Impossible de mute ce membre (permissions ou hiérarchie)."
-            )
+            await ctx.send(t(ctx, "mute.forbidden"))
             return
         except discord.HTTPException as exc:
-            await ctx.send(f"❌ Échec du mute : {exc}")
+            await ctx.send(t(ctx, "mute.failed", error=exc))
             return
 
         storage.add_modlog(
@@ -59,17 +56,18 @@ class Mute(commands.Cog):
 
         until = discord.utils.utcnow() + delta
         embed = discord.Embed(
-            title="🔇 Mute",
-            description=f"{member.mention} est mute.",
+            title=t(ctx, "mute.title"),
+            description=t(ctx, "mute.done", user=member.mention),
             color=discord.Color.orange(),
         )
         embed.add_field(
-            name="Jusqu'à",
+            name=t(ctx, "mute.until"),
             value=discord.utils.format_dt(until, style="F"),
             inline=True,
         )
         embed.add_field(
-            name="Soit", value=discord.utils.format_dt(until, style="R"), inline=True
+            name=t(ctx, "mute.relative"),
+            value=discord.utils.format_dt(until, style="R"), inline=True,
         )
         await ctx.send(embed=embed)
 
@@ -81,17 +79,17 @@ class Mute(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx: commands.Context, member: discord.Member) -> None:
         if member.timed_out_until is None:
-            await ctx.send(f"{member.mention} n'est pas mute.")
+            await ctx.send(t(ctx, "unmute.not_muted", user=member.mention))
             return
 
         try:
             await member.timeout(None, reason=f"Unmute par {ctx.author}")
         except discord.HTTPException as exc:
-            await ctx.send(f"❌ Échec du unmute : {exc}")
+            await ctx.send(t(ctx, "unmute.failed", error=exc))
             return
 
         storage.add_modlog(ctx.guild.id, member.id, "unmute", ctx.author.id)
-        await ctx.send(f"🔊 {member.mention} n'est plus mute.")
+        await ctx.send(t(ctx, "unmute.done", user=member.mention))
 
 
 async def setup(bot: commands.Bot) -> None:

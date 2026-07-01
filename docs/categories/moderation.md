@@ -8,6 +8,7 @@
 - [`§antispam`](../commands/antispam.md) — Active/désactive l'anti-spam (on/off). — 🔒 *Administrateur*
 - [`§clear`](../commands/clear.md) — Supprime un nombre de messages du salon (max 100). — 🔒 *Gérer les messages*
 - [`§confine`](../commands/confine.md) — Isole un utilisateur dans un salon de confinement. — 🔒 *Administrateur*
+- [`§langue`](../commands/langue.md) — Choisit la langue du bot pour ce serveur (fr/en). — 🔒 *Administrateur*
 - [`§mute`](../commands/mute.md) — Coupe la parole à un utilisateur pour une durée (ex: 5m, 1h30m). — 🔒 *Administrateur*
 - [`§protections`](../commands/protections.md) — Affiche l'état des protections du serveur. — 🔒 *Administrateur*
 - [`§unconfine`](../commands/unconfine.md) — Libère un utilisateur du confinement. — 🔒 *Administrateur*

@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from utils import storage
+from utils.i18n import t
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -34,15 +35,12 @@ class AntiPub(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antipub", True)
-            await ctx.send(
-                "🚫 **Anti-pub activé** : les invitations Discord seront "
-                "supprimées."
-            )
+            await ctx.send(t(ctx, "antipub.on"))
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antipub", False)
-            await ctx.send("🚫 **Anti-pub désactivé**.")
+            await ctx.send(t(ctx, "antipub.off"))
         else:
-            await ctx.send("❌ Utilise `antipub on` ou `antipub off`.")
+            await ctx.send(t(ctx, "toggle.usage", name="antipub"))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -61,8 +59,7 @@ class AntiPub(commands.Cog):
         except discord.HTTPException:
             pass
         await message.channel.send(
-            f"🚫 {message.author.mention} les invitations Discord sont "
-            "interdites ici.",
+            t(message, "antipub.warn", user=message.author.mention),
             delete_after=10,
         )
 

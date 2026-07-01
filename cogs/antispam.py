@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 
 from utils import storage
+from utils.i18n import t
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -38,15 +39,15 @@ class AntiSpam(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antispam", True)
-            await ctx.send(
-                f"⏱️ **Anti-spam activé** : au-delà de {MAX_MESSAGES} messages "
-                f"en {int(WINDOW)}s, l'utilisateur est mute {int(MUTE_DURATION.total_seconds() // 60)} min."
-            )
+            await ctx.send(t(
+                ctx, "antispam.on", max=MAX_MESSAGES, window=int(WINDOW),
+                minutes=int(MUTE_DURATION.total_seconds() // 60),
+            ))
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antispam", False)
-            await ctx.send("⏱️ **Anti-spam désactivé**.")
+            await ctx.send(t(ctx, "antispam.off"))
         else:
-            await ctx.send("❌ Utilise `antispam on` ou `antispam off`.")
+            await ctx.send(t(ctx, "toggle.usage", name="antispam"))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -63,7 +64,7 @@ class AntiSpam(commands.Cog):
         history.append(now)
 
         # Nombre de messages dans la fenêtre glissante.
-        recent = [t for t in history if now - t <= WINDOW]
+        recent = [ts for ts in history if now - ts <= WINDOW]
         if len(recent) < MAX_MESSAGES:
             return
 
@@ -83,8 +84,8 @@ class AntiSpam(commands.Cog):
         except discord.HTTPException:
             pass
         await message.channel.send(
-            f"⏱️ {message.author.mention} arrête de spammer — tu es mute "
-            f"{int(MUTE_DURATION.total_seconds() // 60)} minute(s).",
+            t(message, "antispam.warn", user=message.author.mention,
+              minutes=int(MUTE_DURATION.total_seconds() // 60)),
             delete_after=10,
         )
 

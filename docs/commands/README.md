@@ -20,6 +20,7 @@
 - [`§help`](help.md)
 - [`§helpowner`](helpowner.md)
 - [`§invite`](invite.md)
+- [`§langue`](langue.md)
 - [`§membercount`](membercount.md)
 - [`§mute`](mute.md)
 - [`§owners`](owners.md)

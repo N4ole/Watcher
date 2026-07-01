@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 
 from utils import storage
+from utils.i18n import t
 
 log = logging.getLogger(__name__)
 
@@ -28,15 +29,12 @@ class AntiBot(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antibot", True)
-            await ctx.send(
-                "🤖 **Anti-bot activé** : les bots qui rejoignent seront "
-                "automatiquement expulsés."
-            )
+            await ctx.send(t(ctx, "antibot.on"))
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antibot", False)
-            await ctx.send("🤖 **Anti-bot désactivé**.")
+            await ctx.send(t(ctx, "antibot.off"))
         else:
-            await ctx.send("❌ Utilise `antibot on` ou `antibot off`.")
+            await ctx.send(t(ctx, "toggle.usage", name="antibot"))
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:

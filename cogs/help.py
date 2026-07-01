@@ -33,6 +33,7 @@ _CATEGORIES = {
     "Protections": ("🛡️ Modération", "Administrateur"),
     "UserStatus": ("🛡️ Modération", "Administrateur"),
     "Analyse": ("🛡️ Modération", "Administrateur"),
+    "Langue": ("🛡️ Modération", "Administrateur"),
     # 👑 Propriétaire
     "ContactOwner": ("👑 Propriétaire de serveur", "Propriétaire du serveur"),
 }
