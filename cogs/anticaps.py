@@ -17,10 +17,6 @@ class AntiCaps(commands.Cog):
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot or message.guild is None:
             return
-        # On ne sanctionne pas les modérateurs/admins.
-        perms = message.author.guild_permissions
-        if perms.administrator or perms.manage_messages:
-            return
         if not automod.is_caps_spam(message.content):
             return
 

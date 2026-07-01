@@ -17,9 +17,6 @@ class AntiEmoji(commands.Cog):
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot or message.guild is None:
             return
-        perms = message.author.guild_permissions
-        if perms.administrator or perms.manage_messages:
-            return
         if not automod.is_emoji_spam(message.content):
             return
 
