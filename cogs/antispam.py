@@ -75,6 +75,11 @@ class AntiSpam(commands.Cog):
             pass
         try:
             await message.author.timeout(MUTE_DURATION, reason="Anti-spam")
+            storage.add_modlog(
+                message.guild.id, message.author.id, "mute",
+                self.bot.user.id if self.bot.user else None,
+                duration=MUTE_DURATION.total_seconds(), detail="anti-spam",
+            )
         except discord.HTTPException:
             pass
         await message.channel.send(

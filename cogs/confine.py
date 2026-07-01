@@ -189,6 +189,7 @@ class Confine(commands.Cog):
         if channel is None:
             await ctx.send(f"⚠️ {member.mention} est déjà confiné.")
             return
+        storage.add_modlog(ctx.guild.id, member.id, "confine", ctx.author.id)
         await ctx.send(
             f"🔒 {member.mention} a été confiné dans {channel.mention}."
         )

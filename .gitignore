@@ -16,6 +16,7 @@ warns.json
 confinements.json
 stats.json
 guild_settings.json
+modlog.json
 
 # Logs
 *.log

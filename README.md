@@ -50,6 +50,9 @@ des membres par serveur, et utilisation (commandes) par serveur.
 - **Accès** : les **owners** du bot voient toutes les données ; un
   **administrateur** d'un serveur où le bot est présent voit les données des
   serveurs qu'il administre. Les autres sont refusés.
+- **Analytics & contrôle** : les owners disposent de cartes analytics (serveurs,
+  membres, commandes, ping, uptime) et d'un panneau de **contrôle du bot**
+  (changer le statut, recharger les cogs). Interface au thème **néon**.
 - **Activation** : renseignez `OAUTH_CLIENT_ID` et `OAUTH_CLIENT_SECRET` dans le
   `.env` (sinon le panel ne démarre pas). Ajoutez `OAUTH_REDIRECT_URI` dans les
   *Redirects* OAuth2 de l'application Discord.
@@ -128,6 +131,8 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antiraid <on/off>` | Quand activé, chaque nouveau membre doit valider un captcha (code à recopier dans le salon `vérification`) avant d'accéder au serveur. |
 | `antipub <on/off>`  | Quand activé, supprime les messages contenant une invitation Discord et prévient l'auteur. |
 | `antispam <on/off>` | Quand activé, mute temporairement un membre qui envoie trop de messages en peu de temps. |
+| `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
+| `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
 | `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |
