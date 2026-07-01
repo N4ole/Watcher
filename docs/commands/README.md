@@ -11,6 +11,7 @@
 - [`§avatar`](avatar.md)
 - [`§bonjour`](bonjour.md)
 - [`§botinfo`](botinfo.md)
+- [`§central`](central.md)
 - [`§choose`](choose.md)
 - [`§clear`](clear.md)
 - [`§coinflip`](coinflip.md)

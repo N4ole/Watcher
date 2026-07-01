@@ -174,6 +174,26 @@ def set_warns(guild_id: int, user_id: int, count: int) -> None:
         _write_warns(data)
 
 
+def warn_totals() -> tuple[int, int]:
+    """Renvoie (nombre d'utilisateurs avertis, total des points de warn)."""
+    users, points = 0, 0
+    for guild in _read_warns().values():
+        for count in guild.values():
+            users += 1
+            points += int(count)
+    return users, points
+
+
+def total_watched() -> int:
+    """Nombre total d'utilisateurs surveillés (tous serveurs confondus)."""
+    return sum(len(users) for users in _read().values())
+
+
+def count_setting_enabled(key: str) -> int:
+    """Nombre de serveurs où le réglage `key` est activé."""
+    return sum(1 for g in _read_settings().values() if g.get(key))
+
+
 # --------------------------------------------------------------------------- #
 # Confinements temporisés
 #   confinements.json = {guild_id: {user_id: release_timestamp_utc}}
