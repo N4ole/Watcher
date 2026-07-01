@@ -273,22 +273,40 @@ _NEON_CSS = """
  .stat .l{opacity:.7;font-size:.85em}
 """
 
+# JavaScript i18n partagé : mémorise la langue et traduit les éléments
+# possédant des attributs data-fr / data-en.
+_I18N_JS = """
+function getLang(){return localStorage.getItem('lang')||'fr';}
+function applyLang(l){localStorage.setItem('lang',l);document.documentElement.lang=l;
+ document.querySelectorAll('[data-fr]').forEach(function(e){
+   e.textContent=e.getAttribute('data-'+l);});
+ var b=document.getElementById('lang');if(b)b.textContent=(l==='fr'?'English':'Français');}
+function toggleLang(){applyLang(getLang()==='fr'?'en':'fr');}
+"""
+
 _LOGIN_HTML = """<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
 <title>ClaudeBot — Panel</title>
 <style>""" + _NEON_CSS + """
  body{display:flex;height:100vh;align-items:center;justify-content:center}
- .card{padding:44px;text-align:center;max-width:420px}
+ .card{padding:44px;text-align:center;max-width:420px;position:relative}
+ #lang{position:absolute;top:16px;right:16px}
 </style></head>
 <body><div class="card">
+ <button class="btn" id="lang" onclick="toggleLang()">English</button>
  <h1>▚ ClaudeBot ▞</h1>
- <p>Panneau d'administration. Connecte-toi avec Discord pour accéder aux
- statistiques et au contrôle du bot.</p>
- <a class="btn" href="/login">Se connecter avec Discord</a>
+ <p data-fr="Panneau d'administration. Connecte-toi avec Discord pour accéder aux statistiques et au contrôle du bot."
+    data-en="Admin panel. Log in with Discord to access the bot's statistics and controls."></p>
+ <a class="btn" href="/login" data-fr="Se connecter avec Discord"
+    data-en="Log in with Discord"></a>
  <p style="margin-top:26px;font-size:.85em;opacity:.75">
-   <a href="/privacy">Politique de confidentialité</a> ·
-   <a href="/terms">Conditions d'utilisation</a></p>
-</div></body></html>"""
+   <a href="/privacy" data-fr="Politique de confidentialité"
+      data-en="Privacy Policy"></a> ·
+   <a href="/terms" data-fr="Conditions d'utilisation"
+      data-en="Terms of Service"></a></p>
+</div>
+<script>""" + _I18N_JS + """applyLang(getLang());</script>
+</body></html>"""
 
 _DASHBOARD_HTML = """<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
@@ -304,11 +322,37 @@ _DASHBOARD_HTML = """<!DOCTYPE html>
 <body>
  <header><h1>▚ ClaudeBot ▞</h1>
    <span class="row"><span id="who"></span>
-   <a class="btn" href="/logout">Déconnexion</a></span></header>
+   <button class="btn" id="lang" onclick="toggleLang()">English</button>
+   <a class="btn" href="/logout" id="logout"></a></span></header>
  <div id="content"></div>
 <script>
+const T={fr:{lang:'English',logout:'Déconnexion',analytics:'Analytics',
+ servers:'Serveurs',members:'Membres',commands:'Commandes',ping:'Ping',
+ uptime:'Uptime',control:'Contrôle du bot',statusPh:'Statut (ex: §help)',
+ setStatus:'Définir le statut',reloadCogs:'Recharger les cogs',
+ statusOk:'✅ Statut mis à jour',cogsOk:'cogs rechargés',err:'❌ Erreur',
+ serversEvo:'Évolution du nombre de serveurs',serversLbl:'Serveurs',
+ membersTotal:'Membres (total)',membersLbl:'Membres',
+ cmdUsed:'Commandes utilisées',noData:'Aucune donnée disponible pour le moment.',
+ expired:'Session expirée.',reconnect:'Se reconnecter'},
+ en:{lang:'Français',logout:'Log out',analytics:'Analytics',servers:'Servers',
+ members:'Members',commands:'Commands',ping:'Ping',uptime:'Uptime',
+ control:'Bot control',statusPh:'Status (e.g. §help)',setStatus:'Set status',
+ reloadCogs:'Reload cogs',statusOk:'✅ Status updated',cogsOk:'cogs reloaded',
+ err:'❌ Error',serversEvo:'Server count over time',serversLbl:'Servers',
+ membersTotal:'Members (total)',membersLbl:'Members',cmdUsed:'Commands used',
+ noData:'No data available yet.',expired:'Session expired.',
+ reconnect:'Log in again'}};
+function getLang(){return localStorage.getItem('lang')||'fr';}
+function toggleLang(){localStorage.setItem('lang',getLang()==='fr'?'en':'fr');
+ location.reload();}
+const L=T[getLang()];
+document.documentElement.lang=getLang();
+document.getElementById('lang').textContent=L.lang;
+document.getElementById('logout').textContent=L.logout;
 function fmtUptime(s){const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),
- m=Math.floor(s%3600/60);return (d?d+'j ':'')+(h?h+'h ':'')+m+'m';}
+ m=Math.floor(s%3600/60);const u=getLang()==='fr'?'j':'d';
+ return (d?d+u+' ':'')+(h?h+'h ':'')+m+'m';}
 function tsLabels(p){return p.map(x=>new Date(x.ts*1000).toLocaleString());}
 const NEON={cyan:'#00eaff',magenta:'#ff2bd6',purple:'#9d4bff',
  green:'#39ff14',yellow:'#f5ff3d'};
@@ -321,55 +365,50 @@ async function post(url,body){const r=await fetch(url,{method:'POST',
 async function load(){
  const r=await fetch('/api/stats');
  if(!r.ok){document.getElementById('content').innerHTML=
-   '<p>Session expirée. <a href="/login">Se reconnecter</a></p>';return;}
+   '<p>'+L.expired+' <a href="/login">'+L.reconnect+'</a></p>';return;}
  const d=await r.json();
  document.getElementById('who').textContent='@'+(d.user.username||'');
- // Analytics (owners).
  if(d.analytics){const a=d.analytics;
-   card('<h2>Analytics</h2><div class="grid">'+
-    '<div class="stat"><div class="n">'+a.guilds+'</div><div class="l">Serveurs</div></div>'+
-    '<div class="stat"><div class="n">'+a.members+'</div><div class="l">Membres</div></div>'+
-    '<div class="stat"><div class="n">'+a.commands_total+'</div><div class="l">Commandes</div></div>'+
-    '<div class="stat"><div class="n">'+a.latency_ms+'<span style="font-size:.5em">ms</span></div><div class="l">Ping</div></div>'+
-    '<div class="stat"><div class="n">'+fmtUptime(a.uptime_seconds)+'</div><div class="l">Uptime</div></div>'+
+   card('<h2>'+L.analytics+'</h2><div class="grid">'+
+    '<div class="stat"><div class="n">'+a.guilds+'</div><div class="l">'+L.servers+'</div></div>'+
+    '<div class="stat"><div class="n">'+a.members+'</div><div class="l">'+L.members+'</div></div>'+
+    '<div class="stat"><div class="n">'+a.commands_total+'</div><div class="l">'+L.commands+'</div></div>'+
+    '<div class="stat"><div class="n">'+a.latency_ms+'<span style="font-size:.5em">ms</span></div><div class="l">'+L.ping+'</div></div>'+
+    '<div class="stat"><div class="n">'+fmtUptime(a.uptime_seconds)+'</div><div class="l">'+L.uptime+'</div></div>'+
     '</div>');
-   // Contrôle du bot (owners).
-   const cc=card('<h2>Contrôle du bot</h2>'+
-    '<div class="row"><input id="pres" placeholder="Statut (ex: §help)" value="'+
-      (a.presence||'')+'"><button class="btn" id="setpres">Définir le statut</button>'+
-    '<button class="btn" id="reload">Recharger les cogs</button>'+
+   const cc=card('<h2>'+L.control+'</h2>'+
+    '<div class="row"><input id="pres" placeholder="'+L.statusPh+'" value="'+
+      (a.presence||'')+'"><button class="btn" id="setpres">'+L.setStatus+'</button>'+
+    '<button class="btn" id="reload">'+L.reloadCogs+'</button>'+
     '<span id="ctlmsg"></span></div>');
    cc.querySelector('#setpres').onclick=async()=>{
      const t=cc.querySelector('#pres').value;const j=await post('/api/control/presence',{text:t});
-     cc.querySelector('#ctlmsg').textContent=j.ok?'✅ Statut mis à jour':'❌ Erreur';};
+     cc.querySelector('#ctlmsg').textContent=j.ok?L.statusOk:L.err;};
    cc.querySelector('#reload').onclick=async()=>{
      const j=await post('/api/control/reload');
-     cc.querySelector('#ctlmsg').textContent=j.ok?('✅ '+j.reloaded+' cogs rechargés'):'❌ Erreur';};
+     cc.querySelector('#ctlmsg').textContent=j.ok?('✅ '+j.reloaded+' '+L.cogsOk):L.err;};
  }
- // Évolution serveurs (owners).
  if(d.servers_history){
-   card('<h2>Évolution du nombre de serveurs</h2><canvas id="servers"></canvas>');
+   card('<h2>'+L.serversEvo+'</h2><canvas id="servers"></canvas>');
    new Chart(document.getElementById('servers'),{type:'line',data:{
      labels:tsLabels(d.servers_history),datasets:[
-      {label:'Serveurs',data:d.servers_history.map(p=>p.guilds),
+      {label:L.serversLbl,data:d.servers_history.map(p=>p.guilds),
        borderColor:NEON.cyan,backgroundColor:'rgba(0,234,255,.1)',fill:true,tension:.25},
-      {label:'Membres (total)',data:d.servers_history.map(p=>p.members),
+      {label:L.membersTotal,data:d.servers_history.map(p=>p.members),
        borderColor:NEON.magenta,tension:.25,yAxisID:'y1'}]},
      options:{scales:{y1:{position:'right'}}}});
  }
- // Par serveur.
  d.guilds.forEach((g,i)=>{
    card('<h2>'+g.name+'</h2><canvas id="m'+i+'"></canvas><canvas id="u'+i+'"></canvas>');
    new Chart(document.getElementById('m'+i),{type:'line',data:{
-     labels:tsLabels(g.members),datasets:[{label:'Membres',
+     labels:tsLabels(g.members),datasets:[{label:L.membersLbl,
        data:g.members.map(p=>p.count),borderColor:NEON.green,
        backgroundColor:'rgba(57,255,20,.1)',fill:true,tension:.25}]}});
    new Chart(document.getElementById('u'+i),{type:'bar',data:{
-     labels:g.usage.map(p=>p.date),datasets:[{label:'Commandes utilisées',
+     labels:g.usage.map(p=>p.date),datasets:[{label:L.cmdUsed,
        data:g.usage.map(p=>p.count),backgroundColor:NEON.purple}]}});
  });
- if(!d.analytics && d.guilds.length===0){
-   card('<p>Aucune donnée disponible pour le moment.</p>');}
+ if(!d.analytics && d.guilds.length===0){card('<p>'+L.noData+'</p>');}
 }
 load();
 </script>
@@ -397,15 +436,13 @@ def _legal_page(title: str, fr_body: str, en_body: str) -> str:
  <a href="/privacy">Confidentialité / Privacy</a> ·
  <a href="/terms">Conditions / Terms</a></footer>
 <script>
-function toggleLang(){
- const fr=document.getElementById('fr'),en=document.getElementById('en'),
-   btn=document.getElementById('lang');
- const showEn=fr.style.display!=='none';
- fr.style.display=showEn?'none':'';
- en.style.display=showEn?'':'none';
- btn.textContent=showEn?'Français':'English';
- document.documentElement.lang=showEn?'en':'fr';
-}
+function getLang(){return localStorage.getItem('lang')||'fr';}
+function applyLang(l){localStorage.setItem('lang',l);document.documentElement.lang=l;
+ document.getElementById('fr').style.display=(l==='fr'?'':'none');
+ document.getElementById('en').style.display=(l==='en'?'':'none');
+ document.getElementById('lang').textContent=(l==='fr'?'English':'Français');}
+function toggleLang(){applyLang(getLang()==='fr'?'en':'fr');}
+applyLang(getLang());
 </script>
 </div></body></html>"""
     )
