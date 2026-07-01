@@ -73,6 +73,11 @@ chargé automatiquement au démarrage.
 | `help`     | Liste les commandes disponibles (hors commandes d'owner) |
 | `bonjour`  | Le bot vous salue                    |
 | `ping`     | Affiche la latence du bot            |
+| `userinfo [membre]` | Affiche les informations détaillées d'un utilisateur (défaut : soi-même) |
+| `avatar [membre]`   | Affiche l'avatar d'un utilisateur (avec liens PNG/JPG/WEBP/GIF) |
+| `uptime`   | Affiche depuis combien de temps le bot tourne |
+| `status`   | Version, ping et nombre de serveurs |
+| `contactowner <message>` | Réservée au **propriétaire du serveur** : envoie le message en MP à tous les owners du bot, avec les infos du serveur et une invitation. |
 
 ### Commandes d'administration
 
@@ -85,6 +90,9 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `watchlist`         | Liste les utilisateurs surveillés sur le serveur.               |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
+| `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |
+| `unmute <membre>`   | Rend la parole à un utilisateur mute.                           |
+| `clear <nombre>`    | Supprime un nombre de messages du salon (max 100 ; permission *Gérer les messages*). |
 | `warn <membre>`     | Avertit un utilisateur (sanction progressive, voir ci-dessous). |
 | `unwarn <membre>`   | Retire un avertissement et lève les sanctions temporaires.      |
 | `warns <membre>`    | Affiche le nombre d'avertissements d'un utilisateur.            |
@@ -106,6 +114,27 @@ précédent, et applique une sanction :
 > temporisé jusqu'à une **date de fin précise**, persistée dans
 > `confinements.json` : la libération est **automatiquement reprise au démarrage**
 > du bot (libération immédiate si l'échéance est déjà passée).
+
+### Automodération
+
+Active en permanence, ignore les bots et les modérateurs (permission *Gérer les
+messages* ou *Administrateur*).
+
+- **Anti-majuscules** : un message contenant **plus de 75 %** de lettres
+  majuscules (au moins 8 lettres) est supprimé.
+- **Anti-emojis** : un message composé à **plus de 75 %** d'emojis (au moins 5)
+  est supprimé.
+
+Escalation par utilisateur et par type d'infraction :
+
+| Infraction | Sanction |
+|------------|----------|
+| 1re | Suppression + message d'avertissement |
+| 2e | Suppression + avertissement officiel |
+| 3e et + | Suppression + mute (timeout) de 5, 10, 15... minutes |
+
+> Les compteurs d'automodération sont conservés en mémoire (réinitialisés au
+> redémarrage du bot).
 
 > Le salon de log n'est visible que par les administrateurs et le bot.
 > La surveillance persiste entre les redémarrages (`watched.json`).
