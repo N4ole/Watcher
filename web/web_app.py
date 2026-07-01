@@ -219,6 +219,12 @@ def build_app(bot) -> web.Application:
                 failed += 1
         return web.json_response({"ok": True, "reloaded": reloaded, "failed": failed})
 
+    async def privacy(_request: web.Request) -> web.Response:
+        return web.Response(text=_PRIVACY_HTML, content_type="text/html")
+
+    async def terms(_request: web.Request) -> web.Response:
+        return web.Response(text=_TERMS_HTML, content_type="text/html")
+
     app.router.add_get("/", index)
     app.router.add_get("/login", login)
     app.router.add_get("/logout", logout)
@@ -226,6 +232,11 @@ def build_app(bot) -> web.Application:
     app.router.add_get("/api/stats", api_stats)
     app.router.add_post("/api/control/presence", control_presence)
     app.router.add_post("/api/control/reload", control_reload)
+    # Pages publiques (accessibles sans connexion).
+    app.router.add_get("/privacy", privacy)
+    app.router.add_get("/confidentialite", privacy)
+    app.router.add_get("/terms", terms)
+    app.router.add_get("/conditions", terms)
     return app
 
 
@@ -274,6 +285,9 @@ _LOGIN_HTML = """<!DOCTYPE html>
  <p>Panneau d'administration. Connecte-toi avec Discord pour accéder aux
  statistiques et au contrôle du bot.</p>
  <a class="btn" href="/login">Se connecter avec Discord</a>
+ <p style="margin-top:26px;font-size:.85em;opacity:.75">
+   <a href="/privacy">Politique de confidentialité</a> ·
+   <a href="/terms">Conditions d'utilisation</a></p>
 </div></body></html>"""
 
 _DASHBOARD_HTML = """<!DOCTYPE html>
@@ -360,3 +374,124 @@ async function load(){
 load();
 </script>
 </body></html>"""
+
+
+# --------------------------------------------------------------------------- #
+# Pages légales publiques
+# --------------------------------------------------------------------------- #
+def _legal_page(title: str, body: str) -> str:
+    return (
+        "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"utf-8\">"
+        f"<title>ClaudeBot — {title}</title><style>" + _NEON_CSS + """
+ body{max-width:820px;margin:auto;padding:32px 24px;line-height:1.6}
+ h1{margin-bottom:4px}
+ h2{margin-top:28px}
+ .card{padding:28px}
+ footer{margin-top:30px;font-size:.85em;opacity:.7;text-align:center}
+</style></head><body><div class="card">""" + body + """
+ <footer><a href="/">Accueil</a> · <a href="/privacy">Confidentialité</a> ·
+ <a href="/terms">Conditions</a></footer>
+</div></body></html>"""
+    )
+
+
+_PRIVACY_BODY = """
+ <h1>Politique de confidentialité</h1>
+ <p><em>Dernière mise à jour : 2026.</em></p>
+ <p>Cette politique décrit les données traitées par le bot Discord
+ « ClaudeBot » (« le Bot ») et la façon dont elles sont utilisées.</p>
+
+ <h2>1. Données collectées</h2>
+ <p>Le Bot peut enregistrer, selon les fonctionnalités activées par les
+ administrateurs d'un serveur :</p>
+ <ul>
+   <li><strong>Identifiants Discord</strong> (utilisateurs, serveurs, salons,
+   rôles) nécessaires au fonctionnement des commandes ;</li>
+   <li><strong>Données de modération</strong> : avertissements, mutes,
+   confinements et historique des sanctions ;</li>
+   <li><strong>Statistiques agrégées</strong> : nombre de messages, arrivées
+   et départs, nombre de membres (pour les graphiques d'activité) ;</li>
+   <li><strong>Réglages de serveur</strong> (protections activées) ;</li>
+   <li><strong>Rappels</strong> que vous programmez ;</li>
+   <li>Lorsqu'un administrateur active la <strong>surveillance</strong> d'un
+   utilisateur, le contenu de ses messages, réactions, changements de pseudo
+   et statut, et son activité vocale sont recopiés dans un salon privé du
+   serveur concerné.</li>
+ </ul>
+ <p>Le Bot n'accède au contenu des messages que dans le cadre des
+ fonctionnalités d'automodération et de surveillance décrites ci-dessus.</p>
+
+ <h2>2. Connexion au panel web</h2>
+ <p>Le panel d'administration utilise l'authentification Discord (OAuth2). Le
+ Bot lit alors votre identifiant, votre nom d'utilisateur et la liste de vos
+ serveurs afin de vérifier vos droits d'accès. Aucune de ces informations
+ n'est revendue ni transmise à des tiers.</p>
+
+ <h2>3. Finalités</h2>
+ <p>Les données servent uniquement au fonctionnement du Bot (modération,
+ statistiques, rappels) et ne sont pas utilisées à des fins publicitaires.</p>
+
+ <h2>4. Conservation</h2>
+ <p>Les données sont conservées tant qu'elles sont nécessaires au service. Les
+ statistiques d'activité sont automatiquement purgées au-delà de 60 jours. Un
+ administrateur peut supprimer les données liées à une fonctionnalité en la
+ désactivant (par exemple <code>unwatch</code>, <code>unwarn</code>).</p>
+
+ <h2>5. Partage</h2>
+ <p>Les données ne sont pas partagées avec des tiers. Elles restent stockées
+ par l'hébergeur du Bot et, pour la surveillance, dans le serveur Discord
+ concerné.</p>
+
+ <h2>6. Vos droits</h2>
+ <p>Vous pouvez demander la suppression des données vous concernant en
+ contactant un administrateur du serveur ou l'exploitant du Bot. Retirer le
+ Bot d'un serveur cesse toute nouvelle collecte pour ce serveur.</p>
+
+ <h2>7. Contact</h2>
+ <p>Pour toute question relative à ces données, contactez l'exploitant du Bot
+ via le serveur de support ou la commande <code>contactowner</code>.</p>
+"""
+
+_TERMS_BODY = """
+ <h1>Conditions d'utilisation</h1>
+ <p><em>Dernière mise à jour : 2026.</em></p>
+ <p>En ajoutant ou en utilisant le bot « ClaudeBot » (« le Bot »), vous
+ acceptez les présentes conditions.</p>
+
+ <h2>1. Service</h2>
+ <p>Le Bot fournit des fonctionnalités de modération, d'utilitaires et de
+ statistiques pour les serveurs Discord. Il est fourni « tel quel », sans
+ garantie de disponibilité ni d'absence d'erreurs.</p>
+
+ <h2>2. Utilisation acceptable</h2>
+ <ul>
+   <li>Respectez les <a href="https://discord.com/terms">Conditions de
+   Discord</a> et les <a href="https://discord.com/guidelines">Règles de la
+   communauté</a> ;</li>
+   <li>N'utilisez pas le Bot pour harceler, espionner à des fins abusives, ou
+   enfreindre la loi ;</li>
+   <li>Les fonctionnalités de surveillance et de modération doivent être
+   utilisées de manière responsable et conforme au droit applicable et à la
+   transparence envers vos membres.</li>
+ </ul>
+
+ <h2>3. Responsabilité</h2>
+ <p>L'exploitant du Bot ne saurait être tenu responsable des dommages
+ résultant de l'utilisation ou de l'indisponibilité du Bot, ni de l'usage
+ qu'en font les administrateurs de serveur.</p>
+
+ <h2>4. Disponibilité</h2>
+ <p>Le service peut être modifié, suspendu ou interrompu à tout moment, sans
+ préavis.</p>
+
+ <h2>5. Données</h2>
+ <p>Le traitement des données est décrit dans la
+ <a href="/privacy">Politique de confidentialité</a>.</p>
+
+ <h2>6. Modifications</h2>
+ <p>Ces conditions peuvent évoluer. L'utilisation continue du Bot vaut
+ acceptation de la version en vigueur.</p>
+"""
+
+_PRIVACY_HTML = _legal_page("Confidentialité", _PRIVACY_BODY)
+_TERMS_HTML = _legal_page("Conditions d'utilisation", _TERMS_BODY)

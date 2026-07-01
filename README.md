@@ -84,6 +84,11 @@ des membres par serveur, et utilisation (commandes) par serveur.
 
 Une fois lancé, le panel est accessible sur `http://WEB_HOST:WEB_PORT`.
 
+Deux pages **publiques** (sans connexion) sont servies par le panel :
+`/privacy` (politique de confidentialité) et `/terms` (conditions
+d'utilisation) — utiles pour les champs *Privacy Policy URL* / *Terms of
+Service URL* du portail développeur Discord.
+
 👉 Guide pas à pas pour configurer l'OAuth2 : [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md).
 
 ## Messages d'erreur
