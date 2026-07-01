@@ -37,6 +37,36 @@ serveurs). En MP, les commandes des non-owners sont ignorées.
 Chaque commande utilise `@commands.hybrid_command`, ce qui la rend disponible
 **à la fois** en préfixe (`§ping`) et en slash (`/ping`) sans duplication.
 
+Les commandes slash sont synchronisées **sur le serveur de dev** (`GUILD_ID`,
+mise à jour instantanée) **et globalement** (utilisables partout, y compris en
+MP).
+
+## Panel web (administration)
+
+Un panel web optionnel, avec **connexion Discord (OAuth2)**, affiche des
+graphiques : évolution du nombre de serveurs et du total de membres, évolution
+des membres par serveur, et utilisation (commandes) par serveur.
+
+- **Accès** : les **owners** du bot voient toutes les données ; un
+  **administrateur** d'un serveur où le bot est présent voit les données des
+  serveurs qu'il administre. Les autres sont refusés.
+- **Activation** : renseignez `OAUTH_CLIENT_ID` et `OAUTH_CLIENT_SECRET` dans le
+  `.env` (sinon le panel ne démarre pas). Ajoutez `OAUTH_REDIRECT_URI` dans les
+  *Redirects* OAuth2 de l'application Discord.
+- Les statistiques sont échantillonnées chaque heure (et à chaque
+  entrée/sortie de serveur), et persistées dans `stats.json`.
+
+Une fois lancé, le panel est accessible sur `http://WEB_HOST:WEB_PORT`.
+
+👉 Guide pas à pas pour configurer l'OAuth2 : [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md).
+
+## Messages d'erreur
+
+Un gestionnaire d'erreurs global affiche un message clair lorsqu'une commande
+échoue : notamment, si un utilisateur n'a pas les permissions requises, le bot
+indique **quelle(s) permission(s)** sont nécessaires. La commande `help` range
+les commandes **par catégories** et précise la permission requise (🔒).
+
 ## Installation
 
 ```bash

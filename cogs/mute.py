@@ -99,18 +99,6 @@ class Mute(commands.Cog):
 
         await ctx.send(f"🔊 {member.mention} n'est plus mute.")
 
-    @mute.error
-    @unmute.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("⛔ Cette commande est réservée aux administrateurs.")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Utilisateur introuvable.")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("❌ Usage : `mute <membre> <durée>` (ex: `5m`, `1h30m`).")
-        else:
-            raise error
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Mute(bot))
