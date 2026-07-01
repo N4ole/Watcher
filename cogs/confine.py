@@ -203,16 +203,6 @@ class Confine(commands.Cog):
         await self.remove_confinement(ctx.guild, member)
         await ctx.send(f"🔓 {member.mention} a été libéré du confinement.")
 
-    @confine.error
-    @unconfine.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("⛔ Cette commande est réservée aux administrateurs.")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Utilisateur introuvable.")
-        else:
-            raise error
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Confine(bot))

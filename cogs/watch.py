@@ -132,17 +132,6 @@ class Watch(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @watch.error
-    @unwatch.error
-    @watchlist.error
-    async def _perm_error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("⛔ Cette commande est réservée aux administrateurs.")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Utilisateur introuvable.")
-        else:
-            raise error
-
     # ------------------------------------------------------------------ #
     # Listeners
     # ------------------------------------------------------------------ #

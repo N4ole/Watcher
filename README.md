@@ -58,6 +58,15 @@ des membres par serveur, et utilisation (commandes) par serveur.
 
 Une fois lancé, le panel est accessible sur `http://WEB_HOST:WEB_PORT`.
 
+👉 Guide pas à pas pour configurer l'OAuth2 : [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md).
+
+## Messages d'erreur
+
+Un gestionnaire d'erreurs global affiche un message clair lorsqu'une commande
+échoue : notamment, si un utilisateur n'a pas les permissions requises, le bot
+indique **quelle(s) permission(s)** sont nécessaires. La commande `help` range
+les commandes **par catégories** et précise la permission requise (🔒).
+
 ## Installation
 
 ```bash

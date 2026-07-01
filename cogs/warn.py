@@ -181,17 +181,6 @@ class Warn(commands.Cog):
             f"{member.mention} a **{count}/{MAX_WARN}** avertissement(s)."
         )
 
-    @warn.error
-    @unwarn.error
-    @warns.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("⛔ Cette commande est réservée aux administrateurs.")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Utilisateur introuvable.")
-        else:
-            raise error
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Warn(bot))

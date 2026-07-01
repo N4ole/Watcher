@@ -37,19 +37,6 @@ class Clear(commands.Cog):
             ephemeral=True,
         )
 
-    @clear.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send(
-                "⛔ Il te faut la permission *Gérer les messages*."
-            )
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("❌ Usage : `clear <nombre>`.")
-        elif isinstance(error, commands.BadArgument):
-            await ctx.send("❌ Le nombre doit être un entier.")
-        else:
-            raise error
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Clear(bot))
