@@ -131,6 +131,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antiraid <on/off>` | Quand activé, chaque nouveau membre doit valider un captcha (code à recopier dans le salon `vérification`) avant d'accéder au serveur. |
 | `antipub <on/off>`  | Quand activé, supprime les messages contenant une invitation Discord et prévient l'auteur. |
 | `antispam <on/off>` | Quand activé, mute temporairement un membre qui envoie trop de messages en peu de temps. |
+| `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
