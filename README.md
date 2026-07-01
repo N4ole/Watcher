@@ -129,6 +129,20 @@ chargé automatiquement au démarrage.
 | `avatar [membre]`   | Affiche l'avatar d'un utilisateur (avec liens PNG/JPG/WEBP/GIF) |
 | `uptime`   | Affiche depuis combien de temps le bot tourne |
 | `status`   | Version, ping et nombre de serveurs |
+| `botinfo`  | Informations et statistiques du bot |
+| `serverinfo` | Informations sur le serveur |
+| `membercount` | Nombre de membres (humains / bots) |
+| `remindme <message> <temps>` | Rappel envoyé en MP après le délai (ex: `1h30m`) |
+| `poll <question [\| opt1 \| opt2...]>` | Crée un sondage à réactions |
+| `roll [NdM]` | Lance des dés (ex: `2d6`, `d20`) |
+| `coinflip` | Pile ou face |
+| `8ball <question>` | La boule magique répond |
+| `choose <a \| b \| ...>` | Le bot choisit une option au hasard |
+
+> La commande `help` présente les commandes **par catégories, une page par
+> catégorie**, avec des **boutons** de navigation (◀️ / ▶️).
+> `help <commande>` affiche le **détail** d'une commande (description, usage,
+> catégorie, permission requise, alias).
 | `contactowner <message>` | Réservée au **propriétaire du serveur** : envoie le message en MP à tous les owners du bot, avec les infos du serveur et une invitation. |
 
 ### Commandes d'administration
@@ -147,6 +161,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
+| `analyse`           | Génère un graphique en barres de l'activité du serveur sur 7 jours (membres, messages par membre/jour, arrivées/départs). |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
 | `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |

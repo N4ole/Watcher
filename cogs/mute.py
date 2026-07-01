@@ -4,30 +4,16 @@ La durée accepte un format court, combinable :
     30s, 5m, 2h, 1d, ou une combinaison comme "1h30m".
 Le timeout Discord est limité à 28 jours maximum.
 """
-import re
 from datetime import timedelta
 
 import discord
 from discord.ext import commands
 
 from utils import storage
+from utils.duration import parse_duration
 
 # Durée maximale d'un timeout Discord.
 MAX_TIMEOUT = timedelta(days=28)
-
-_UNITS = {"s": 1, "m": 60, "h": 3600, "d": 86400, "j": 86400}
-_DURATION_RE = re.compile(r"(\d+)\s*([smhdj])", re.IGNORECASE)
-
-
-def parse_duration(text: str) -> timedelta | None:
-    """Convertit '1h30m' / '5m' / '30s' en timedelta. None si invalide."""
-    matches = _DURATION_RE.findall(text)
-    if not matches:
-        return None
-    total = sum(int(value) * _UNITS[unit.lower()] for value, unit in matches)
-    if total <= 0:
-        return None
-    return timedelta(seconds=total)
 
 
 class Mute(commands.Cog):

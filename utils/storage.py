@@ -23,10 +23,12 @@ _WARNS_PATH = _DATA / "warns.json"
 _CONFINE_PATH = _DATA / "confinements.json"
 _SETTINGS_PATH = _DATA / "guild_settings.json"
 _MODLOG_PATH = _DATA / "modlog.json"
+_REMINDERS_PATH = _DATA / "reminders.json"
 _lock = Lock()
 _owners_lock = Lock()
 _warns_lock = Lock()
 _confine_lock = Lock()
+_reminders_lock = Lock()
 _settings_lock = Lock()
 _modlog_lock = Lock()
 
@@ -299,3 +301,52 @@ def add_modlog(
 def get_modlog(guild_id: int, user_id: int) -> list[dict]:
     """Renvoie l'historique de modération d'un utilisateur."""
     return _read_modlog().get(str(guild_id), {}).get(str(user_id), [])
+
+
+# --------------------------------------------------------------------------- #
+# Rappels (reminders.json = liste de rappels)
+#   {"id", "user_id", "channel_id", "message", "due"}
+# --------------------------------------------------------------------------- #
+def _read_reminders() -> list[dict]:
+    if not _REMINDERS_PATH.exists():
+        return []
+    try:
+        with _REMINDERS_PATH.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _write_reminders(data: list[dict]) -> None:
+    with _REMINDERS_PATH.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def add_reminder(
+    user_id: int, channel_id: int, message: str, due_ts: float
+) -> dict:
+    """Enregistre un rappel et le renvoie (avec son id)."""
+    with _reminders_lock:
+        data = _read_reminders()
+        entry = {
+            "id": (max((r["id"] for r in data), default=0) + 1),
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "message": message,
+            "due": due_ts,
+        }
+        data.append(entry)
+        _write_reminders(data)
+        return entry
+
+
+def remove_reminder(reminder_id: int) -> None:
+    """Supprime un rappel par son id."""
+    with _reminders_lock:
+        data = [r for r in _read_reminders() if r["id"] != reminder_id]
+        _write_reminders(data)
+
+
+def get_reminders() -> list[dict]:
+    """Renvoie tous les rappels en attente."""
+    return _read_reminders()
