@@ -96,21 +96,24 @@ class Analyse(commands.Cog):
         )
         fig.suptitle(f"Analyse de {guild_name} — 7 jours", fontsize=15)
 
-        ax1.bar(labels, members, color="#5865F2")
+        ax1.plot(labels, members, color="#5865F2", marker="o", linewidth=2)
+        ax1.fill_between(labels, members, color="#5865F2", alpha=0.12)
         ax1.set_title("Nombre de membres")
 
-        ax2.bar(labels, msg_per_member, color="#57F287")
+        ax2.plot(labels, msg_per_member, color="#57F287", marker="o", linewidth=2)
+        ax2.fill_between(labels, msg_per_member, color="#57F287", alpha=0.12)
         ax2.set_title("Messages par membre et par jour")
 
-        x = range(len(labels))
-        ax3.bar([i - 0.2 for i in x], joins, width=0.4, label="Arrivées",
-                color="#3BA55D")
-        ax3.bar([i + 0.2 for i in x], leaves, width=0.4, label="Départs",
-                color="#ED4245")
-        ax3.set_xticks(list(x))
-        ax3.set_xticklabels(labels)
+        ax3.plot(labels, joins, color="#3BA55D", marker="o", linewidth=2,
+                 label="Arrivées")
+        ax3.plot(labels, leaves, color="#ED4245", marker="o", linewidth=2,
+                 label="Départs")
         ax3.set_title("Arrivées / Départs")
         ax3.legend()
+
+        for ax in (ax1, ax2, ax3):
+            ax.grid(True, alpha=0.25)
+            ax.margins(x=0.02)
 
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=110)
