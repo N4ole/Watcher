@@ -28,6 +28,12 @@ claude_bot/
 Les cogs sont chargés récursivement : ajouter un fichier dans `cogs/` **ou**
 dans un sous-dossier (comme `cogs/owner/`) suffit pour ajouter une commande.
 
+Mentionner le bot (`@ClaudeBot` seul) affiche un message de présentation.
+
+Les **owners du bot** peuvent utiliser ses commandes en **message privé** avec
+lui (les commandes nécessitant un serveur restent, elles, réservées aux
+serveurs). En MP, les commandes des non-owners sont ignorées.
+
 Chaque commande utilise `@commands.hybrid_command`, ce qui la rend disponible
 **à la fois** en préfixe (`§ping`) et en slash (`/ping`) sans duplication.
 
@@ -117,8 +123,7 @@ précédent, et applique une sanction :
 
 ### Automodération
 
-Active en permanence, ignore les bots et les modérateurs (permission *Gérer les
-messages* ou *Administrateur*).
+Active en permanence, ignore les bots et les administrateurs.
 
 - **Anti-majuscules** : un message contenant **plus de 75 %** de lettres
   majuscules (au moins 8 lettres) est supprimé.
