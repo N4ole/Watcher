@@ -14,6 +14,8 @@ _CATEGORIES = {
     "Clear": ("🛡️ Modération", "Gérer les messages"),
     "AntiBot": ("🛡️ Modération", "Administrateur"),
     "AntiRaid": ("🛡️ Modération", "Administrateur"),
+    "AntiPub": ("🛡️ Modération", "Administrateur"),
+    "AntiSpam": ("🛡️ Modération", "Administrateur"),
     "ContactOwner": ("👑 Propriétaire de serveur", "Propriétaire du serveur"),
 }
 _DEFAULT = ("🔧 Général", None)
