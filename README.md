@@ -227,7 +227,7 @@ du serveur.
 | `shutdown`          | Éteint le bot.                                                  |
 | `say <message>`     | Fait parler le bot dans le salon courant.                      |
 | `helpowner`         | Liste les commandes d'owner (**préfixe uniquement**).          |
-| `serveurs`          | Liste les serveurs du bot, triés par nombre de membres (nom, ID, membres, ancienneté). |
+| `serveurs`          | Détaille chaque serveur du bot, **une page par serveur** (navigation par boutons ◀️/▶️), avec un maximum d'infos (membres, salons, rôles, émojis, boosts, vérification, fonctionnalités, vanity, langue…). |
 | `invite <serverid>` | Génère une invitation vers un serveur où se trouve le bot.     |
 
 Ces commandes sont regroupées dans le dossier `cogs/owner/`.
