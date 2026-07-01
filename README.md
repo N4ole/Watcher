@@ -129,6 +129,18 @@ chargé automatiquement au démarrage.
 | `avatar [membre]`   | Affiche l'avatar d'un utilisateur (avec liens PNG/JPG/WEBP/GIF) |
 | `uptime`   | Affiche depuis combien de temps le bot tourne |
 | `status`   | Version, ping et nombre de serveurs |
+| `botinfo`  | Informations et statistiques du bot |
+| `serverinfo` | Informations sur le serveur |
+| `membercount` | Nombre de membres (humains / bots) |
+| `remindme <message> <temps>` | Rappel envoyé en MP après le délai (ex: `1h30m`) |
+| `poll <question [\| opt1 \| opt2...]>` | Crée un sondage à réactions |
+| `roll [NdM]` | Lance des dés (ex: `2d6`, `d20`) |
+| `coinflip` | Pile ou face |
+| `8ball <question>` | La boule magique répond |
+| `choose <a \| b \| ...>` | Le bot choisit une option au hasard |
+
+> La commande `help` présente les commandes **par catégories, une page par
+> catégorie**, avec des **boutons** de navigation (◀️ / ▶️).
 | `contactowner <message>` | Réservée au **propriétaire du serveur** : envoie le message en MP à tous les owners du bot, avec les infos du serveur et une invitation. |
 
 ### Commandes d'administration
