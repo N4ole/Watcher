@@ -25,6 +25,8 @@ class ClaudeBot(commands.Bot):
         intents.members = True
         # Nécessaire pour suivre les connexions/déconnexions vocales.
         intents.voice_states = True
+        # Nécessaire pour suivre les changements de statut (watch).
+        intents.presences = True
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(config.PREFIX),

@@ -308,6 +308,100 @@ class Watch(commands.Cog):
             )
             await channel.send(embed=embed)
 
+    # --- Réactions ------------------------------------------------------- #
+    async def _log_reaction(
+        self, payload: discord.RawReactionActionEvent, added: bool
+    ) -> None:
+        if payload.guild_id is None:
+            return
+        guild = self.bot.get_guild(payload.guild_id)
+        if guild is None:
+            return
+        channel = self._log_channel(guild, payload.user_id)
+        if channel is None:
+            return
+
+        member = guild.get_member(payload.user_id)
+        name = str(member) if member else f"ID {payload.user_id}"
+        icon = member.display_avatar.url if member else None
+        jump = (
+            f"https://discord.com/channels/{payload.guild_id}"
+            f"/{payload.channel_id}/{payload.message_id}"
+        )
+
+        verb = "ajoutée" if added else "retirée"
+        embed = discord.Embed(
+            description=f"Réaction {verb} : {payload.emoji}",
+            color=discord.Color.teal() if added else discord.Color.dark_teal(),
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.set_author(name=f"{name} — réaction {verb}", icon_url=icon)
+        embed.add_field(
+            name="Message", value=f"[aller au message]({jump})", inline=True
+        )
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(
+        self, payload: discord.RawReactionActionEvent
+    ) -> None:
+        await self._log_reaction(payload, added=True)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(
+        self, payload: discord.RawReactionActionEvent
+    ) -> None:
+        await self._log_reaction(payload, added=False)
+
+    # --- Pseudo (nickname) ---------------------------------------------- #
+    @commands.Cog.listener()
+    async def on_member_update(
+        self, before: discord.Member, after: discord.Member
+    ) -> None:
+        if before.nick == after.nick:
+            return
+        channel = self._log_channel(after.guild, after.id)
+        if channel is None:
+            return
+
+        embed = discord.Embed(
+            color=discord.Color.purple(),
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.set_author(
+            name=f"{after} — pseudo modifié",
+            icon_url=after.display_avatar.url,
+        )
+        embed.add_field(
+            name="Avant", value=before.nick or "*(aucun)*", inline=True
+        )
+        embed.add_field(
+            name="Après", value=after.nick or "*(aucun)*", inline=True
+        )
+        await channel.send(embed=embed)
+
+    # --- Statut ---------------------------------------------------------- #
+    @commands.Cog.listener()
+    async def on_presence_update(
+        self, before: discord.Member, after: discord.Member
+    ) -> None:
+        if before.status == after.status:
+            return
+        channel = self._log_channel(after.guild, after.id)
+        if channel is None:
+            return
+
+        embed = discord.Embed(
+            description=f"Statut : **{before.status}** → **{after.status}**",
+            color=discord.Color.greyple(),
+            timestamp=datetime.now(timezone.utc),
+        )
+        embed.set_author(
+            name=f"{after} — statut modifié",
+            icon_url=after.display_avatar.url,
+        )
+        await channel.send(embed=embed)
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Watch(bot))
