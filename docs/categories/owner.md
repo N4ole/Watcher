@@ -1,6 +1,7 @@
 # 👑 Owner
 
 - [`§addowner`](../commands/addowner.md) — Ajoute un owner au bot. — 🔒 *Owner du bot*
+- [`§central`](../commands/central.md) — Tableau de bord global du bot (owners). — 🔒 *Owner du bot*
 - [`§helpowner`](../commands/helpowner.md) — Pas de description. — 🔒 *Owner du bot*
 - [`§invite`](../commands/invite.md) — Génère une invitation vers un serveur du bot. — 🔒 *Owner du bot*
 - [`§owners`](../commands/owners.md) — Liste les owners du bot. — 🔒 *Owner du bot*
