@@ -85,6 +85,8 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `watchlist`         | Liste les utilisateurs surveillés sur le serveur.               |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
+| `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |
+| `unmute <membre>`   | Rend la parole à un utilisateur mute.                           |
 | `warn <membre>`     | Avertit un utilisateur (sanction progressive, voir ci-dessous). |
 | `unwarn <membre>`   | Retire un avertissement et lève les sanctions temporaires.      |
 | `warns <membre>`    | Affiche le nombre d'avertissements d'un utilisateur.            |
