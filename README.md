@@ -73,6 +73,8 @@ chargé automatiquement au démarrage.
 | `help`     | Liste les commandes disponibles (hors commandes d'owner) |
 | `bonjour`  | Le bot vous salue                    |
 | `ping`     | Affiche la latence du bot            |
+| `userinfo [membre]` | Affiche les informations détaillées d'un utilisateur (défaut : soi-même) |
+| `avatar [membre]`   | Affiche l'avatar d'un utilisateur (avec liens PNG/JPG/WEBP/GIF) |
 
 ### Commandes d'administration
 
