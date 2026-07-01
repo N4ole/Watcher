@@ -141,6 +141,8 @@ chargé automatiquement au démarrage.
 
 > La commande `help` présente les commandes **par catégories, une page par
 > catégorie**, avec des **boutons** de navigation (◀️ / ▶️).
+> `help <commande>` affiche le **détail** d'une commande (description, usage,
+> catégorie, permission requise, alias).
 | `contactowner <message>` | Réservée au **propriétaire du serveur** : envoie le message en MP à tous les owners du bot, avec les infos du serveur et une invitation. |
 
 ### Commandes d'administration

@@ -102,13 +102,52 @@ class Help(commands.Cog):
         cog_name = command.cog.qualified_name if command.cog else ""
         return _CATEGORIES.get(cog_name, _DEFAULT)
 
+    def _is_hidden(self, command: commands.Command) -> bool:
+        """True si la commande ne doit pas apparaître dans l'aide publique."""
+        if command.hidden:
+            return True
+        return bool(command.module and command.module.startswith("cogs.owner"))
+
+    def _command_detail(self, command: commands.Command) -> discord.Embed:
+        category, perm = self._category_of(command)
+        embed = discord.Embed(
+            title=f"Commande : {config.PREFIX}{command.qualified_name}",
+            description=command.description or command.help or "Pas de description.",
+            color=discord.Color.blurple(),
+        )
+        signature = command.signature.strip()
+        usage = f"{config.PREFIX}{command.qualified_name}"
+        if signature:
+            usage += f" {signature}"
+        embed.add_field(name="Usage", value=f"`{usage}`", inline=False)
+        embed.add_field(name="Catégorie", value=category, inline=True)
+        embed.add_field(
+            name="Permission", value=f"🔒 {perm}" if perm else "Aucune", inline=True
+        )
+        embed.add_field(
+            name="Disponible en",
+            value="préfixe `" + config.PREFIX + "` et slash `/`"
+            if isinstance(command, commands.HybridCommand)
+            else "préfixe uniquement",
+            inline=True,
+        )
+        if command.aliases:
+            embed.add_field(
+                name="Alias",
+                value=", ".join(f"`{a}`" for a in command.aliases),
+                inline=False,
+            )
+        embed.set_footer(
+            text="⟨ ⟩ = obligatoire · [ ] = facultatif · "
+            f"{config.PREFIX}help pour la liste complète"
+        )
+        return embed
+
     def _build_pages(self) -> list[discord.Embed]:
         grouped: dict[str, list[str]] = {}
         total = 0
         for command in sorted(self.bot.commands, key=lambda c: c.name):
-            if command.hidden:
-                continue
-            if command.module and command.module.startswith("cogs.owner"):
+            if self._is_hidden(command):
                 continue
             category, perm = self._category_of(command)
             desc = command.description or "Pas de description."
@@ -142,9 +181,22 @@ class Help(commands.Cog):
 
     @commands.hybrid_command(
         name="help",
-        description="Affiche la liste des commandes, par catégories.",
+        description="Aide générale, ou détail d'une commande : help [commande].",
     )
-    async def help(self, ctx: commands.Context) -> None:
+    async def help(
+        self, ctx: commands.Context, commande: str | None = None
+    ) -> None:
+        # Détail d'une commande précise.
+        if commande:
+            name = commande.lower().lstrip(config.PREFIX).strip()
+            command = self.bot.get_command(name)
+            if command is None or self._is_hidden(command):
+                await ctx.send(f"❌ Commande introuvable : `{commande}`")
+                return
+            await ctx.send(embed=self._command_detail(command))
+            return
+
+        # Aide générale paginée.
         pages = self._build_pages()
         if not pages:
             await ctx.send("Aucune commande disponible.")
