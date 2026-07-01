@@ -10,20 +10,33 @@ par commande).
 claude_bot/
 ├── main.py          # Point d'entrée : lance le bot
 ├── bot.py           # Classe du bot + chargement automatique des cogs
-├── config.py        # Configuration (token, préfixe, guild id)
+├── config.py        # Configuration (token, préfixe, guild id, OAuth...)
 ├── requirements.txt
 ├── .env.example     # Modèle de configuration
-└── cogs/            # Un fichier par commande
+├── utils/           # Modules communs
+│   ├── storage.py       # Persistance (JSON)
+│   ├── checks.py        # Vérifications (is_owner...)
+│   ├── automod.py       # Logique anti-majuscules / anti-emojis
+│   └── badwords.py      # Dictionnaire anti-insulte
+├── web/             # Panel web
+│   ├── web_app.py       # Serveur aiohttp + OAuth2
+│   └── stats.py         # Statistiques (séries temporelles)
+├── data/            # Données runtime générées (JSON, ignoré par git)
+├── docs/            # Documentation (guide OAuth2...)
+└── cogs/            # Un fichier par commande / fonctionnalité
     ├── help.py
-    ├── bonjour.py
     ├── ping.py
     ├── watch.py
+    ├── ...
     └── owner/        # Commandes réservées aux owners du bot
         ├── manage.py     # addowner / rmowner / owners
         ├── reload.py     # reload
         ├── shutdown.py   # shutdown
         └── say.py        # say
 ```
+
+Les modules communs sont regroupés dans `utils/` et `web/` (packages Python) ;
+les fichiers de données générés à l'exécution sont dans `data/`.
 
 Les cogs sont chargés récursivement : ajouter un fichier dans `cogs/` **ou**
 dans un sous-dossier (comme `cogs/owner/`) suffit pour ajouter une commande.
@@ -131,6 +144,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antiraid <on/off>` | Quand activé, chaque nouveau membre doit valider un captcha (code à recopier dans le salon `vérification`) avant d'accéder au serveur. |
 | `antipub <on/off>`  | Quand activé, supprime les messages contenant une invitation Discord et prévient l'auteur. |
 | `antispam <on/off>` | Quand activé, mute temporairement un membre qui envoie trop de messages en peu de temps. |
+| `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |

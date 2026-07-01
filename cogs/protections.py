@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 
-import storage
+from utils import storage
 
 # Protections activables via commande (clé de réglage -> libellé).
 _TOGGLES = {
@@ -10,6 +10,7 @@ _TOGGLES = {
     "antiraid": "🛡️ Anti-raid (captcha)",
     "antipub": "🚫 Anti-pub (invitations)",
     "antispam": "⏱️ Anti-spam",
+    "antiinsulte": "🤬 Anti-insulte",
 }
 
 

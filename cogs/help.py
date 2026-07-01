@@ -16,6 +16,7 @@ _CATEGORIES = {
     "AntiRaid": ("🛡️ Modération", "Administrateur"),
     "AntiPub": ("🛡️ Modération", "Administrateur"),
     "AntiSpam": ("🛡️ Modération", "Administrateur"),
+    "AntiInsulte": ("🛡️ Modération", "Administrateur"),
     "Protections": ("🛡️ Modération", "Administrateur"),
     "UserStatus": ("🛡️ Modération", "Administrateur"),
     "ContactOwner": ("👑 Propriétaire de serveur", "Propriétaire du serveur"),
