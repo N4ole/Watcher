@@ -10,6 +10,8 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
+import storage
+
 # Durée maximale d'un timeout Discord.
 MAX_TIMEOUT = timedelta(days=28)
 
@@ -64,6 +66,11 @@ class Mute(commands.Cog):
             await ctx.send(f"❌ Échec du mute : {exc}")
             return
 
+        storage.add_modlog(
+            ctx.guild.id, member.id, "mute", ctx.author.id,
+            duration=delta.total_seconds(), detail=duree,
+        )
+
         until = discord.utils.utcnow() + delta
         embed = discord.Embed(
             title="🔇 Mute",
@@ -97,6 +104,7 @@ class Mute(commands.Cog):
             await ctx.send(f"❌ Échec du unmute : {exc}")
             return
 
+        storage.add_modlog(ctx.guild.id, member.id, "unmute", ctx.author.id)
         await ctx.send(f"🔊 {member.mention} n'est plus mute.")
 
 

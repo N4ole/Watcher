@@ -131,6 +131,10 @@ class Warn(commands.Cog):
         level = storage.add_warn(ctx.guild.id, member.id)
         await self._sync_warn_role(member, level)
         sanction = await self._apply_sanction(ctx, member, level)
+        storage.add_modlog(
+            ctx.guild.id, member.id, "warn", ctx.author.id,
+            detail=f"warn {level}/{MAX_WARN} — {sanction}",
+        )
 
         embed = discord.Embed(
             title="⚠️ Avertissement",

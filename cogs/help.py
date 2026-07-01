@@ -12,6 +12,12 @@ _CATEGORIES = {
     "Mute": ("🛡️ Modération", "Administrateur"),
     "Warn": ("🛡️ Modération", "Administrateur"),
     "Clear": ("🛡️ Modération", "Gérer les messages"),
+    "AntiBot": ("🛡️ Modération", "Administrateur"),
+    "AntiRaid": ("🛡️ Modération", "Administrateur"),
+    "AntiPub": ("🛡️ Modération", "Administrateur"),
+    "AntiSpam": ("🛡️ Modération", "Administrateur"),
+    "Protections": ("🛡️ Modération", "Administrateur"),
+    "UserStatus": ("🛡️ Modération", "Administrateur"),
     "ContactOwner": ("👑 Propriétaire de serveur", "Propriétaire du serveur"),
 }
 _DEFAULT = ("🔧 Général", None)
