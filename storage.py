@@ -17,10 +17,12 @@ _STORE_PATH = Path(__file__).parent / "watched.json"
 _OWNERS_PATH = Path(__file__).parent / "owners.json"
 _WARNS_PATH = Path(__file__).parent / "warns.json"
 _CONFINE_PATH = Path(__file__).parent / "confinements.json"
+_SETTINGS_PATH = Path(__file__).parent / "guild_settings.json"
 _lock = Lock()
 _owners_lock = Lock()
 _warns_lock = Lock()
 _confine_lock = Lock()
+_settings_lock = Lock()
 
 
 def _read() -> dict:
@@ -210,3 +212,34 @@ def get_confinements() -> list[tuple[int, int, float]]:
         for uid, ts in users.items():
             result.append((int(gid), int(uid), float(ts)))
     return result
+
+
+# --------------------------------------------------------------------------- #
+# Réglages par serveur (guild_settings.json = {guild_id: {clé: valeur}})
+# --------------------------------------------------------------------------- #
+def _read_settings() -> dict:
+    if not _SETTINGS_PATH.exists():
+        return {}
+    try:
+        with _SETTINGS_PATH.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _write_settings(data: dict) -> None:
+    with _SETTINGS_PATH.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def get_setting(guild_id: int, key: str, default=None):
+    """Renvoie la valeur d'un réglage de serveur, ou `default`."""
+    return _read_settings().get(str(guild_id), {}).get(key, default)
+
+
+def set_setting(guild_id: int, key: str, value) -> None:
+    """Définit la valeur d'un réglage de serveur."""
+    with _settings_lock:
+        data = _read_settings()
+        data.setdefault(str(guild_id), {})[key] = value
+        _write_settings(data)

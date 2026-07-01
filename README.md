@@ -124,6 +124,8 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `watch <membre>`    | Surveille un utilisateur : crée la catégorie `WATCHED USER` et un salon privé `<user>-watched` où sont recopiés ses messages (envoyés, modifiés, supprimés), ses réactions (ajoutées/retirées), ses changements de pseudo et de statut, et son activité vocale (connexion/déconnexion, heure de sortie et durée de présence). |
 | `unwatch <membre>`  | Arrête la surveillance (le salon de log est conservé).          |
 | `watchlist`         | Liste les utilisateurs surveillés sur le serveur.               |
+| `antibot <on/off>`  | Quand activé, expulse automatiquement tout bot qui rejoint le serveur. |
+| `antiraid <on/off>` | Quand activé, chaque nouveau membre doit valider un captcha (code à recopier dans le salon `vérification`) avant d'accéder au serveur. |
 | `confine <membre>`  | Isole un utilisateur : crée la catégorie `confinement` et un salon `confin-<user>` où seuls lui et les admins accèdent, et retire son accès au reste du serveur. |
 | `unconfine <membre>`| Libère l'utilisateur : restaure son accès et supprime le salon de confinement. |
 | `mute <membre> <durée>` | Coupe la parole (timeout Discord) pour une durée (`30s`, `5m`, `2h`, `1d`, `1h30m` ; max 28 j). |

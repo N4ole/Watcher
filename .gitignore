@@ -15,6 +15,7 @@ owners.json
 warns.json
 confinements.json
 stats.json
+guild_settings.json
 
 # Logs
 *.log
