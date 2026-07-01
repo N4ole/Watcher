@@ -9,6 +9,10 @@ __pycache__/
 *.egg-info/
 .Python
 
+# Données runtime
+watched.json
+owners.json
+
 # Logs
 *.log
 
