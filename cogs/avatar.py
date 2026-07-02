@@ -39,13 +39,6 @@ class Avatar(commands.Cog):
         embed.set_footer(text=t(ctx, "f.requested_by", user=ctx.author))
         await ctx.send(embed=embed)
 
-    @avatar.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MemberNotFound):
-            await ctx.send("❌ Utilisateur introuvable.")
-        else:
-            raise error
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Avatar(bot))

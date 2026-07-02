@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks
+from utils.i18n import t
 
 
 class Invite(commands.Cog):
@@ -18,12 +19,12 @@ class Invite(commands.Cog):
     @checks.is_owner()
     async def invite(self, ctx: commands.Context, server_id: str) -> None:
         if not server_id.isdigit():
-            await ctx.send("❌ ID de serveur invalide.")
+            await ctx.send(t(ctx, "invite.bad_id"))
             return
 
         guild = self.bot.get_guild(int(server_id))
         if guild is None:
-            await ctx.send("❌ Le bot n'est pas présent sur ce serveur.")
+            await ctx.send(t(ctx, "invite.not_present"))
             return
 
         # Cherche un salon où le bot peut créer une invitation.
@@ -36,10 +37,7 @@ class Invite(commands.Cog):
             None,
         )
         if channel is None:
-            await ctx.send(
-                "❌ Aucun salon ne permet au bot de créer une invitation "
-                f"sur **{guild.name}**."
-            )
+            await ctx.send(t(ctx, "invite.no_channel", name=guild.name))
             return
 
         try:
@@ -48,17 +46,15 @@ class Invite(commands.Cog):
                 reason=f"Demandé par {ctx.author}",
             )
         except discord.HTTPException as exc:
-            await ctx.send(f"❌ Impossible de créer l'invitation : {exc}")
+            await ctx.send(t(ctx, "invite.failed", error=exc))
             return
 
-        await ctx.send(f"🔗 Invitation vers **{guild.name}** : {invite.url}")
+        await ctx.send(t(ctx, "invite.done", name=guild.name, url=invite.url))
 
     @invite.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("❌ Précisez l'ID du serveur.")
+            await ctx.send(t(ctx, "error.owner_only"))
         else:
             raise error
 

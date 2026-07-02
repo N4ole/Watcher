@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from utils import checks
 import config
+from utils.i18n import t
 
 
 class HelpOwner(commands.Cog):
@@ -22,38 +23,35 @@ class HelpOwner(commands.Cog):
             key=lambda c: c.qualified_name,
         )
 
-    def _detail(self, command: commands.Command) -> discord.Embed:
+    def _detail(self, ctx, command: commands.Command) -> discord.Embed:
         signature = command.signature.strip()
         usage = f"{config.PREFIX}{command.qualified_name}"
         if signature:
             usage += f" {signature}"
         embed = discord.Embed(
             title=f"👑 {config.PREFIX}{command.qualified_name}",
-            description=command.description or command.help or "Pas de description.",
+            description=command.description or command.help
+            or t(ctx, "help.no_desc"),
             color=discord.Color.gold(),
         )
-        embed.add_field(name="Usage", value=f"`{usage}`", inline=False)
+        embed.add_field(name=t(ctx, "ho.usage"), value=f"`{usage}`", inline=False)
         embed.add_field(
-            name="Disponible en",
-            value="préfixe `" + config.PREFIX + "` et slash `/`"
+            name=t(ctx, "ho.avail"),
+            value=t(ctx, "ho.avail_both", prefix=config.PREFIX)
             if isinstance(command, commands.HybridCommand)
-            else "préfixe uniquement",
+            else t(ctx, "ho.avail_prefix"),
             inline=True,
         )
         if command.aliases:
             embed.add_field(
-                name="Alias",
+                name=t(ctx, "ho.alias"),
                 value=", ".join(f"`{a}`" for a in command.aliases),
                 inline=True,
             )
         embed.add_field(
-            name="En message privé",
-            value="✅ oui (réservé aux owners)",
-            inline=True,
+            name=t(ctx, "ho.dm"), value=t(ctx, "ho.dm_val"), inline=True,
         )
-        embed.set_footer(
-            text="⟨ ⟩ = obligatoire · [ ] = facultatif · réservé aux owners"
-        )
+        embed.set_footer(text=t(ctx, "ho.legend"))
         return embed
 
     @commands.command(name="helpowner")
@@ -68,22 +66,18 @@ class HelpOwner(commands.Cog):
             name = commande.lower().lstrip(config.PREFIX).strip()
             command = self.bot.get_command(name)
             if command is None or command not in owner_commands:
-                await ctx.send(f"❌ Commande owner introuvable : `{commande}`")
+                await ctx.send(t(ctx, "ho.not_found", cmd=commande))
                 return
-            await ctx.send(embed=self._detail(command))
+            await ctx.send(embed=self._detail(ctx, command))
             return
 
         embed = discord.Embed(
-            title="👑 Commandes d'owner",
-            description=(
-                f"Préfixe : `{config.PREFIX}` — commandes réservées aux owners "
-                f"du bot.\nDétail d'une commande : `{config.PREFIX}helpowner "
-                "<commande>`."
-            ),
+            title=t(ctx, "ho.title"),
+            description=t(ctx, "ho.desc", prefix=config.PREFIX),
             color=discord.Color.gold(),
         )
         for cmd in owner_commands:
-            description = cmd.description or cmd.help or "Pas de description."
+            description = cmd.description or cmd.help or t(ctx, "help.no_desc")
             signature = cmd.signature.strip()
             usage = f"{config.PREFIX}{cmd.qualified_name}"
             if signature:
@@ -93,13 +87,13 @@ class HelpOwner(commands.Cog):
                 value=description,
                 inline=False,
             )
-        embed.set_footer(text=f"{len(owner_commands)} commande(s) d'owner")
+        embed.set_footer(text=t(ctx, "ho.footer", count=len(owner_commands)))
         await ctx.send(embed=embed)
 
     @helpowner.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
+            await ctx.send(t(ctx, "error.owner_only"))
         else:
             raise error
 

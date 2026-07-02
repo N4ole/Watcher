@@ -3,55 +3,58 @@ import discord
 from discord.ext import commands
 
 import config
+from utils.i18n import t
 
-# Catégorie et permission requise, par nom de cog.
+# Catégorie (clé i18n) et permission (clé i18n ou None), par nom de cog.
 _CATEGORIES = {
-    # 📊 Infos
-    "UserInfo": ("📊 Infos", None),
-    "Avatar": ("📊 Infos", None),
-    "ServerInfo": ("📊 Infos", None),
-    "BotInfo": ("📊 Infos", None),
-    "MemberCount": ("📊 Infos", None),
-    # 🎲 Utilitaire
-    "Poll": ("🎲 Utilitaire", None),
-    "Roll": ("🎲 Utilitaire", None),
-    "CoinFlip": ("🎲 Utilitaire", None),
-    "EightBall": ("🎲 Utilitaire", None),
-    "Choose": ("🎲 Utilitaire", None),
-    "RemindMe": ("🎲 Utilitaire", None),
-    # 🛡️ Modération
-    "Watch": ("🛡️ Modération", "Administrateur"),
-    "Confine": ("🛡️ Modération", "Administrateur"),
-    "Mute": ("🛡️ Modération", "Administrateur"),
-    "Warn": ("🛡️ Modération", "Administrateur"),
-    "Clear": ("🛡️ Modération", "Gérer les messages"),
-    "AntiBot": ("🛡️ Modération", "Administrateur"),
-    "AntiRaid": ("🛡️ Modération", "Administrateur"),
-    "AntiPub": ("🛡️ Modération", "Administrateur"),
-    "AntiSpam": ("🛡️ Modération", "Administrateur"),
-    "AntiInsulte": ("🛡️ Modération", "Administrateur"),
-    "Protections": ("🛡️ Modération", "Administrateur"),
-    "UserStatus": ("🛡️ Modération", "Administrateur"),
-    "Analyse": ("🛡️ Modération", "Administrateur"),
-    "Langue": ("🛡️ Modération", "Administrateur"),
-    # 👑 Propriétaire
-    "ContactOwner": ("👑 Propriétaire de serveur", "Propriétaire du serveur"),
+    # Infos
+    "UserInfo": ("cat.info", None),
+    "Avatar": ("cat.info", None),
+    "ServerInfo": ("cat.info", None),
+    "BotInfo": ("cat.info", None),
+    "MemberCount": ("cat.info", None),
+    # Utilitaire
+    "Poll": ("cat.util", None),
+    "Roll": ("cat.util", None),
+    "CoinFlip": ("cat.util", None),
+    "EightBall": ("cat.util", None),
+    "Choose": ("cat.util", None),
+    "RemindMe": ("cat.util", None),
+    # Modération
+    "Watch": ("cat.mod", "perm.admin"),
+    "Confine": ("cat.mod", "perm.admin"),
+    "Mute": ("cat.mod", "perm.admin"),
+    "Warn": ("cat.mod", "perm.admin"),
+    "Clear": ("cat.mod", "perm.manage_messages"),
+    "AntiBot": ("cat.mod", "perm.admin"),
+    "AntiRaid": ("cat.mod", "perm.admin"),
+    "AntiPub": ("cat.mod", "perm.admin"),
+    "AntiSpam": ("cat.mod", "perm.admin"),
+    "AntiInsulte": ("cat.mod", "perm.admin"),
+    "Protections": ("cat.mod", "perm.admin"),
+    "UserStatus": ("cat.mod", "perm.admin"),
+    "Analyse": ("cat.mod", "perm.admin"),
+    "Langue": ("cat.mod", "perm.admin"),
+    # Propriétaire de serveur
+    "ContactOwner": ("cat.owner_server", "perm.server_owner"),
 }
-_DEFAULT = ("🔧 Général", None)
+_DEFAULT = ("cat.general", None)
 _ORDER = [
-    "🔧 Général", "📊 Infos", "🎲 Utilitaire",
-    "🛡️ Modération", "👑 Propriétaire de serveur",
+    "cat.general", "cat.info", "cat.util", "cat.mod", "cat.owner_server",
 ]
 
 
 class HelpView(discord.ui.View):
     """Vue de navigation entre les pages d'aide."""
 
-    def __init__(self, pages: list[discord.Embed], author_id: int) -> None:
+    def __init__(
+        self, pages: list[discord.Embed], author_id: int, source
+    ) -> None:
         super().__init__(timeout=120)
         self.pages = pages
         self.index = 0
         self.author_id = author_id
+        self.source = source
         self._refresh()
 
     def _refresh(self) -> None:
@@ -62,7 +65,7 @@ class HelpView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id != self.author_id:
             await interaction.response.send_message(
-                "Ce menu n'est pas pour toi.", ephemeral=True
+                t(self.source, "help.not_for_you"), ephemeral=True
             )
             return False
         return True
@@ -110,73 +113,75 @@ class Help(commands.Cog):
             return True
         return bool(command.module and command.module.startswith("cogs.owner"))
 
-    def _command_detail(self, command: commands.Command) -> discord.Embed:
-        category, perm = self._category_of(command)
+    def _command_detail(self, ctx, command: commands.Command) -> discord.Embed:
+        cat_key, perm_key = self._category_of(command)
         embed = discord.Embed(
-            title=f"Commande : {config.PREFIX}{command.qualified_name}",
-            description=command.description or command.help or "Pas de description.",
+            title=t(ctx, "help.cmd_title", prefix=config.PREFIX,
+                    name=command.qualified_name),
+            description=command.description or command.help
+            or t(ctx, "help.no_desc"),
             color=discord.Color.blurple(),
         )
         signature = command.signature.strip()
         usage = f"{config.PREFIX}{command.qualified_name}"
         if signature:
             usage += f" {signature}"
-        embed.add_field(name="Usage", value=f"`{usage}`", inline=False)
-        embed.add_field(name="Catégorie", value=category, inline=True)
+        embed.add_field(name=t(ctx, "help.usage"), value=f"`{usage}`",
+                        inline=False)
+        embed.add_field(name=t(ctx, "help.category"), value=t(ctx, cat_key),
+                        inline=True)
         embed.add_field(
-            name="Permission", value=f"🔒 {perm}" if perm else "Aucune", inline=True
+            name=t(ctx, "help.permission"),
+            value=f"🔒 {t(ctx, perm_key)}" if perm_key
+            else t(ctx, "help.perm_none"),
+            inline=True,
         )
         embed.add_field(
-            name="Disponible en",
-            value="préfixe `" + config.PREFIX + "` et slash `/`"
+            name=t(ctx, "help.avail"),
+            value=t(ctx, "help.avail_both", prefix=config.PREFIX)
             if isinstance(command, commands.HybridCommand)
-            else "préfixe uniquement",
+            else t(ctx, "help.avail_prefix"),
             inline=True,
         )
         if command.aliases:
             embed.add_field(
-                name="Alias",
+                name=t(ctx, "help.alias"),
                 value=", ".join(f"`{a}`" for a in command.aliases),
                 inline=False,
             )
-        embed.set_footer(
-            text="⟨ ⟩ = obligatoire · [ ] = facultatif · "
-            f"{config.PREFIX}help pour la liste complète"
-        )
+        embed.set_footer(text=t(ctx, "help.legend", prefix=config.PREFIX))
         return embed
 
-    def _build_pages(self) -> list[discord.Embed]:
+    def _build_pages(self, ctx) -> list[discord.Embed]:
         grouped: dict[str, list[str]] = {}
         total = 0
         for command in sorted(self.bot.commands, key=lambda c: c.name):
             if self._is_hidden(command):
                 continue
-            category, perm = self._category_of(command)
-            desc = command.description or "Pas de description."
+            cat_key, perm_key = self._category_of(command)
+            desc = command.description or t(ctx, "help.no_desc")
             line = f"`{config.PREFIX}{command.name}` — {desc}"
-            if perm:
-                line += f" 🔒 *{perm}*"
-            grouped.setdefault(category, []).append(line)
+            if perm_key:
+                line += f" 🔒 *{t(ctx, perm_key)}*"
+            grouped.setdefault(cat_key, []).append(line)
             total += 1
 
         ordered = _ORDER + [c for c in grouped if c not in _ORDER]
+        page_keys = [c for c in ordered if c in grouped]
         pages = []
-        page_categories = [c for c in ordered if c in grouped]
-        for i, category in enumerate(page_categories):
+        for i, cat_key in enumerate(page_keys):
+            category = t(ctx, cat_key)
             embed = discord.Embed(
-                title=f"📖 Aide — {category}",
-                description=(
-                    f"Préfixe `{config.PREFIX}` · aussi en slash `/` · "
-                    "🔒 = permission requise."
-                ),
+                title=t(ctx, "help.title", category=category),
+                description=t(ctx, "help.desc", prefix=config.PREFIX),
                 color=discord.Color.blurple(),
             )
             embed.add_field(
-                name=category, value="\n".join(grouped[category]), inline=False
+                name=category, value="\n".join(grouped[cat_key]), inline=False
             )
             embed.set_footer(
-                text=f"Page {i + 1}/{len(page_categories)} · "
-                f"{total} commande(s) au total"
+                text=t(ctx, "help.page", n=i + 1, total=len(page_keys),
+                       count=total)
             )
             pages.append(embed)
         return pages
@@ -193,17 +198,17 @@ class Help(commands.Cog):
             name = commande.lower().lstrip(config.PREFIX).strip()
             command = self.bot.get_command(name)
             if command is None or self._is_hidden(command):
-                await ctx.send(f"❌ Commande introuvable : `{commande}`")
+                await ctx.send(t(ctx, "help.not_found", cmd=commande))
                 return
-            await ctx.send(embed=self._command_detail(command))
+            await ctx.send(embed=self._command_detail(ctx, command))
             return
 
         # Aide générale paginée.
-        pages = self._build_pages()
+        pages = self._build_pages(ctx)
         if not pages:
-            await ctx.send("Aucune commande disponible.")
+            await ctx.send(t(ctx, "help.no_cmd"))
             return
-        view = HelpView(pages, ctx.author.id)
+        view = HelpView(pages, ctx.author.id, ctx.guild)
         await ctx.send(embed=pages[0], view=view)
 
 

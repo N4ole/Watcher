@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks
+from utils.i18n import t
 
 
 class Say(commands.Cog):
@@ -23,7 +24,7 @@ class Say(commands.Cog):
         # Nettoyage / accusé de réception selon le type d'invocation.
         if ctx.interaction is not None:
             await ctx.interaction.response.send_message(
-                "✅ Message envoyé.", ephemeral=True
+                t(ctx, "say.sent"), ephemeral=True
             )
         elif ctx.message is not None:
             try:
@@ -34,9 +35,9 @@ class Say(commands.Cog):
     @say.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
+            await ctx.send(t(ctx, "error.owner_only"))
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("❌ Précisez le message à envoyer.")
+            await ctx.send(t(ctx, "say.missing"))
         else:
             raise error
 

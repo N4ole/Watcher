@@ -7,13 +7,14 @@ from discord.ext import commands
 import config
 from utils import checks, storage
 from utils.duration import human
+from utils.i18n import t
 
 _PROTECTIONS = {
-    "antibot": "Anti-bot",
-    "antiraid": "Anti-raid",
-    "antipub": "Anti-pub",
-    "antispam": "Anti-spam",
-    "antiinsulte": "Anti-insulte",
+    "antibot": "prot.antibot",
+    "antiraid": "prot.antiraid",
+    "antipub": "prot.antipub",
+    "antispam": "prot.antispam",
+    "antiinsulte": "prot.antiinsulte",
 }
 
 
@@ -59,54 +60,46 @@ class Central(commands.Cog):
         uptime = human(now - self.bot.start_time)
 
         embed = discord.Embed(
-            title="🛰️ Centralisation ClaudeBot",
+            title=t(ctx, "central.title"),
             color=discord.Color.gold(),
         )
         if self.bot.user:
             embed.set_thumbnail(url=self.bot.user.display_avatar.url)
 
         embed.add_field(
-            name="🌐 Serveurs",
-            value=(
-                f"**{len(guilds)}** serveurs\n"
-                f"**{total_members}** membres\n"
-                f"👤 {humans} · 🤖 {bots}"
-            ),
+            name=t(ctx, "central.servers"),
+            value=t(ctx, "central.servers_val", guilds=len(guilds),
+                    members=total_members, humans=humans, bots=bots),
             inline=True,
         )
         embed.add_field(
-            name="🛡️ Modération active",
-            value=(
-                f"🔇 {muted} mute(s)\n"
-                f"🔒 {confined} confiné(s)\n"
-                f"👁️ {watched} surveillé(s)"
-            ),
+            name=t(ctx, "central.mod"),
+            value=t(ctx, "central.mod_val", muted=muted, confined=confined,
+                    watched=watched),
             inline=True,
         )
         embed.add_field(
-            name="⚠️ Avertissements",
-            value=(
-                f"{warned_users} utilisateur(s)\n"
-                f"{warn_points} point(s) au total\n"
-                f"⏳ {timed_confinements} confinement(s) temporisé(s)"
-            ),
+            name=t(ctx, "central.warns"),
+            value=t(ctx, "central.warns_val", users=warned_users,
+                    points=warn_points, timed=timed_confinements),
             inline=True,
         )
 
         prot = "\n".join(
-            f"{label} : **{storage.count_setting_enabled(key)}** serveur(s)"
-            for key, label in _PROTECTIONS.items()
+            t(ctx, "central.prot_line", label=t(ctx, label_key),
+              count=storage.count_setting_enabled(key))
+            for key, label_key in _PROTECTIONS.items()
         )
-        embed.add_field(name="🚨 Protections activées", value=prot, inline=False)
+        embed.add_field(name=t(ctx, "central.prot"), value=prot, inline=False)
 
-        embed.add_field(name="⏰ Rappels en attente", value=str(reminders), inline=True)
-        embed.add_field(name="👑 Owners", value=str(owners), inline=True)
+        embed.add_field(name=t(ctx, "central.reminders"),
+                        value=str(reminders), inline=True)
+        embed.add_field(name=t(ctx, "central.owners"),
+                        value=str(owners), inline=True)
         embed.add_field(
-            name="⚙️ Bot",
-            value=(
-                f"v{config.VERSION} · {round(self.bot.latency * 1000)} ms\n"
-                f"Uptime : {uptime}"
-            ),
+            name=t(ctx, "central.bot"),
+            value=t(ctx, "central.bot_val", version=config.VERSION,
+                    ping=round(self.bot.latency * 1000), uptime=uptime),
             inline=True,
         )
         await ctx.send(embed=embed)
@@ -114,7 +107,7 @@ class Central(commands.Cog):
     @central.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
+            await ctx.send(t(ctx, "error.owner_only"))
         else:
             raise error
 
