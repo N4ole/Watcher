@@ -53,10 +53,12 @@ class Ban(commands.Cog):
         if guild is None:
             storage.clear_tempban(guild_id, user_id)
             return
+        unbanned = False
         try:
             await guild.unban(
                 discord.Object(id=user_id), reason="Fin du ban temporaire"
             )
+            unbanned = True
             log.info(
                 "Ban temporaire expiré — %s débanni de %s (%s)",
                 user_id, guild.name, guild.id,
@@ -67,6 +69,54 @@ class Ban(commands.Cog):
             pass
         finally:
             storage.clear_tempban(guild_id, user_id)
+
+        # Ban terminé : on prévient l'utilisateur et on lui envoie une invite.
+        if unbanned:
+            await self._notify_unban(guild, user_id)
+
+    async def _make_invite(self, guild: discord.Guild) -> str | None:
+        """Crée une invitation (7 j, usage unique) sur le 1er salon possible."""
+        channel = guild.system_channel or next(
+            iter(guild.text_channels), None
+        )
+        channels = [channel] if channel else []
+        channels += [c for c in guild.text_channels if c is not channel]
+        for chan in channels:
+            if chan and chan.permissions_for(guild.me).create_instant_invite:
+                try:
+                    invite = await chan.create_invite(
+                        max_age=7 * 86400, max_uses=1, unique=True,
+                        reason="Fin du ban temporaire",
+                    )
+                    return invite.url
+                except discord.HTTPException:
+                    continue
+        return None
+
+    async def _notify_unban(self, guild: discord.Guild, user_id: int) -> None:
+        """MP à l'utilisateur : fin de ban + invitation pour revenir."""
+        try:
+            user = self.bot.get_user(user_id) or await self.bot.fetch_user(
+                user_id
+            )
+        except (discord.HTTPException, discord.NotFound):
+            return
+        invite_url = await self._make_invite(guild)
+        embed = discord.Embed(
+            title=t(guild, "ban.unban_dm_title"),
+            description=(
+                t(guild, "ban.unban_dm_desc", server=guild.name)
+                if invite_url
+                else t(guild, "ban.unban_dm_no_invite", server=guild.name)
+            ),
+            color=discord.Color.green(),
+        )
+        if invite_url:
+            embed.add_field(name="🔗", value=invite_url, inline=False)
+        try:
+            await user.send(embed=embed)
+        except (discord.HTTPException, discord.Forbidden):
+            pass  # MP fermés : rien de plus à faire.
 
     @commands.hybrid_command(
         name="ban",
@@ -100,6 +150,33 @@ class Ban(commands.Cog):
             await ctx.send(t(ctx, "ban.hierarchy"))
             return
 
+        until = discord.utils.utcnow() + delta if delta is not None else None
+
+        # Prévenir l'utilisateur en MP AVANT le ban (après, le bot ne partage
+        # plus de serveur avec lui). On indique serveur, raison et durée.
+        dm = discord.Embed(
+            title=t(member, "ban.dm_title"),
+            description=t(member, "ban.dm_temp" if delta else "ban.dm_perm",
+                          server=ctx.guild.name),
+            color=discord.Color.red(),
+        )
+        dm.add_field(name=t(member, "mod.reason_label"), value=reason,
+                     inline=False)
+        if until is not None:
+            dm.add_field(
+                name=t(member, "mod.duration_label"),
+                value=f"{discord.utils.format_dt(until, style='F')} "
+                      f"({discord.utils.format_dt(until, style='R')})",
+                inline=False,
+            )
+        else:
+            dm.add_field(name=t(member, "mod.duration_label"),
+                         value=t(member, "mod.permanent"), inline=False)
+        try:
+            await member.send(embed=dm)
+        except (discord.HTTPException, discord.Forbidden):
+            pass  # MP fermés : on bannit quand même.
+
         try:
             await ctx.guild.ban(
                 member, reason=f"{ctx.author} : {reason}",
@@ -122,7 +199,6 @@ class Ban(commands.Cog):
             title=t(ctx, "ban.title"), color=discord.Color.red()
         )
         if delta is not None:
-            until = discord.utils.utcnow() + delta
             release_ts = until.timestamp()
             storage.set_tempban(ctx.guild.id, member.id, release_ts)
             self.bot.loop.create_task(

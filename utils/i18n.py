@@ -769,6 +769,33 @@ _CATALOG: dict[str, dict[str, str]] = {
                           "en": "List currently watched users."},
     # --- Kick / Ban ---
     "mod.no_reason": {"fr": "Aucune raison fournie.", "en": "No reason provided."},
+    "mod.reason_label": {"fr": "Raison", "en": "Reason"},
+    "mod.duration_label": {"fr": "Durée", "en": "Duration"},
+    "mod.permanent": {"fr": "Définitif", "en": "Permanent"},
+    "kick.dm_title": {"fr": "👢 Tu as été expulsé", "en": "👢 You have been kicked"},
+    "kick.dm_desc": {
+        "fr": "Tu as été expulsé du serveur **{server}**.",
+        "en": "You have been kicked from **{server}**."},
+    "ban.dm_title": {"fr": "🔨 Tu as été banni", "en": "🔨 You have been banned"},
+    "ban.dm_perm": {
+        "fr": "Tu as été banni **définitivement** du serveur **{server}**.",
+        "en": "You have been **permanently** banned from **{server}**."},
+    "ban.dm_temp": {
+        "fr": "Tu as été banni du serveur **{server}**.",
+        "en": "You have been banned from **{server}**."},
+    "ban.unban_dm_title": {
+        "fr": "✅ Ton bannissement est terminé",
+        "en": "✅ Your ban has ended"},
+    "ban.unban_dm_desc": {
+        "fr": "Ton bannissement du serveur **{server}** est terminé. Tu peux "
+              "revenir avec cette invitation :",
+        "en": "Your ban from **{server}** has ended. You can rejoin using "
+              "this invite:"},
+    "ban.unban_dm_no_invite": {
+        "fr": "Ton bannissement du serveur **{server}** est terminé, mais je "
+              "n'ai pas pu générer d'invitation.",
+        "en": "Your ban from **{server}** has ended, but I couldn't generate "
+              "an invite."},
     "kick.done": {
         "fr": "👢 **{user}** a été expulsé.\n**Raison :** {reason}",
         "en": "👢 **{user}** has been kicked.\n**Reason:** {reason}"},

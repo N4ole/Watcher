@@ -40,6 +40,20 @@ class Kick(commands.Cog):
             await ctx.send(t(ctx, "kick.hierarchy"))
             return
 
+        # Prévenir l'utilisateur en MP AVANT l'expulsion (après, le bot ne
+        # partage plus forcément de serveur avec lui). Sans invitation.
+        dm = discord.Embed(
+            title=t(member, "kick.dm_title"),
+            description=t(member, "kick.dm_desc", server=ctx.guild.name),
+            color=discord.Color.orange(),
+        )
+        dm.add_field(name=t(member, "mod.reason_label"), value=reason,
+                     inline=False)
+        try:
+            await member.send(embed=dm)
+        except (discord.HTTPException, discord.Forbidden):
+            pass  # MP fermés : on expulse quand même.
+
         try:
             await member.kick(reason=f"{ctx.author} : {reason}")
         except discord.Forbidden:
