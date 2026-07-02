@@ -470,10 +470,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "en": "❌ Unable to contact the bot owners at the moment.",
     },
     # --- respond (owner -> propriétaires de serveurs) ---
-    "resp.dm_title": {"fr": "📬 Message des owners de ClaudeBot",
-                      "en": "📬 Message from the ClaudeBot owners"},
-    "resp.announce_title": {"fr": "📢 Annonce de ClaudeBot",
-                            "en": "📢 ClaudeBot announcement"},
+    "resp.dm_title": {"fr": "📬 Message des owners de Watcher",
+                      "en": "📬 Message from the Watcher owners"},
+    "resp.announce_title": {"fr": "📢 Annonce de Watcher",
+                            "en": "📢 Watcher announcement"},
     "resp.from": {"fr": "Envoyé par", "en": "Sent by"},
     "resp.usage": {
         "fr": "Usage : `{prefix}respond <ID utilisateur | all> <message>`",
@@ -502,8 +502,8 @@ _CATALOG: dict[str, dict[str, str]] = {
               " ({failed} failure(s)).",
     },
     # --- Mention (présentation) ---
-    "mention.title": {"fr": "👋 Bonjour, je suis ClaudeBot !",
-                      "en": "👋 Hi, I'm ClaudeBot!"},
+    "mention.title": {"fr": "👋 Bonjour, je suis Watcher !",
+                      "en": "👋 Hi, I'm Watcher!"},
     "mention.desc": {"fr": "Un bot de modération et d'utilitaires pour ton serveur.",
                      "en": "A moderation and utility bot for your server."},
     "mention.prefix": {"fr": "Préfixe", "en": "Prefix"},
@@ -607,8 +607,8 @@ _CATALOG: dict[str, dict[str, str]] = {
         "en": "⟨ ⟩ = required · [ ] = optional · owners only",
     },
     # --- Central ---
-    "central.title": {"fr": "🛰️ Centralisation ClaudeBot",
-                      "en": "🛰️ ClaudeBot central dashboard"},
+    "central.title": {"fr": "🛰️ Centralisation Watcher",
+                      "en": "🛰️ Watcher central dashboard"},
     "central.servers": {"fr": "🌐 Serveurs", "en": "🌐 Servers"},
     "central.servers_val": {
         "fr": "**{guilds}** serveurs\n**{members}** membres\n👤 {humans} · 🤖 {bots}",
@@ -675,7 +675,14 @@ _CATALOG: dict[str, dict[str, str]] = {
     "perm.admin": {"fr": "Administrateur", "en": "Administrator"},
     "perm.manage_messages": {"fr": "Gérer les messages", "en": "Manage Messages"},
     "perm.server_owner": {"fr": "Propriétaire du serveur", "en": "Server owner"},
+    "perm.kick": {"fr": "Expulser des membres", "en": "Kick Members"},
+    "perm.ban": {"fr": "Bannir des membres", "en": "Ban Members"},
     # Descriptions traduites des commandes (utilisées par le help).
+    "cmddesc.kick": {"fr": "Expulse un utilisateur du serveur (avec raison).",
+                     "en": "Kick a user from the server (with reason)."},
+    "cmddesc.ban": {
+        "fr": "Bannit un utilisateur (raison et durée optionnelle).",
+        "en": "Ban a user (reason and optional duration)."},
     "cmddesc.8ball": {"fr": "Pose une question à la boule magique.",
                       "en": "Ask the magic 8-ball a question."},
     "cmddesc.analyse": {"fr": "Graphique d'activité du serveur sur 7 jours.",
@@ -760,6 +767,105 @@ _CATALOG: dict[str, dict[str, str]] = {
                       "en": "Watch a user and log their activity."},
     "cmddesc.watchlist": {"fr": "Liste les utilisateurs actuellement surveillés.",
                           "en": "List currently watched users."},
+    "cmddesc.logs": {
+        "fr": "Active/désactive les logs Discord par type (on/off <type>).",
+        "en": "Enable/disable Discord logs by type (on/off <type>)."},
+    # --- Logs Discord ---
+    "logs.usage": {
+        "fr": "Usage : `{prefix}logs <on|off> <type>`\nTypes : {types}.",
+        "en": "Usage: `{prefix}logs <on|off> <type>`\nTypes: {types}."},
+    "logs.bad_type": {
+        "fr": "❌ Type inconnu. Types disponibles : {types}.",
+        "en": "❌ Unknown type. Available types: {types}."},
+    "logs.on": {
+        "fr": "✅ Logs **{type}** activés dans {channel}.",
+        "en": "✅ **{type}** logs enabled in {channel}."},
+    "logs.on_all": {
+        "fr": "✅ Tous les types de logs ont été activés (catégorie **logs**).",
+        "en": "✅ All log types have been enabled (**logs** category)."},
+    "logs.off": {"fr": "✅ Logs **{type}** désactivés.",
+                 "en": "✅ **{type}** logs disabled."},
+    "logs.off_all": {"fr": "✅ Tous les logs ont été désactivés.",
+                     "en": "✅ All logs have been disabled."},
+    "logs.already_off": {"fr": "ℹ️ Les logs **{type}** ne sont pas activés.",
+                         "en": "ℹ️ **{type}** logs are not enabled."},
+    "logs.entry_cmd": {"fr": "📋 Commande `{prefix}{cmd}`",
+                       "en": "📋 Command `{prefix}{cmd}`"},
+    "logs.entry_error": {"fr": "⚠️ Échec `{prefix}{cmd}`",
+                         "en": "⚠️ Failed `{prefix}{cmd}`"},
+    "logs.f_user": {"fr": "Utilisateur", "en": "User"},
+    "logs.f_channel": {"fr": "Salon", "en": "Channel"},
+    "logs.f_via": {"fr": "Via", "en": "Via"},
+    "logs.f_args": {"fr": "Arguments", "en": "Arguments"},
+    "logs.f_error": {"fr": "Erreur", "en": "Error"},
+    # --- Kick / Ban ---
+    "mod.no_reason": {"fr": "Aucune raison fournie.", "en": "No reason provided."},
+    "mod.reason_label": {"fr": "Raison", "en": "Reason"},
+    "mod.duration_label": {"fr": "Durée", "en": "Duration"},
+    "mod.permanent": {"fr": "Définitif", "en": "Permanent"},
+    "kick.dm_title": {"fr": "👢 Tu as été expulsé", "en": "👢 You have been kicked"},
+    "kick.dm_desc": {
+        "fr": "Tu as été expulsé du serveur **{server}**.",
+        "en": "You have been kicked from **{server}**."},
+    "ban.dm_title": {"fr": "🔨 Tu as été banni", "en": "🔨 You have been banned"},
+    "ban.dm_perm": {
+        "fr": "Tu as été banni **définitivement** du serveur **{server}**.",
+        "en": "You have been **permanently** banned from **{server}**."},
+    "ban.dm_temp": {
+        "fr": "Tu as été banni du serveur **{server}**.",
+        "en": "You have been banned from **{server}**."},
+    "ban.unban_dm_title": {
+        "fr": "✅ Ton bannissement est terminé",
+        "en": "✅ Your ban has ended"},
+    "ban.unban_dm_desc": {
+        "fr": "Ton bannissement du serveur **{server}** est terminé. Tu peux "
+              "revenir avec cette invitation :",
+        "en": "Your ban from **{server}** has ended. You can rejoin using "
+              "this invite:"},
+    "ban.unban_dm_no_invite": {
+        "fr": "Ton bannissement du serveur **{server}** est terminé, mais je "
+              "n'ai pas pu générer d'invitation.",
+        "en": "Your ban from **{server}** has ended, but I couldn't generate "
+              "an invite."},
+    "kick.done": {
+        "fr": "👢 **{user}** a été expulsé.\n**Raison :** {reason}",
+        "en": "👢 **{user}** has been kicked.\n**Reason:** {reason}"},
+    "kick.self": {"fr": "❌ Tu ne peux pas t'expulser toi-même.",
+                  "en": "❌ You can't kick yourself."},
+    "kick.hierarchy": {
+        "fr": "❌ Tu ne peux pas expulser un membre dont le rôle est égal ou "
+              "supérieur au tien.",
+        "en": "❌ You can't kick a member whose role is equal to or higher "
+              "than yours."},
+    "kick.forbidden": {
+        "fr": "❌ Je n'ai pas la permission d'expulser cet utilisateur "
+              "(rôle trop haut ?).",
+        "en": "❌ I don't have permission to kick this user (role too high?)."},
+    "kick.failed": {"fr": "❌ Échec de l'expulsion : {error}",
+                    "en": "❌ Kick failed: {error}"},
+    "ban.title": {"fr": "🔨 Bannissement", "en": "🔨 Ban"},
+    "ban.perm_desc": {
+        "fr": "**{user}** a été banni **définitivement**.\n**Raison :** {reason}",
+        "en": "**{user}** has been banned **permanently**.\n"
+              "**Reason:** {reason}"},
+    "ban.temp_desc": {
+        "fr": "**{user}** a été banni.\n**Raison :** {reason}",
+        "en": "**{user}** has been banned.\n**Reason:** {reason}"},
+    "ban.until": {"fr": "Déban le", "en": "Unban on"},
+    "ban.relative": {"fr": "Dans", "en": "In"},
+    "ban.self": {"fr": "❌ Tu ne peux pas te bannir toi-même.",
+                 "en": "❌ You can't ban yourself."},
+    "ban.hierarchy": {
+        "fr": "❌ Tu ne peux pas bannir un membre dont le rôle est égal ou "
+              "supérieur au tien.",
+        "en": "❌ You can't ban a member whose role is equal to or higher "
+              "than yours."},
+    "ban.forbidden": {
+        "fr": "❌ Je n'ai pas la permission de bannir cet utilisateur "
+              "(rôle trop haut ?).",
+        "en": "❌ I don't have permission to ban this user (role too high?)."},
+    "ban.failed": {"fr": "❌ Échec du bannissement : {error}",
+                   "en": "❌ Ban failed: {error}"},
     # --- Servers (détail owner) ---
     "srv.title": {"fr": "🌐 Serveurs du bot ({count})",
                   "en": "🌐 Bot servers ({count})"},

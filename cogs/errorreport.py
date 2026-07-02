@@ -106,7 +106,7 @@ class ErrorReport(commands.Cog):
                 value="Trace complète jointe (`traceback.txt`).",
                 inline=False,
             )
-        embed.set_footer(text="ClaudeBot — rapport d'erreur automatique")
+        embed.set_footer(text="Watcher — rapport d'erreur automatique")
 
         self._reporting = True
         try:
@@ -165,10 +165,10 @@ class ErrorReport(commands.Cog):
         )
 
     async def report_event_error(self, event: str) -> None:
-        """Signale une erreur d'événement (appelée par ClaudeBot.on_error).
+        """Signale une erreur d'événement (appelée par Watcher.on_error).
 
         Les erreurs d'événements ne sont pas dispatchées aux listeners de cog :
-        ``ClaudeBot.on_error`` délègue donc ici. L'exception courante est lue
+        ``Watcher.on_error`` délègue donc ici. L'exception courante est lue
         via ``sys.exc_info()`` (toujours valide dans le bloc ``except``).
         """
         # Évite toute récursion si l'erreur survient pendant notre envoi de MP.

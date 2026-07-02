@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 COGS_DIR = Path(__file__).parent / "cogs"
 
 
-class ClaudeBot(commands.Bot):
+class Watcher(commands.Bot):
     """Bot Discord supportant les commandes préfixe (§) et slash (/)."""
 
     def __init__(self) -> None:

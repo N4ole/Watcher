@@ -24,7 +24,7 @@ class BotInfo(commands.Cog):
         members = sum((g.member_count or 0) for g in self.bot.guilds)
 
         embed = discord.Embed(
-            title="🤖 ClaudeBot",
+            title="🤖 Watcher",
             description=t(ctx, "bi.desc"),
             color=discord.Color.blurple(),
         )
