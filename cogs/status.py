@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 import config
+from utils.i18n import t
 
 
 class Status(commands.Cog):
@@ -17,15 +18,16 @@ class Status(commands.Cog):
     )
     async def status(self, ctx: commands.Context) -> None:
         embed = discord.Embed(
-            title="📊 Statut du bot",
+            title=t(ctx, "st.title"),
             color=discord.Color.blurple(),
         )
-        embed.add_field(name="Version", value=config.VERSION, inline=True)
+        embed.add_field(name=t(ctx, "bi.version"), value=config.VERSION, inline=True)
         embed.add_field(
-            name="Ping", value=f"{round(self.bot.latency * 1000)} ms", inline=True
+            name=t(ctx, "bi.ping"),
+            value=f"{round(self.bot.latency * 1000)} ms", inline=True,
         )
         embed.add_field(
-            name="Serveurs", value=str(len(self.bot.guilds)), inline=True
+            name=t(ctx, "bi.servers"), value=str(len(self.bot.guilds)), inline=True
         )
         await ctx.send(embed=embed)
 

@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 MAX_CLEAR = 100
 
 
@@ -19,7 +21,7 @@ class Clear(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx: commands.Context, nombre: int) -> None:
         if nombre < 1:
-            await ctx.send("❌ Indique un nombre supérieur à 0.")
+            await ctx.send(t(ctx, "clear.bad_number"))
             return
         nombre = min(nombre, MAX_CLEAR)
 
@@ -32,7 +34,7 @@ class Clear(commands.Cog):
 
         deleted = await ctx.channel.purge(limit=nombre)
         await ctx.send(
-            f"🧹 {len(deleted)} message(s) supprimé(s).",
+            t(ctx, "clear.done", count=len(deleted)),
             delete_after=5,
             ephemeral=True,
         )

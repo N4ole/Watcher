@@ -11,6 +11,7 @@ import discord
 from discord.ext import commands, tasks
 
 from utils import analytics
+from utils.i18n import t
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class Analyse(commands.Cog):
     # Rendu du graphique
     # ------------------------------------------------------------------ #
     @staticmethod
-    def _render(data: list[dict], guild_name: str) -> bytes:
+    def _render(data: list[dict], texts: dict) -> bytes:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
@@ -94,21 +95,21 @@ class Analyse(commands.Cog):
         fig, (ax1, ax2, ax3) = plt.subplots(
             3, 1, figsize=(9, 10), constrained_layout=True
         )
-        fig.suptitle(f"Analyse de {guild_name} — 7 jours", fontsize=15)
+        fig.suptitle(texts["title"], fontsize=15)
 
         ax1.plot(labels, members, color="#5865F2", marker="o", linewidth=2)
         ax1.fill_between(labels, members, color="#5865F2", alpha=0.12)
-        ax1.set_title("Nombre de membres")
+        ax1.set_title(texts["members"])
 
         ax2.plot(labels, msg_per_member, color="#57F287", marker="o", linewidth=2)
         ax2.fill_between(labels, msg_per_member, color="#57F287", alpha=0.12)
-        ax2.set_title("Messages par membre et par jour")
+        ax2.set_title(texts["msg"])
 
         ax3.plot(labels, joins, color="#3BA55D", marker="o", linewidth=2,
-                 label="Arrivées")
+                 label=texts["joins"])
         ax3.plot(labels, leaves, color="#ED4245", marker="o", linewidth=2,
-                 label="Départs")
-        ax3.set_title("Arrivées / Départs")
+                 label=texts["leaves"])
+        ax3.set_title(texts["joinleave"])
         ax3.legend()
 
         for ax in (ax1, ax2, ax3):
@@ -136,12 +137,20 @@ class Analyse(commands.Cog):
         self._do_flush()
         data = analytics.get_range(ctx.guild.id, PERIOD_DAYS)
 
+        texts = {
+            "title": t(ctx, "analyse.chart_title", name=ctx.guild.name),
+            "members": t(ctx, "analyse.members"),
+            "msg": t(ctx, "analyse.msg_per_member"),
+            "joinleave": t(ctx, "analyse.joinleave"),
+            "joins": t(ctx, "analyse.joins"),
+            "leaves": t(ctx, "analyse.leaves"),
+        }
         image = await self.bot.loop.run_in_executor(
-            None, self._render, data, ctx.guild.name
+            None, self._render, data, texts
         )
         file = discord.File(io.BytesIO(image), filename="analyse.png")
         embed = discord.Embed(
-            title="📈 Analyse du serveur (7 jours)",
+            title=t(ctx, "analyse.title"),
             color=discord.Color.blurple(),
         )
         embed.set_image(url="attachment://analyse.png")

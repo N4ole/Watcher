@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class MemberCount(commands.Cog):
     """Compteur de membres."""
@@ -19,11 +21,9 @@ class MemberCount(commands.Cog):
         bots = sum(1 for m in guild.members if m.bot)
         humans = (guild.member_count or 0) - bots
         embed = discord.Embed(
-            title="👥 Membres",
-            description=(
-                f"**{guild.member_count}** au total\n"
-                f"👤 {humans} humains · 🤖 {bots} bots"
-            ),
+            title=t(ctx, "mc.title"),
+            description=t(ctx, "mc.desc", total=guild.member_count,
+                          humans=humans, bots=bots),
             color=discord.Color.green(),
         )
         await ctx.send(embed=embed)

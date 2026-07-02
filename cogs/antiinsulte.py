@@ -1,9 +1,14 @@
 """Commande admin `antiinsulte on/off` : supprime les messages insultants."""
+import logging
+
 import discord
 from discord.ext import commands
 
 from utils import badwords
 from utils import storage
+from utils.i18n import t
+
+log = logging.getLogger("action")
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -25,15 +30,12 @@ class AntiInsulte(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antiinsulte", True)
-            await ctx.send(
-                "🤬 **Anti-insulte activé** : les messages insultants seront "
-                "supprimés."
-            )
+            await ctx.send(t(ctx, "antiinsulte.on"))
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antiinsulte", False)
-            await ctx.send("🤬 **Anti-insulte désactivé**.")
+            await ctx.send(t(ctx, "antiinsulte.off"))
         else:
-            await ctx.send("❌ Utilise `antiinsulte on` ou `antiinsulte off`.")
+            await ctx.send(t(ctx, "toggle.usage", name="antiinsulte"))
 
     async def _handle(self, message: discord.Message) -> None:
         if message.author.bot or message.guild is None:
@@ -42,7 +44,8 @@ class AntiInsulte(commands.Cog):
             return
         if not storage.get_setting(message.guild.id, "antiinsulte", False):
             return
-        if badwords.find_insult(message.content) is None:
+        hit = badwords.find_insult(message.content)
+        if hit is None:
             return
 
         try:
@@ -50,8 +53,13 @@ class AntiInsulte(commands.Cog):
         except discord.HTTPException:
             pass
         await message.channel.send(
-            f"🤬 {message.author.mention} les insultes ne sont pas tolérées ici.",
+            t(message, "antiinsulte.warn", user=message.author.mention),
             delete_after=10,
+        )
+        log.info(
+            "Anti-insulte — message supprimé de %s (%s) dans #%s / %s (%s)",
+            message.author, message.author.id, message.channel,
+            message.guild.name, message.guild.id,
         )
 
     @commands.Cog.listener()

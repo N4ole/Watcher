@@ -38,6 +38,10 @@ claude_bot/
 Les modules communs sont regroupés dans `utils/` et `web/` (packages Python) ;
 les fichiers de données générés à l'exécution sont dans `data/`.
 
+Le bot est **bilingue** (français par défaut, anglais). La commande
+`langue <fr/en>` change la langue **par serveur** ; les messages passent par le
+catalogue centralisé [`utils/i18n.py`](utils/i18n.py) (fonction `t(ctx, clé)`).
+
 ## Documentation
 
 Documentation détaillée dans [`docs/`](docs/README.md), sur trois axes :
@@ -73,9 +77,14 @@ des membres par serveur, et utilisation (commandes) par serveur.
 - **Accès** : les **owners** du bot voient toutes les données ; un
   **administrateur** d'un serveur où le bot est présent voit les données des
   serveurs qu'il administre. Les autres sont refusés.
-- **Analytics & contrôle** : les owners disposent de cartes analytics (serveurs,
-  membres, commandes, ping, uptime) et d'un panneau de **contrôle du bot**
-  (changer le statut, recharger les cogs). Interface au thème **néon**.
+- **Dashboard selon le statut** : détecté à la connexion. Les **owners** ont une
+  interface en trois pages — **Général** (analytics + contrôle du bot),
+  **Analytics** (sélecteur de serveur : vue agrégée par défaut ou par serveur)
+  et **Live** (console en direct recopiant toute la sortie du bot). Les
+  **administrateurs** voient les graphiques des serveurs qu'ils administrent.
+- **Journal d'actions** : chaque action du bot (commandes avec qui/où/quand,
+  automodération, arrivées/départs de serveurs…) est écrite dans la console et
+  consultable en direct sur la page **Live**. Interface au thème **néon**.
 - **Activation** : renseignez `OAUTH_CLIENT_ID` et `OAUTH_CLIENT_SECRET` dans le
   `.env` (sinon le panel ne démarre pas). Ajoutez `OAUTH_REDIRECT_URI` dans les
   *Redirects* OAuth2 de l'application Discord.
@@ -83,6 +92,11 @@ des membres par serveur, et utilisation (commandes) par serveur.
   entrée/sortie de serveur), et persistées dans `stats.json`.
 
 Une fois lancé, le panel est accessible sur `http://WEB_HOST:WEB_PORT`.
+
+Deux pages **publiques** (sans connexion) sont servies par le panel :
+`/privacy` (politique de confidentialité) et `/terms` (conditions
+d'utilisation) — utiles pour les champs *Privacy Policy URL* / *Terms of
+Service URL* du portail développeur Discord.
 
 👉 Guide pas à pas pour configurer l'OAuth2 : [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md).
 
@@ -169,6 +183,7 @@ Réservées aux membres possédant la permission **Administrateur**.
 | `antipub <on/off>`  | Quand activé, supprime les messages contenant une invitation Discord et prévient l'auteur. |
 | `antispam <on/off>` | Quand activé, mute temporairement un membre qui envoie trop de messages en peu de temps. |
 | `antiinsulte <on/off>` | Quand activé, supprime les messages contenant une insulte (gère les orthographes alternatives : leet, lettres répétées, espacées…) et prévient l'auteur. |
+| `langue <fr/en>`    | Choisit la langue du bot pour ce serveur (français par défaut). |
 | `protections`       | Affiche l'état (on/off) de toutes les protections du serveur. |
 | `userstatus <membre>` | Affiche l'historique des sanctions reçues par un membre (warns, mutes, durées, totaux…). |
 | `analyse`           | Génère des courbes d'activité du serveur sur 7 jours (membres, messages par membre/jour, arrivées/départs). |

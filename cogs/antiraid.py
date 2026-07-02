@@ -13,6 +13,7 @@ import discord
 from discord.ext import commands
 
 from utils import storage
+from utils.i18n import t
 
 log = logging.getLogger(__name__)
 
@@ -90,17 +91,12 @@ class AntiRaid(commands.Cog):
         if value in _ON:
             await self._ensure_setup(ctx.guild)
             storage.set_setting(ctx.guild.id, "antiraid", True)
-            await ctx.send(
-                "🛡️ **Anti-raid activé** : les nouveaux membres devront "
-                f"valider un captcha dans #{CHANNEL_NAME} pour accéder au serveur."
-            )
+            await ctx.send(t(ctx, "antiraid.on", channel=CHANNEL_NAME))
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antiraid", False)
-            await ctx.send(
-                "🛡️ **Anti-raid désactivé** : plus de captcha à l'arrivée."
-            )
+            await ctx.send(t(ctx, "antiraid.off"))
         else:
-            await ctx.send("❌ Utilise `antiraid on` ou `antiraid off`.")
+            await ctx.send(t(ctx, "toggle.usage", name="antiraid"))
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
@@ -117,11 +113,10 @@ class AntiRaid(commands.Cog):
             return
 
         code = _new_code()
-        await channel.send(
-            f"👋 Bienvenue {member.mention} ! Pour accéder au serveur, "
-            f"recopie ce code : **`{code}`**\n"
-            f"(tu as {CAPTCHA_TIMEOUT // 60} minutes et {MAX_ATTEMPTS} essais)."
-        )
+        await channel.send(t(
+            guild, "antiraid.welcome", user=member.mention, code=code,
+            minutes=CAPTCHA_TIMEOUT // 60, attempts=MAX_ATTEMPTS,
+        ))
 
         def check(msg: discord.Message) -> bool:
             return msg.author == member and msg.channel == channel
@@ -136,18 +131,28 @@ class AntiRaid(commands.Cog):
             if msg.content.strip().upper() == code:
                 try:
                     await member.remove_roles(role, reason="Captcha validé")
-                    await channel.send(f"✅ {member.mention} vérifié, bienvenue !")
+                    await channel.send(
+                        t(guild, "antiraid.verified", user=member.mention)
+                    )
+                    log.info(
+                        "Anti-raid — %s (%s) a validé le captcha sur %s (%s)",
+                        member, member.id, guild.name, guild.id,
+                    )
                 except discord.HTTPException:
                     pass
                 return
             await channel.send(
-                f"❌ {member.mention} code incorrect, réessaie."
+                t(guild, "antiraid.wrong", user=member.mention)
             )
 
         # Échec ou expiration : expulsion.
         try:
             await member.kick(reason="Captcha anti-raid non validé")
-            await channel.send(f"⛔ {member} n'a pas validé le captcha à temps.")
+            await channel.send(t(guild, "antiraid.kicked", user=str(member)))
+            log.info(
+                "Anti-raid — %s (%s) expulsé (captcha non validé) sur %s (%s)",
+                member, member.id, guild.name, guild.id,
+            )
         except discord.HTTPException:
             pass
 

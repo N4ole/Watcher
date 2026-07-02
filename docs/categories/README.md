@@ -5,4 +5,4 @@
 - [👑 Propriétaire de serveur](proprietaire-de-serveur.md) (1 commandes)
 - [📊 Infos](infos.md) (5 commandes)
 - [🔧 Général](general.md) (5 commandes)
-- [🛡️ Modération](moderation.md) (19 commandes)
+- [🛡️ Modération](moderation.md) (20 commandes)

@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks
+from utils.i18n import t
 
 
 class Reload(commands.Cog):
@@ -36,28 +37,28 @@ class Reload(commands.Cog):
                 except Exception as exc:  # noqa: BLE001
                     failed.append(f"{ext} ({exc})")
             await self.bot.tree.sync()
-            desc = f"✅ Rechargés : {len(reloaded)}"
+            desc = t(ctx, "reload.all_ok", count=len(reloaded))
             if failed:
-                desc += "\n❌ Échecs :\n" + "\n".join(failed)
+                desc += t(ctx, "reload.all_fail", failed="\n".join(failed))
             await ctx.send(desc)
             return
 
         extension = self._match_extension(cog)
         if extension is None:
-            await ctx.send(f"❌ Cog introuvable : `{cog}`")
+            await ctx.send(t(ctx, "reload.not_found", cog=cog))
             return
 
         try:
             await self.bot.reload_extension(extension)
             await self.bot.tree.sync()
-            await ctx.send(f"✅ Cog rechargé : `{extension}`")
+            await ctx.send(t(ctx, "reload.one", cog=extension))
         except Exception as exc:  # noqa: BLE001
-            await ctx.send(f"❌ Échec du rechargement de `{extension}` : {exc}")
+            await ctx.send(t(ctx, "reload.one_fail", cog=extension, error=exc))
 
     @reload.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
+            await ctx.send(t(ctx, "error.owner_only"))
         else:
             raise error
 

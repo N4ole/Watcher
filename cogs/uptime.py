@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 def _format_uptime(delta) -> str:
     total = int(delta.total_seconds())
@@ -34,12 +36,12 @@ class Uptime(commands.Cog):
     async def uptime(self, ctx: commands.Context) -> None:
         delta = datetime.now(timezone.utc) - self.bot.start_time
         embed = discord.Embed(
-            title="⏱️ Uptime",
-            description=f"Le bot tourne depuis **{_format_uptime(delta)}**.",
+            title=t(ctx, "uptime.title"),
+            description=t(ctx, "uptime.desc", duration=_format_uptime(delta)),
             color=discord.Color.green(),
         )
         embed.add_field(
-            name="Démarré",
+            name=t(ctx, "uptime.started"),
             value=discord.utils.format_dt(self.bot.start_time, style="F"),
             inline=False,
         )

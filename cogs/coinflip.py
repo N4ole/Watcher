@@ -3,6 +3,8 @@ import random
 
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class CoinFlip(commands.Cog):
     """Pile ou face."""
@@ -16,8 +18,8 @@ class CoinFlip(commands.Cog):
         description="Lance une pièce : pile ou face.",
     )
     async def coinflip(self, ctx: commands.Context) -> None:
-        result = random.choice(["🪙 Pile", "🪙 Face"])
-        await ctx.send(result)
+        key = random.choice(["coin.heads", "coin.tails"])
+        await ctx.send(t(ctx, key))
 
 
 async def setup(bot: commands.Bot) -> None:

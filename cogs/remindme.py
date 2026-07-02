@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from utils import storage
 from utils.duration import human, parse_duration
+from utils.i18n import t
 
 
 class RemindMe(commands.Cog):
@@ -36,7 +37,9 @@ class RemindMe(commands.Cog):
 
     async def _fire(self, reminder: dict) -> None:
         user = self.bot.get_user(reminder["user_id"]) or None
-        text = f"⏰ Rappel : {reminder['message']}"
+        channel = self.bot.get_channel(reminder["channel_id"])
+        source = getattr(channel, "guild", None)
+        text = t(source, "remind.fire", message=reminder["message"])
         sent = False
         if user is not None:
             try:
@@ -45,13 +48,11 @@ class RemindMe(commands.Cog):
             except discord.HTTPException:
                 sent = False
         # Repli sur le salon d'origine si le MP échoue.
-        if not sent:
-            channel = self.bot.get_channel(reminder["channel_id"])
-            if channel is not None:
-                try:
-                    await channel.send(f"<@{reminder['user_id']}> {text}")
-                except discord.HTTPException:
-                    pass
+        if not sent and channel is not None:
+            try:
+                await channel.send(f"<@{reminder['user_id']}> {text}")
+            except discord.HTTPException:
+                pass
         storage.remove_reminder(reminder["id"])
 
     @commands.hybrid_command(
@@ -63,9 +64,7 @@ class RemindMe(commands.Cog):
     ) -> None:
         delta = parse_duration(temps)
         if delta is None:
-            await ctx.send(
-                "❌ Durée invalide. Exemples : `30s`, `5m`, `2h`, `1d`, `1h30m`."
-            )
+            await ctx.send(t(ctx, "remind.bad_duration"))
             return
 
         due = datetime.now(timezone.utc) + delta
@@ -74,8 +73,8 @@ class RemindMe(commands.Cog):
         )
         self.bot.loop.create_task(self._schedule(reminder))
         await ctx.send(
-            f"✅ Je te le rappellerai en MP dans **{human(delta)}** "
-            f"({discord.utils.format_dt(due, style='R')})."
+            t(ctx, "remind.set", duration=human(delta),
+              when=discord.utils.format_dt(due, style="R"))
         )
 
     @remindme.error

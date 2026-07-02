@@ -3,6 +3,8 @@ import random
 
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class Choose(commands.Cog):
     """Choix aléatoire parmi plusieurs options."""
@@ -17,9 +19,9 @@ class Choose(commands.Cog):
     async def choose(self, ctx: commands.Context, *, options: str) -> None:
         choices = [o.strip() for o in options.split("|") if o.strip()]
         if len(choices) < 2:
-            await ctx.send("❌ Donne au moins deux options séparées par `|`.")
+            await ctx.send(t(ctx, "choose.need"))
             return
-        await ctx.send(f"🤔 Je choisis : **{random.choice(choices)}**")
+        await ctx.send(t(ctx, "choose.result", choice=random.choice(choices)))
 
 
 async def setup(bot: commands.Bot) -> None:

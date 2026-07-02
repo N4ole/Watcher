@@ -5,6 +5,8 @@ import re
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 _DICE_RE = re.compile(r"^\s*(\d*)\s*d\s*(\d+)\s*$", re.IGNORECASE)
 
 
@@ -21,13 +23,13 @@ class Roll(commands.Cog):
     async def roll(self, ctx: commands.Context, des: str = "1d6") -> None:
         match = _DICE_RE.match(des)
         if not match:
-            await ctx.send("❌ Format invalide. Exemples : `d6`, `2d20`, `4d10`.")
+            await ctx.send(t(ctx, "roll.bad"))
             return
 
         count = int(match.group(1) or 1)
         faces = int(match.group(2))
         if not (1 <= count <= 100) or not (2 <= faces <= 1000):
-            await ctx.send("❌ Entre 1 et 100 dés, de 2 à 1000 faces.")
+            await ctx.send(t(ctx, "roll.limits"))
             return
 
         rolls = [random.randint(1, faces) for _ in range(count)]

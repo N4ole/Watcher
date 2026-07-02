@@ -2,6 +2,7 @@
 from discord.ext import commands
 
 from utils import checks
+from utils.i18n import t
 
 
 class Shutdown(commands.Cog):
@@ -16,13 +17,13 @@ class Shutdown(commands.Cog):
     )
     @checks.is_owner()
     async def shutdown(self, ctx: commands.Context) -> None:
-        await ctx.send("🛑 Extinction du bot...")
+        await ctx.send(t(ctx, "shutdown.msg"))
         await self.bot.close()
 
     @shutdown.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("⛔ Cette commande est réservée aux owners du bot.")
+            await ctx.send(t(ctx, "error.owner_only"))
         else:
             raise error
 
