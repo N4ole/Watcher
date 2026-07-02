@@ -1,4 +1,4 @@
-# claude_bot
+# Watcher
 
 Bot Discord en Python supportant à la fois les **commandes préfixe** (`§`) et
 les **commandes slash** (`/`), avec une architecture multi-fichiers (un fichier
@@ -7,7 +7,7 @@ par commande).
 ## Structure
 
 ```
-claude_bot/
+Watcher/
 ├── main.py          # Point d'entrée : lance le bot
 ├── bot.py           # Classe du bot + chargement automatique des cogs
 ├── config.py        # Configuration (token, préfixe, guild id, OAuth...)
@@ -55,7 +55,7 @@ Régénérer les fiches par commande/catégorie après un changement :
 Les cogs sont chargés récursivement : ajouter un fichier dans `cogs/` **ou**
 dans un sous-dossier (comme `cogs/owner/`) suffit pour ajouter une commande.
 
-Mentionner le bot (`@ClaudeBot` seul) affiche un message de présentation.
+Mentionner le bot (`@Watcher` seul) affiche un message de présentation.
 
 Les **owners du bot** peuvent utiliser ses commandes en **message privé** avec
 lui (les commandes nécessitant un serveur restent, elles, réservées aux

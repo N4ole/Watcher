@@ -3,7 +3,7 @@ import logging
 import sys
 
 import config
-from bot import ClaudeBot
+from bot import Watcher
 from utils import logsetup
 from web import logbuffer
 
@@ -29,7 +29,7 @@ def main() -> None:
         )
         sys.exit(1)
 
-    bot = ClaudeBot()
+    bot = Watcher()
     bot.run(config.TOKEN, log_handler=None)
 
 

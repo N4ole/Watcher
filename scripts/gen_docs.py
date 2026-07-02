@@ -13,7 +13,7 @@ import unicodedata
 from pathlib import Path
 
 import config
-from bot import ClaudeBot
+from bot import Watcher
 from cogs.help import _CATEGORIES, _DEFAULT
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -92,7 +92,7 @@ async def main() -> None:
     CMD_DIR.mkdir(parents=True, exist_ok=True)
     CAT_DIR.mkdir(parents=True, exist_ok=True)
 
-    bot = ClaudeBot()
+    bot = Watcher()
     await bot._load_cogs()
     commands_all = sorted(bot.commands, key=lambda c: c.qualified_name)
 

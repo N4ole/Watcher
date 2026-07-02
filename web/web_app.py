@@ -369,7 +369,7 @@ _COOKIE_BANNER = """
 
 _LOGIN_HTML = """<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
-<title>ClaudeBot — Panel</title>
+<title>Watcher — Panel</title>
 <style>""" + _NEON_CSS + """
  body{display:flex;height:100vh;align-items:center;justify-content:center}
  .card{padding:44px;text-align:center;max-width:420px;position:relative}
@@ -377,7 +377,7 @@ _LOGIN_HTML = """<!DOCTYPE html>
 </style></head>
 <body><div class="card">
  <button class="btn" id="lang" onclick="toggleLang()">English</button>
- <h1>▚ ClaudeBot ▞</h1>
+ <h1>▚ Watcher ▞</h1>
  <p data-fr="Panneau d'administration. Connecte-toi avec Discord pour accéder aux statistiques et au contrôle du bot."
     data-en="Admin panel. Log in with Discord to access the bot's statistics and controls."></p>
  <a class="btn gate-consent" href="/login" data-fr="Se connecter avec Discord"
@@ -399,7 +399,7 @@ applyLang(_lang);initConsent();
 
 _DASHBOARD_HTML = """<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8">
-<title>ClaudeBot — Dashboard</title>
+<title>Watcher — Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>""" + _NEON_CSS + """
  body{padding:24px;max-width:1100px;margin:auto}
@@ -421,7 +421,7 @@ _DASHBOARD_HTML = """<!DOCTYPE html>
  .lg-t{color:#66d9ff}.lg-lvl{opacity:.7}
 </style></head>
 <body>
- <header><h1>▚ ClaudeBot ▞</h1>
+ <header><h1>▚ Watcher ▞</h1>
    <span class="row"><span id="who"></span>
    <button class="btn" id="lang" onclick="toggleLang()">English</button>
    <a class="btn" href="/logout" id="logout"></a></span></header>
@@ -608,7 +608,7 @@ load();
 def _legal_page(title: str, fr_body: str, en_body: str) -> str:
     return (
         "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"utf-8\">"
-        f"<title>ClaudeBot — {title}</title><style>" + _NEON_CSS + """
+        f"<title>Watcher — {title}</title><style>" + _NEON_CSS + """
  body{max-width:820px;margin:auto;padding:32px 24px;line-height:1.6}
  h1{margin-bottom:4px}
  h2{margin-top:28px}
@@ -638,7 +638,7 @@ _PRIVACY_BODY = """
  <h1>Politique de confidentialité</h1>
  <p><em>Dernière mise à jour : 2026.</em></p>
  <p>Cette politique décrit les données traitées par le bot Discord
- « ClaudeBot » (« le Bot ») et la façon dont elles sont utilisées.</p>
+ « Watcher » (« le Bot ») et la façon dont elles sont utilisées.</p>
 
  <h2>1. Données collectées</h2>
  <p>Le Bot peut enregistrer, selon les fonctionnalités activées par les
@@ -699,7 +699,7 @@ _PRIVACY_BODY = """
 _TERMS_BODY = """
  <h1>Conditions d'utilisation</h1>
  <p><em>Dernière mise à jour : 2026.</em></p>
- <p>En ajoutant ou en utilisant le bot « ClaudeBot » (« le Bot »), vous
+ <p>En ajoutant ou en utilisant le bot « Watcher » (« le Bot »), vous
  acceptez les présentes conditions.</p>
 
  <h2>1. Service</h2>
@@ -740,7 +740,7 @@ _TERMS_BODY = """
 _PRIVACY_BODY_EN = """
  <h1>Privacy Policy</h1>
  <p><em>Last updated: 2026.</em></p>
- <p>This policy describes the data processed by the Discord bot “ClaudeBot”
+ <p>This policy describes the data processed by the Discord bot “Watcher”
  (“the Bot”) and how it is used.</p>
 
  <h2>1. Data collected</h2>
@@ -797,7 +797,7 @@ _PRIVACY_BODY_EN = """
 _TERMS_BODY_EN = """
  <h1>Terms of Service</h1>
  <p><em>Last updated: 2026.</em></p>
- <p>By adding or using the “ClaudeBot” bot (“the Bot”), you accept these terms.</p>
+ <p>By adding or using the “Watcher” bot (“the Bot”), you accept these terms.</p>
 
  <h2>1. Service</h2>
  <p>The Bot provides moderation, utility and statistics features for Discord

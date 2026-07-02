@@ -470,10 +470,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "en": "❌ Unable to contact the bot owners at the moment.",
     },
     # --- respond (owner -> propriétaires de serveurs) ---
-    "resp.dm_title": {"fr": "📬 Message des owners de ClaudeBot",
-                      "en": "📬 Message from the ClaudeBot owners"},
-    "resp.announce_title": {"fr": "📢 Annonce de ClaudeBot",
-                            "en": "📢 ClaudeBot announcement"},
+    "resp.dm_title": {"fr": "📬 Message des owners de Watcher",
+                      "en": "📬 Message from the Watcher owners"},
+    "resp.announce_title": {"fr": "📢 Annonce de Watcher",
+                            "en": "📢 Watcher announcement"},
     "resp.from": {"fr": "Envoyé par", "en": "Sent by"},
     "resp.usage": {
         "fr": "Usage : `{prefix}respond <ID utilisateur | all> <message>`",
@@ -502,8 +502,8 @@ _CATALOG: dict[str, dict[str, str]] = {
               " ({failed} failure(s)).",
     },
     # --- Mention (présentation) ---
-    "mention.title": {"fr": "👋 Bonjour, je suis ClaudeBot !",
-                      "en": "👋 Hi, I'm ClaudeBot!"},
+    "mention.title": {"fr": "👋 Bonjour, je suis Watcher !",
+                      "en": "👋 Hi, I'm Watcher!"},
     "mention.desc": {"fr": "Un bot de modération et d'utilitaires pour ton serveur.",
                      "en": "A moderation and utility bot for your server."},
     "mention.prefix": {"fr": "Préfixe", "en": "Prefix"},
@@ -607,8 +607,8 @@ _CATALOG: dict[str, dict[str, str]] = {
         "en": "⟨ ⟩ = required · [ ] = optional · owners only",
     },
     # --- Central ---
-    "central.title": {"fr": "🛰️ Centralisation ClaudeBot",
-                      "en": "🛰️ ClaudeBot central dashboard"},
+    "central.title": {"fr": "🛰️ Centralisation Watcher",
+                      "en": "🛰️ Watcher central dashboard"},
     "central.servers": {"fr": "🌐 Serveurs", "en": "🌐 Servers"},
     "central.servers_val": {
         "fr": "**{guilds}** serveurs\n**{members}** membres\n👤 {humans} · 🤖 {bots}",

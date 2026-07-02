@@ -1,4 +1,4 @@
-# Documentation ClaudeBot
+# Documentation Watcher
 
 La documentation est organisée sur trois axes.
 
