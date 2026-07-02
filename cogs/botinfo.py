@@ -6,6 +6,7 @@ from discord.ext import commands
 
 import config
 from utils.duration import human
+from utils.i18n import t
 
 
 class BotInfo(commands.Cog):
@@ -24,25 +25,27 @@ class BotInfo(commands.Cog):
 
         embed = discord.Embed(
             title="🤖 ClaudeBot",
-            description="Bot de modération et d'utilitaires.",
+            description=t(ctx, "bi.desc"),
             color=discord.Color.blurple(),
         )
         if self.bot.user:
             embed.set_thumbnail(url=self.bot.user.display_avatar.url)
-        embed.add_field(name="Version", value=config.VERSION, inline=True)
+        embed.add_field(name=t(ctx, "bi.version"), value=config.VERSION, inline=True)
         embed.add_field(
-            name="Serveurs", value=str(len(self.bot.guilds)), inline=True
+            name=t(ctx, "bi.servers"), value=str(len(self.bot.guilds)), inline=True
         )
-        embed.add_field(name="Membres", value=str(members), inline=True)
+        embed.add_field(name=t(ctx, "f.members"), value=str(members), inline=True)
         embed.add_field(
-            name="Ping", value=f"{round(self.bot.latency * 1000)} ms", inline=True
+            name=t(ctx, "bi.ping"),
+            value=f"{round(self.bot.latency * 1000)} ms", inline=True,
         )
-        embed.add_field(name="Uptime", value=human(uptime), inline=True)
+        embed.add_field(name=t(ctx, "bi.uptime"), value=human(uptime), inline=True)
         embed.add_field(
-            name="Commandes", value=str(len(self.bot.commands)), inline=True
+            name=t(ctx, "bi.commands"), value=str(len(self.bot.commands)),
+            inline=True,
         )
         embed.add_field(
-            name="Préfixe", value=f"`{config.PREFIX}`", inline=True
+            name=t(ctx, "bi.prefix"), value=f"`{config.PREFIX}`", inline=True
         )
         await ctx.send(embed=embed)
 

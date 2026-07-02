@@ -360,6 +360,149 @@ _CATALOG: dict[str, dict[str, str]] = {
                      "en": "⏱️ Total mute time: **{duration}**"},
     "us.recent": {"fr": "Dernières actions", "en": "Recent actions"},
     "us.by": {"fr": "par", "en": "by"},
+    # --- Champs communs infos ---
+    "f.id": {"fr": "ID", "en": "ID"},
+    "f.owner": {"fr": "Propriétaire", "en": "Owner"},
+    "f.created": {"fr": "Créé le", "en": "Created on"},
+    "f.members": {"fr": "Membres", "en": "Members"},
+    "f.channels": {"fr": "Salons", "en": "Channels"},
+    "f.roles": {"fr": "Rôles", "en": "Roles"},
+    "f.boosts": {"fr": "Boosts", "en": "Boosts"},
+    "f.emojis": {"fr": "Émojis", "en": "Emojis"},
+    "f.requested_by": {"fr": "Demandé par {user}", "en": "Requested by {user}"},
+    # --- ServerInfo ---
+    "si.members_val": {"fr": "{total} ({humans} 👤 / {bots} 🤖)",
+                       "en": "{total} ({humans} 👤 / {bots} 🤖)"},
+    "si.boosts_val": {"fr": "{count} (niveau {tier})",
+                      "en": "{count} (level {tier})"},
+    # --- BotInfo ---
+    "bi.desc": {"fr": "Bot de modération et d'utilitaires.",
+                "en": "Moderation and utility bot."},
+    "bi.version": {"fr": "Version", "en": "Version"},
+    "bi.servers": {"fr": "Serveurs", "en": "Servers"},
+    "bi.ping": {"fr": "Ping", "en": "Ping"},
+    "bi.uptime": {"fr": "Uptime", "en": "Uptime"},
+    "bi.commands": {"fr": "Commandes", "en": "Commands"},
+    "bi.prefix": {"fr": "Préfixe", "en": "Prefix"},
+    # --- MemberCount ---
+    "mc.title": {"fr": "👥 Membres", "en": "👥 Members"},
+    "mc.desc": {
+        "fr": "**{total}** au total\n👤 {humans} humains · 🤖 {bots} bots",
+        "en": "**{total}** total\n👤 {humans} humans · 🤖 {bots} bots",
+    },
+    # --- Poll ---
+    "poll.too_many": {"fr": "❌ 10 options maximum.",
+                      "en": "❌ 10 options maximum."},
+    "poll.title": {"fr": "📊 Sondage", "en": "📊 Poll"},
+    "poll.by": {"fr": "Sondage lancé par {user}",
+                "en": "Poll started by {user}"},
+    # --- Roll ---
+    "roll.bad": {"fr": "❌ Format invalide. Exemples : `d6`, `2d20`, `4d10`.",
+                 "en": "❌ Invalid format. Examples: `d6`, `2d20`, `4d10`."},
+    "roll.limits": {"fr": "❌ Entre 1 et 100 dés, de 2 à 1000 faces.",
+                    "en": "❌ Between 1 and 100 dice, 2 to 1000 sides."},
+    # --- Choose ---
+    "choose.need": {"fr": "❌ Donne au moins deux options séparées par `|`.",
+                    "en": "❌ Provide at least two options separated by `|`."},
+    "choose.result": {"fr": "🤔 Je choisis : **{choice}**",
+                      "en": "🤔 I choose: **{choice}**"},
+    # --- UserInfo ---
+    "ui.title": {"fr": "Informations sur {user}",
+                 "en": "Information about {user}"},
+    "ui.name": {"fr": "Nom", "en": "Name"},
+    "ui.nick": {"fr": "Surnom", "en": "Nickname"},
+    "ui.bot": {"fr": "Bot", "en": "Bot"},
+    "ui.yes": {"fr": "Oui", "en": "Yes"},
+    "ui.no": {"fr": "Non", "en": "No"},
+    "ui.status": {"fr": "Statut", "en": "Status"},
+    "ui.activity": {"fr": "Activité", "en": "Activity"},
+    "ui.created": {"fr": "Compte créé", "en": "Account created"},
+    "ui.joined": {"fr": "A rejoint le serveur", "en": "Joined the server"},
+    "ui.boosting": {"fr": "Booste depuis", "en": "Boosting since"},
+    "ui.roles": {"fr": "Rôles ({count})", "en": "Roles ({count})"},
+    "ui.top_role": {"fr": "Rôle le plus haut", "en": "Top role"},
+    "ui.none": {"fr": "*(aucun)*", "en": "*(none)*"},
+    "status.online": {"fr": "🟢 En ligne", "en": "🟢 Online"},
+    "status.idle": {"fr": "🌙 Absent", "en": "🌙 Idle"},
+    "status.dnd": {"fr": "⛔ Ne pas déranger", "en": "⛔ Do not disturb"},
+    "status.offline": {"fr": "⚫ Hors ligne", "en": "⚫ Offline"},
+    # --- Avatar ---
+    "avatar.title": {"fr": "Avatar de {user}", "en": "{user}'s avatar"},
+    # --- Uptime ---
+    "uptime.title": {"fr": "⏱️ Uptime", "en": "⏱️ Uptime"},
+    "uptime.desc": {"fr": "Le bot tourne depuis **{duration}**.",
+                    "en": "The bot has been running for **{duration}**."},
+    "uptime.started": {"fr": "Démarré", "en": "Started"},
+    # --- Status ---
+    "st.title": {"fr": "📊 Statut du bot", "en": "📊 Bot status"},
+    # --- ContactOwner ---
+    "co.not_owner": {
+        "fr": "⛔ Seul le propriétaire du serveur peut utiliser cette commande.",
+        "en": "⛔ Only the server owner can use this command.",
+    },
+    "co.title": {"fr": "📨 Message d'un propriétaire de serveur",
+                 "en": "📨 Message from a server owner"},
+    "co.server": {"fr": "Serveur", "en": "Server"},
+    "co.server_id": {"fr": "ID serveur", "en": "Server ID"},
+    "co.owner": {"fr": "Propriétaire", "en": "Owner"},
+    "co.invite": {"fr": "Invitation", "en": "Invite"},
+    "co.no_invite": {"fr": "*(impossible de créer une invitation)*",
+                     "en": "*(unable to create an invite)*"},
+    "co.sent": {"fr": "✅ Ton message a été transmis à {count} owner(s) du bot.",
+                "en": "✅ Your message was forwarded to {count} bot owner(s)."},
+    "co.failed": {
+        "fr": "❌ Impossible de contacter les owners du bot pour le moment.",
+        "en": "❌ Unable to contact the bot owners at the moment.",
+    },
+    # --- Mention (présentation) ---
+    "mention.title": {"fr": "👋 Bonjour, je suis ClaudeBot !",
+                      "en": "👋 Hi, I'm ClaudeBot!"},
+    "mention.desc": {"fr": "Un bot de modération et d'utilitaires pour ton serveur.",
+                     "en": "A moderation and utility bot for your server."},
+    "mention.prefix": {"fr": "Préfixe", "en": "Prefix"},
+    "mention.help": {"fr": "Aide", "en": "Help"},
+    "mention.features": {"fr": "Fonctionnalités", "en": "Features"},
+    "mention.features_val": {
+        "fr": "• Modération (warn, mute, confine, clear...)\n"
+              "• Automodération (anti-majuscules, anti-emojis)\n"
+              "• Surveillance et infos utilisateurs",
+        "en": "• Moderation (warn, mute, confine, clear...)\n"
+              "• Automoderation (anti-caps, anti-emojis)\n"
+              "• Watching and user info",
+    },
+    # --- Analyse ---
+    "analyse.title": {"fr": "📈 Analyse du serveur (7 jours)",
+                      "en": "📈 Server analysis (7 days)"},
+    "analyse.chart_title": {"fr": "Analyse de {name} — 7 jours",
+                            "en": "{name} analysis — 7 days"},
+    "analyse.members": {"fr": "Nombre de membres", "en": "Member count"},
+    "analyse.msg_per_member": {"fr": "Messages par membre et par jour",
+                               "en": "Messages per member per day"},
+    "analyse.joinleave": {"fr": "Arrivées / Départs", "en": "Joins / Leaves"},
+    "analyse.joins": {"fr": "Arrivées", "en": "Joins"},
+    "analyse.leaves": {"fr": "Départs", "en": "Leaves"},
+    # --- CoinFlip ---
+    "coin.heads": {"fr": "🪙 Pile", "en": "🪙 Heads"},
+    "coin.tails": {"fr": "🪙 Face", "en": "🪙 Tails"},
+}
+
+# Listes de réponses (sélectionnées par langue).
+EIGHTBALL = {
+    "fr": [
+        "Oui, c'est certain.", "Sans aucun doute.", "Oui, absolument.",
+        "C'est probable.", "Les signes disent oui.", "Peut-être.",
+        "Difficile à dire, réessaie.",
+        "Je ne peux pas prédire ça maintenant.",
+        "Ne compte pas dessus.", "Ma réponse est non.", "Très douteux.",
+        "C'est non.",
+    ],
+    "en": [
+        "Yes, definitely.", "Without a doubt.", "Yes, absolutely.",
+        "It is likely.", "Signs point to yes.", "Maybe.",
+        "Hard to say, try again.", "I can't predict that right now.",
+        "Don't count on it.", "My answer is no.", "Very doubtful.",
+        "It's a no.",
+    ],
 }
 
 

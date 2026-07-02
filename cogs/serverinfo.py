@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class ServerInfo(commands.Cog):
     """Informations détaillées sur le serveur."""
@@ -25,32 +27,35 @@ class ServerInfo(commands.Cog):
         )
         if guild.icon:
             embed.set_thumbnail(url=guild.icon.url)
-        embed.add_field(name="ID", value=f"`{guild.id}`", inline=True)
+        embed.add_field(name=t(ctx, "f.id"), value=f"`{guild.id}`", inline=True)
         embed.add_field(
-            name="Propriétaire",
+            name=t(ctx, "f.owner"),
             value=guild.owner.mention if guild.owner else "?",
             inline=True,
         )
         embed.add_field(
-            name="Créé le",
+            name=t(ctx, "f.created"),
             value=discord.utils.format_dt(guild.created_at, style="D"),
             inline=True,
         )
         embed.add_field(
-            name="Membres",
-            value=f"{guild.member_count} ({humans} 👤 / {bots} 🤖)",
+            name=t(ctx, "f.members"),
+            value=t(ctx, "si.members_val", total=guild.member_count,
+                    humans=humans, bots=bots),
             inline=True,
         )
-        embed.add_field(name="Salons", value=str(len(guild.channels)), inline=True)
-        embed.add_field(name="Rôles", value=str(len(guild.roles)), inline=True)
+        embed.add_field(name=t(ctx, "f.channels"),
+                        value=str(len(guild.channels)), inline=True)
+        embed.add_field(name=t(ctx, "f.roles"),
+                        value=str(len(guild.roles)), inline=True)
         embed.add_field(
-            name="Boosts",
-            value=f"{guild.premium_subscription_count} (niveau {guild.premium_tier})",
+            name=t(ctx, "f.boosts"),
+            value=t(ctx, "si.boosts_val", count=guild.premium_subscription_count,
+                    tier=guild.premium_tier),
             inline=True,
         )
-        embed.add_field(
-            name="Émojis", value=str(len(guild.emojis)), inline=True
-        )
+        embed.add_field(name=t(ctx, "f.emojis"),
+                        value=str(len(guild.emojis)), inline=True)
         await ctx.send(embed=embed)
 
 

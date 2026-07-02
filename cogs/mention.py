@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 
 import config
+from utils.i18n import t
 
 
 class Mention(commands.Cog):
@@ -27,25 +28,20 @@ class Mention(commands.Cog):
             return
 
         embed = discord.Embed(
-            title="👋 Bonjour, je suis ClaudeBot !",
-            description=(
-                "Un bot de modération et d'utilitaires pour ton serveur."
-            ),
+            title=t(message, "mention.title"),
+            description=t(message, "mention.desc"),
             color=discord.Color.blurple(),
         )
-        embed.add_field(name="Préfixe", value=f"`{config.PREFIX}`", inline=True)
+        embed.add_field(name=t(message, "mention.prefix"),
+                        value=f"`{config.PREFIX}`", inline=True)
         embed.add_field(
-            name="Aide",
+            name=t(message, "mention.help"),
             value=f"`{config.PREFIX}help` ou `/help`",
             inline=True,
         )
         embed.add_field(
-            name="Fonctionnalités",
-            value=(
-                "• Modération (warn, mute, confine, clear...)\n"
-                "• Automodération (anti-majuscules, anti-emojis)\n"
-                "• Surveillance et infos utilisateurs"
-            ),
+            name=t(message, "mention.features"),
+            value=t(message, "mention.features_val"),
             inline=False,
         )
         if self.bot.user.display_avatar:

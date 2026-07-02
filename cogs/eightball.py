@@ -3,13 +3,7 @@ import random
 
 from discord.ext import commands
 
-_ANSWERS = [
-    "Oui, c'est certain.", "Sans aucun doute.", "Oui, absolument.",
-    "C'est probable.", "Les signes disent oui.", "Peut-être.",
-    "Difficile à dire, réessaie.", "Je ne peux pas prédire ça maintenant.",
-    "Ne compte pas dessus.", "Ma réponse est non.", "Très douteux.",
-    "C'est non.",
-]
+from utils.i18n import EIGHTBALL, get_lang
 
 
 class EightBall(commands.Cog):
@@ -23,7 +17,8 @@ class EightBall(commands.Cog):
         description="Pose une question à la boule magique.",
     )
     async def eightball(self, ctx: commands.Context, *, question: str) -> None:
-        await ctx.send(f"🎱 {random.choice(_ANSWERS)}")
+        answers = EIGHTBALL.get(get_lang(ctx), EIGHTBALL["fr"])
+        await ctx.send(f"🎱 {random.choice(answers)}")
 
 
 async def setup(bot: commands.Bot) -> None:

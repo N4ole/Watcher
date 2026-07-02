@@ -9,6 +9,7 @@ from discord.ext import commands
 
 import config
 from utils import storage
+from utils.i18n import t
 
 
 class ContactOwner(commands.Cog):
@@ -56,31 +57,30 @@ class ContactOwner(commands.Cog):
 
         # Réservé au propriétaire du serveur Discord.
         if ctx.author.id != guild.owner_id:
-            await ctx.send(
-                "⛔ Seul le propriétaire du serveur peut utiliser cette commande."
-            )
+            await ctx.send(t(ctx, "co.not_owner"))
             return
 
         invite_url = await self._create_invite(guild)
 
         embed = discord.Embed(
-            title="📨 Message d'un propriétaire de serveur",
+            title=t(ctx, "co.title"),
             description=message,
             color=discord.Color.gold(),
         )
-        embed.add_field(name="Serveur", value=guild.name, inline=True)
-        embed.add_field(name="ID serveur", value=f"`{guild.id}`", inline=True)
+        embed.add_field(name=t(ctx, "co.server"), value=guild.name, inline=True)
+        embed.add_field(name=t(ctx, "co.server_id"), value=f"`{guild.id}`",
+                        inline=True)
         embed.add_field(
-            name="Membres", value=str(guild.member_count), inline=True
+            name=t(ctx, "f.members"), value=str(guild.member_count), inline=True
         )
         embed.add_field(
-            name="Propriétaire",
+            name=t(ctx, "co.owner"),
             value=f"{ctx.author} (`{ctx.author.id}`)",
             inline=False,
         )
         embed.add_field(
-            name="Invitation",
-            value=invite_url or "*(impossible de créer une invitation)*",
+            name=t(ctx, "co.invite"),
+            value=invite_url or t(ctx, "co.no_invite"),
             inline=False,
         )
         if guild.icon is not None:
@@ -99,22 +99,9 @@ class ContactOwner(commands.Cog):
                 failed += 1
 
         if sent:
-            await ctx.send(
-                f"✅ Ton message a été transmis à {sent} owner(s) du bot."
-            )
+            await ctx.send(t(ctx, "co.sent", count=sent))
         else:
-            await ctx.send(
-                "❌ Impossible de contacter les owners du bot pour le moment."
-            )
-
-    @contactowner.error
-    async def _error(self, ctx: commands.Context, error) -> None:
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("❌ Usage : `contactowner <message>`.")
-        elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send("❌ Cette commande s'utilise sur un serveur.")
-        else:
-            raise error
+            await ctx.send(t(ctx, "co.failed"))
 
 
 async def setup(bot: commands.Bot) -> None:

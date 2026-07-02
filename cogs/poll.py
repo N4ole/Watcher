@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 _NUMBER_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 
@@ -23,15 +25,15 @@ class Poll(commands.Cog):
         options = [p for p in parts[1:] if p]
 
         if len(options) > 10:
-            await ctx.send("❌ 10 options maximum.")
+            await ctx.send(t(ctx, "poll.too_many"))
             return
 
         embed = discord.Embed(
-            title="📊 Sondage",
+            title=t(ctx, "poll.title"),
             description=titre,
             color=discord.Color.blurple(),
         )
-        embed.set_footer(text=f"Sondage lancé par {ctx.author}")
+        embed.set_footer(text=t(ctx, "poll.by", user=ctx.author))
 
         if options:
             embed.description += "\n\n" + "\n".join(

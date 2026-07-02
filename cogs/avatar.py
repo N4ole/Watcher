@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+from utils.i18n import t
+
 
 class Avatar(commands.Cog):
     """Récupère l'avatar d'un utilisateur."""
@@ -29,12 +31,12 @@ class Avatar(commands.Cog):
         )
 
         embed = discord.Embed(
-            title=f"Avatar de {member}",
+            title=t(ctx, "avatar.title", user=member),
             description=links,
             color=discord.Color.blurple(),
         )
         embed.set_image(url=avatar.url)
-        embed.set_footer(text=f"Demandé par {ctx.author}")
+        embed.set_footer(text=t(ctx, "f.requested_by", user=ctx.author))
         await ctx.send(embed=embed)
 
     @avatar.error
