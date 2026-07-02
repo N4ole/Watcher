@@ -26,7 +26,7 @@ class AntiEmoji(commands.Cog):
         key = (message.guild.id, message.author.id)
         self._counts[key] = self._counts.get(key, 0) + 1
         await automod.apply_escalation(
-            message, self._counts[key], "Anti-emojis"
+            message, self._counts[key], "am.emoji"
         )
 
 

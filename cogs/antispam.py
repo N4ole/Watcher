@@ -1,4 +1,5 @@
 """Commande admin `antispam on/off` : sanctionne les envois trop rapides."""
+import logging
 import time
 from collections import defaultdict, deque
 from datetime import timedelta
@@ -8,6 +9,8 @@ from discord.ext import commands
 
 from utils import storage
 from utils.i18n import t
+
+log = logging.getLogger("action")
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -87,6 +90,12 @@ class AntiSpam(commands.Cog):
             t(message, "antispam.warn", user=message.author.mention,
               minutes=int(MUTE_DURATION.total_seconds() // 60)),
             delete_after=10,
+        )
+        log.info(
+            "Anti-spam — %s (%s) mute %d min dans #%s / %s (%s)",
+            message.author, message.author.id,
+            int(MUTE_DURATION.total_seconds() // 60), message.channel,
+            message.guild.name, message.guild.id,
         )
 
 

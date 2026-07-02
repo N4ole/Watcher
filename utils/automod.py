@@ -5,10 +5,15 @@ Escalation par infraction (compteur par utilisateur et par type) :
     2e   -> suppression + avertissement officiel
     3e+  -> suppression + mute (timeout) de 5, 10, 15... minutes
 """
+import logging
 import re
 from datetime import timedelta
 
 import discord
+
+from utils.i18n import t
+
+log = logging.getLogger("action")
 
 # --- Détection majuscules -------------------------------------------------- #
 # On ignore les messages trop courts pour éviter les faux positifs.
@@ -69,11 +74,16 @@ def mute_minutes(count: int) -> int:
 
 
 async def apply_escalation(
-    message: discord.Message, count: int, label: str
+    message: discord.Message, count: int, label_key: str
 ) -> None:
-    """Applique la sanction correspondant au niveau d'infraction."""
+    """Applique la sanction correspondant au niveau d'infraction.
+
+    `label_key` est une clé i18n (ex. "am.caps"), traduite selon le serveur.
+    """
     member = message.author
     channel = message.channel
+    guild = message.guild
+    label = t(guild, label_key)
 
     # Suppression du message fautif.
     try:
@@ -82,23 +92,27 @@ async def apply_escalation(
         pass
 
     if count == 1:
+        action = "suppression"
         await channel.send(
-            f"{member.mention} ⚠️ {label} : merci d'éviter. Ton message a été "
-            "supprimé.",
+            t(guild, "am.warn1", user=member.mention, label=label),
             delete_after=10,
         )
     elif count == 2:
-        await channel.send(
-            f"{member.mention} ⚠️ Avertissement officiel ({label})."
-        )
+        action = "avertissement"
+        await channel.send(t(guild, "am.warn2", user=member.mention, label=label))
     else:
         minutes = mute_minutes(count)
+        action = f"mute {minutes} min"
         try:
-            await member.timeout(
-                timedelta(minutes=minutes), reason=label
-            )
+            await member.timeout(timedelta(minutes=minutes), reason=label)
         except discord.HTTPException:
             pass
         await channel.send(
-            f"{member.mention} 🔇 Mute {minutes} min ({label})."
+            t(guild, "am.mute", user=member.mention, label=label, minutes=minutes)
         )
+
+    where = f"#{getattr(channel, 'name', '?')} / {guild.name} ({guild.id})"
+    log.info(
+        "Automod %s — %s sur %s (%s) dans %s",
+        label_key.split(".")[-1], action, member, member.id, where,
+    )

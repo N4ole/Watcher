@@ -147,6 +147,21 @@ _CATALOG: dict[str, dict[str, str]] = {
         "fr": "❌ Utilise `{name} on` ou `{name} off`.",
         "en": "❌ Use `{name} on` or `{name} off`.",
     },
+    # --- Automodération (escalation) ---
+    "am.caps": {"fr": "Anti-majuscules", "en": "Anti-caps"},
+    "am.emoji": {"fr": "Anti-emojis", "en": "Anti-emojis"},
+    "am.warn1": {
+        "fr": "{user} ⚠️ {label} : merci d'éviter. Ton message a été supprimé.",
+        "en": "{user} ⚠️ {label}: please avoid this. Your message was deleted.",
+    },
+    "am.warn2": {
+        "fr": "{user} ⚠️ Avertissement officiel ({label}).",
+        "en": "{user} ⚠️ Official warning ({label}).",
+    },
+    "am.mute": {
+        "fr": "{user} 🔇 Mute {minutes} min ({label}).",
+        "en": "{user} 🔇 Muted {minutes} min ({label}).",
+    },
     # --- Anti-bot ---
     "antibot.on": {
         "fr": "🤖 **Anti-bot activé** : les bots qui rejoignent seront "

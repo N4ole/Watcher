@@ -16,6 +16,7 @@ from aiohttp import web
 
 from utils import checks
 import config
+from web import logbuffer
 from web import prefs
 from web import stats
 
@@ -223,6 +224,16 @@ def build_app(bot) -> web.Application:
                 failed += 1
         return web.json_response({"ok": True, "reloaded": reloaded, "failed": failed})
 
+    async def api_logs(request: web.Request) -> web.Response:
+        # Console en direct : réservée aux owners.
+        if _require_owner(request) is None:
+            return web.json_response({"error": "forbidden"}, status=403)
+        after = request.query.get("after", "0")
+        after = int(after) if after.isdigit() else 0
+        lines = logbuffer.get_since(after)
+        last = lines[-1]["id"] if lines else after
+        return web.json_response({"lines": lines, "last": last})
+
     async def set_lang(request: web.Request) -> web.Response:
         # Enregistre la langue pour le compte connecté (persistée côté serveur).
         session = _get_session(request)
@@ -250,6 +261,7 @@ def build_app(bot) -> web.Application:
     app.router.add_post("/api/control/presence", control_presence)
     app.router.add_post("/api/control/reload", control_reload)
     app.router.add_post("/api/lang", set_lang)
+    app.router.add_get("/api/logs", api_logs)
     # Pages publiques (accessibles sans connexion).
     app.router.add_get("/privacy", privacy)
     app.router.add_get("/confidentialite", privacy)
@@ -363,12 +375,25 @@ _DASHBOARD_HTML = """<!DOCTYPE html>
    border-bottom:1px solid rgba(157,75,255,.3);padding-bottom:12px}
  canvas{max-height:320px}
  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+ nav.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+ nav.tabs .btn.active{background:var(--cyan);color:#0a0a12;
+   box-shadow:0 0 18px var(--cyan)}
+ select{background:#0a0a12;border:1px solid var(--purple);color:var(--text);
+   padding:8px 10px;border-radius:8px}
+ #console{background:#07070d;border:1px solid rgba(0,234,255,.25);
+   border-radius:10px;padding:12px;height:62vh;overflow:auto;
+   font-family:ui-monospace,Menlo,monospace;font-size:.82em;
+   white-space:pre-wrap;line-height:1.45}
+ .lg-INFO{color:#c8c8e6}.lg-WARNING{color:#f5ff3d}
+ .lg-ERROR,.lg-CRITICAL{color:#ff6b6b}.lg-DEBUG{color:#7fb0b0}
+ .lg-t{color:#66d9ff}.lg-lvl{opacity:.7}
 </style></head>
 <body>
  <header><h1>▚ ClaudeBot ▞</h1>
    <span class="row"><span id="who"></span>
    <button class="btn" id="lang" onclick="toggleLang()">English</button>
    <a class="btn" href="/logout" id="logout"></a></span></header>
+ <nav class="tabs" id="tabs" style="display:none"></nav>
  <div id="content"></div>
 <script>
 const T={fr:{lang:'English',logout:'Déconnexion',analytics:'Analytics',
@@ -377,20 +402,25 @@ const T={fr:{lang:'English',logout:'Déconnexion',analytics:'Analytics',
  setStatus:'Définir le statut',reloadCogs:'Recharger les cogs',
  statusOk:'✅ Statut mis à jour',cogsOk:'cogs rechargés',err:'❌ Erreur',
  serversEvo:'Évolution du nombre de serveurs',serversLbl:'Serveurs',
- membersTotal:'Membres (total)',membersLbl:'Membres',
- cmdUsed:'Commandes utilisées',noData:'Aucune donnée disponible pour le moment.',
- expired:'Session expirée.',reconnect:'Se reconnecter'},
+ membersTotal:'Membres (total)',membersLbl:'Membres',membersEvo:'Évolution des membres',
+ cmdUsed:'Commandes utilisées',cmdPerDay:'Commandes par jour',
+ noData:'Aucune donnée disponible pour le moment.',
+ expired:'Session expirée.',reconnect:'Se reconnecter',
+ tGeneral:'Général',tAnalytics:'Analytics',tLive:'Live',
+ selServer:'Serveur :',selAll:'Général (tous les serveurs)',
+ liveTitle:'Console en direct',liveClear:'Effacer',liveAuto:'Défilement auto'},
  en:{lang:'Français',logout:'Log out',analytics:'Analytics',servers:'Servers',
  members:'Members',commands:'Commands',ping:'Ping',uptime:'Uptime',
  control:'Bot control',statusPh:'Status (e.g. §help)',setStatus:'Set status',
  reloadCogs:'Reload cogs',statusOk:'✅ Status updated',cogsOk:'cogs reloaded',
  err:'❌ Error',serversEvo:'Server count over time',serversLbl:'Servers',
- membersTotal:'Members (total)',membersLbl:'Members',cmdUsed:'Commands used',
+ membersTotal:'Members (total)',membersLbl:'Members',membersEvo:'Members over time',
+ cmdUsed:'Commands used',cmdPerDay:'Commands per day',
  noData:'No data available yet.',expired:'Session expired.',
- reconnect:'Log in again'}};
-// Langue liée au COMPTE (fournie par le serveur, persistée côté serveur).
-let CUR='fr';
-let L=T[CUR];
+ reconnect:'Log in again',tGeneral:'General',tAnalytics:'Analytics',tLive:'Live',
+ selServer:'Server:',selAll:'General (all servers)',
+ liveTitle:'Live console',liveClear:'Clear',liveAuto:'Auto-scroll'}};
+let CUR='fr';let L=T[CUR];let DATA=null;let charts=[];let liveTimer=null;let liveLast=0;
 function applyHeader(){document.documentElement.lang=CUR;L=T[CUR];
  document.getElementById('lang').textContent=L.lang;
  document.getElementById('logout').textContent=L.logout;}
@@ -406,58 +436,135 @@ const NEON={cyan:'#00eaff',magenta:'#ff2bd6',purple:'#9d4bff',
 Chart.defaults.color='#c8c8e6';Chart.defaults.borderColor='rgba(157,75,255,.15)';
 function card(html){const c=document.createElement('div');c.className='card';
  c.innerHTML=html;document.getElementById('content').appendChild(c);return c;}
+function chart(el,cfg){const c=new Chart(el,cfg);charts.push(c);return c;}
 async function post(url,body){const r=await fetch(url,{method:'POST',
  headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});
  return r.json();}
+function clearPage(){
+ if(liveTimer){clearInterval(liveTimer);liveTimer=null;}
+ charts.forEach(function(c){c.destroy();});charts=[];
+ document.getElementById('content').innerHTML='';}
+
+// ---- Page Général ----
+function renderGeneral(){const a=DATA.analytics;
+ if(a){card('<h2>'+L.analytics+'</h2><div class="grid">'+
+   '<div class="stat"><div class="n">'+a.guilds+'</div><div class="l">'+L.servers+'</div></div>'+
+   '<div class="stat"><div class="n">'+a.members+'</div><div class="l">'+L.members+'</div></div>'+
+   '<div class="stat"><div class="n">'+a.commands_total+'</div><div class="l">'+L.commands+'</div></div>'+
+   '<div class="stat"><div class="n">'+a.latency_ms+'<span style="font-size:.5em">ms</span></div><div class="l">'+L.ping+'</div></div>'+
+   '<div class="stat"><div class="n">'+fmtUptime(a.uptime_seconds)+'</div><div class="l">'+L.uptime+'</div></div>'+
+   '</div>');
+  const cc=card('<h2>'+L.control+'</h2><div class="row">'+
+   '<input id="pres" placeholder="'+L.statusPh+'" value="'+(a.presence||'')+'">'+
+   '<button class="btn" id="setpres">'+L.setStatus+'</button>'+
+   '<button class="btn" id="reload">'+L.reloadCogs+'</button>'+
+   '<span id="ctlmsg"></span></div>');
+  cc.querySelector('#setpres').onclick=async()=>{
+    const j=await post('/api/control/presence',{text:cc.querySelector('#pres').value});
+    cc.querySelector('#ctlmsg').textContent=j.ok?L.statusOk:L.err;};
+  cc.querySelector('#reload').onclick=async()=>{
+    const j=await post('/api/control/reload');
+    cc.querySelector('#ctlmsg').textContent=j.ok?('✅ '+j.reloaded+' '+L.cogsOk):L.err;};
+ }
+ if(DATA.servers_history){
+   card('<h2>'+L.serversEvo+'</h2><canvas id="sv"></canvas>');
+   chart(document.getElementById('sv'),{type:'line',data:{
+     labels:tsLabels(DATA.servers_history),datasets:[
+      {label:L.serversLbl,data:DATA.servers_history.map(p=>p.guilds),
+       borderColor:NEON.cyan,backgroundColor:'rgba(0,234,255,.1)',fill:true,tension:.25},
+      {label:L.membersTotal,data:DATA.servers_history.map(p=>p.members),
+       borderColor:NEON.magenta,tension:.25,yAxisID:'y1'}]},
+     options:{scales:{y1:{position:'right'}}}});
+ }}
+
+// ---- Page Analytics (sélecteur de serveur) ----
+function aggregateUsage(){const m={};DATA.guilds.forEach(function(g){
+  g.usage.forEach(function(p){m[p.date]=(m[p.date]||0)+p.count;});});
+ return Object.keys(m).sort().map(function(k){return {date:k,count:m[k]};});}
+function renderAnalytics(sel){
+ let opts='<option value="all">'+L.selAll+'</option>';
+ DATA.guilds.forEach(function(g){opts+='<option value="'+g.id+'"'+
+   (sel===g.id?' selected':'')+'>'+g.name+'</option>';});
+ const head=card('<h2>'+L.analytics+'</h2><div class="row">'+
+   '<label>'+L.selServer+'</label><select id="srv">'+opts+'</select></div>');
+ head.querySelector('#srv').onchange=function(e){
+   // On ne recrée que la partie graphiques.
+   clearPage();renderTabs();renderAnalytics(e.target.value);};
+ if(sel==='all'){
+   if(DATA.servers_history){
+     card('<h2>'+L.membersEvo+' — '+L.selAll+'</h2><canvas id="am"></canvas>');
+     chart(document.getElementById('am'),{type:'line',data:{
+       labels:tsLabels(DATA.servers_history),datasets:[{label:L.membersTotal,
+         data:DATA.servers_history.map(p=>p.members),borderColor:NEON.magenta,
+         backgroundColor:'rgba(255,43,214,.1)',fill:true,tension:.25}]}});
+   }
+   const agg=aggregateUsage();
+   card('<h2>'+L.cmdPerDay+' — '+L.selAll+'</h2><canvas id="au"></canvas>');
+   chart(document.getElementById('au'),{type:'bar',data:{labels:agg.map(p=>p.date),
+     datasets:[{label:L.cmdUsed,data:agg.map(p=>p.count),backgroundColor:NEON.purple}]}});
+ }else{
+   const g=DATA.guilds.find(function(x){return x.id===sel;});
+   if(!g){card('<p>'+L.noData+'</p>');return;}
+   card('<h2>'+L.membersEvo+' — '+g.name+'</h2><canvas id="gm"></canvas>');
+   chart(document.getElementById('gm'),{type:'line',data:{labels:tsLabels(g.members),
+     datasets:[{label:L.membersLbl,data:g.members.map(p=>p.count),borderColor:NEON.green,
+       backgroundColor:'rgba(57,255,20,.1)',fill:true,tension:.25}]}});
+   card('<h2>'+L.cmdPerDay+' — '+g.name+'</h2><canvas id="gu"></canvas>');
+   chart(document.getElementById('gu'),{type:'bar',data:{labels:g.usage.map(p=>p.date),
+     datasets:[{label:L.cmdUsed,data:g.usage.map(p=>p.count),backgroundColor:NEON.purple}]}});
+ }}
+
+// ---- Page Live (console) ----
+function pad(n){return (n<10?'0':'')+n;}
+function renderLive(){
+ const c=card('<h2>'+L.liveTitle+'</h2><div class="row" style="margin-bottom:8px">'+
+   '<button class="btn" id="clr">'+L.liveClear+'</button>'+
+   '<label><input type="checkbox" id="auto" checked> '+L.liveAuto+'</label></div>'+
+   '<div id="console"></div>');
+ const box=c.querySelector('#console');
+ c.querySelector('#clr').onclick=function(){box.innerHTML='';};
+ liveLast=0;
+ async function poll(){
+   const r=await fetch('/api/logs?after='+liveLast);
+   if(!r.ok)return;const j=await r.json();liveLast=j.last;
+   j.lines.forEach(function(ln){const dt=new Date(ln.ts*1000);
+     const ts=pad(dt.getHours())+':'+pad(dt.getMinutes())+':'+pad(dt.getSeconds());
+     const div=document.createElement('div');div.className='lg-'+ln.level;
+     div.innerHTML='<span class="lg-t">'+ts+'</span> <span class="lg-lvl">['+
+       ln.level+']</span> '+ln.msg.replace(/</g,'&lt;');
+     box.appendChild(div);});
+   if(j.lines.length && c.querySelector('#auto').checked){box.scrollTop=box.scrollHeight;}}
+ poll();liveTimer=setInterval(poll,2000);}
+
+const PAGES={general:renderGeneral,analytics:function(){renderAnalytics('all');},
+ live:renderLive};
+let ACTIVE='general';
+function renderTabs(){const tabs=document.getElementById('tabs');tabs.style.display='flex';
+ const defs=[['general',L.tGeneral],['analytics',L.tAnalytics],['live',L.tLive]];
+ tabs.innerHTML='';defs.forEach(function(d){const b=document.createElement('button');
+   b.className='btn'+(ACTIVE===d[0]?' active':'');b.textContent=d[1];
+   b.onclick=function(){show(d[0]);};tabs.appendChild(b);});}
+function show(page){ACTIVE=page;clearPage();renderTabs();PAGES[page]();}
+
 async function load(){
  const r=await fetch('/api/stats');
  if(!r.ok){document.getElementById('content').innerHTML=
    '<p>'+L.expired+' <a href="/login">'+L.reconnect+'</a></p>';return;}
- const d=await r.json();
- CUR=d.lang||'fr';applyHeader();
- document.getElementById('who').textContent='@'+(d.user.username||'');
- if(d.analytics){const a=d.analytics;
-   card('<h2>'+L.analytics+'</h2><div class="grid">'+
-    '<div class="stat"><div class="n">'+a.guilds+'</div><div class="l">'+L.servers+'</div></div>'+
-    '<div class="stat"><div class="n">'+a.members+'</div><div class="l">'+L.members+'</div></div>'+
-    '<div class="stat"><div class="n">'+a.commands_total+'</div><div class="l">'+L.commands+'</div></div>'+
-    '<div class="stat"><div class="n">'+a.latency_ms+'<span style="font-size:.5em">ms</span></div><div class="l">'+L.ping+'</div></div>'+
-    '<div class="stat"><div class="n">'+fmtUptime(a.uptime_seconds)+'</div><div class="l">'+L.uptime+'</div></div>'+
-    '</div>');
-   const cc=card('<h2>'+L.control+'</h2>'+
-    '<div class="row"><input id="pres" placeholder="'+L.statusPh+'" value="'+
-      (a.presence||'')+'"><button class="btn" id="setpres">'+L.setStatus+'</button>'+
-    '<button class="btn" id="reload">'+L.reloadCogs+'</button>'+
-    '<span id="ctlmsg"></span></div>');
-   cc.querySelector('#setpres').onclick=async()=>{
-     const t=cc.querySelector('#pres').value;const j=await post('/api/control/presence',{text:t});
-     cc.querySelector('#ctlmsg').textContent=j.ok?L.statusOk:L.err;};
-   cc.querySelector('#reload').onclick=async()=>{
-     const j=await post('/api/control/reload');
-     cc.querySelector('#ctlmsg').textContent=j.ok?('✅ '+j.reloaded+' '+L.cogsOk):L.err;};
- }
- if(d.servers_history){
-   card('<h2>'+L.serversEvo+'</h2><canvas id="servers"></canvas>');
-   new Chart(document.getElementById('servers'),{type:'line',data:{
-     labels:tsLabels(d.servers_history),datasets:[
-      {label:L.serversLbl,data:d.servers_history.map(p=>p.guilds),
-       borderColor:NEON.cyan,backgroundColor:'rgba(0,234,255,.1)',fill:true,tension:.25},
-      {label:L.membersTotal,data:d.servers_history.map(p=>p.members),
-       borderColor:NEON.magenta,tension:.25,yAxisID:'y1'}]},
-     options:{scales:{y1:{position:'right'}}}});
- }
- d.guilds.forEach((g,i)=>{
-   card('<h2>'+g.name+'</h2><canvas id="m'+i+'"></canvas><canvas id="u'+i+'"></canvas>');
-   new Chart(document.getElementById('m'+i),{type:'line',data:{
-     labels:tsLabels(g.members),datasets:[{label:L.membersLbl,
-       data:g.members.map(p=>p.count),borderColor:NEON.green,
-       backgroundColor:'rgba(57,255,20,.1)',fill:true,tension:.25}]}});
-   new Chart(document.getElementById('u'+i),{type:'bar',data:{
-     labels:g.usage.map(p=>p.date),datasets:[{label:L.cmdUsed,
-       data:g.usage.map(p=>p.count),backgroundColor:NEON.purple}]}});
- });
- if(!d.analytics && d.guilds.length===0){card('<p>'+L.noData+'</p>');}
-}
+ DATA=await r.json();CUR=DATA.lang||'fr';applyHeader();
+ document.getElementById('who').textContent='@'+(DATA.user.username||'');
+ if(DATA.is_owner){show('general');}
+ else{
+   // Vue administrateur : cartes par serveur qu'il administre.
+   if(DATA.guilds.length===0){card('<p>'+L.noData+'</p>');return;}
+   DATA.guilds.forEach(function(g,i){
+     card('<h2>'+g.name+'</h2><canvas id="m'+i+'"></canvas><canvas id="u'+i+'"></canvas>');
+     chart(document.getElementById('m'+i),{type:'line',data:{labels:tsLabels(g.members),
+       datasets:[{label:L.membersLbl,data:g.members.map(p=>p.count),borderColor:NEON.green,
+         backgroundColor:'rgba(57,255,20,.1)',fill:true,tension:.25}]}});
+     chart(document.getElementById('u'+i),{type:'bar',data:{labels:g.usage.map(p=>p.date),
+       datasets:[{label:L.cmdUsed,data:g.usage.map(p=>p.count),backgroundColor:NEON.purple}]}});
+   });
+ }}
 load();
 </script>
 </body></html>"""

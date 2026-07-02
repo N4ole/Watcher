@@ -134,6 +134,10 @@ class AntiRaid(commands.Cog):
                     await channel.send(
                         t(guild, "antiraid.verified", user=member.mention)
                     )
+                    log.info(
+                        "Anti-raid — %s (%s) a validé le captcha sur %s (%s)",
+                        member, member.id, guild.name, guild.id,
+                    )
                 except discord.HTTPException:
                     pass
                 return
@@ -145,6 +149,10 @@ class AntiRaid(commands.Cog):
         try:
             await member.kick(reason="Captcha anti-raid non validé")
             await channel.send(t(guild, "antiraid.kicked", user=str(member)))
+            log.info(
+                "Anti-raid — %s (%s) expulsé (captcha non validé) sur %s (%s)",
+                member, member.id, guild.name, guild.id,
+            )
         except discord.HTTPException:
             pass
 

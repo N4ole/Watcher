@@ -1,10 +1,14 @@
 """Commande admin `antiinsulte on/off` : supprime les messages insultants."""
+import logging
+
 import discord
 from discord.ext import commands
 
 from utils import badwords
 from utils import storage
 from utils.i18n import t
+
+log = logging.getLogger("action")
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -40,7 +44,8 @@ class AntiInsulte(commands.Cog):
             return
         if not storage.get_setting(message.guild.id, "antiinsulte", False):
             return
-        if badwords.find_insult(message.content) is None:
+        hit = badwords.find_insult(message.content)
+        if hit is None:
             return
 
         try:
@@ -50,6 +55,11 @@ class AntiInsulte(commands.Cog):
         await message.channel.send(
             t(message, "antiinsulte.warn", user=message.author.mention),
             delete_after=10,
+        )
+        log.info(
+            "Anti-insulte — message supprimé de %s (%s) dans #%s / %s (%s)",
+            message.author, message.author.id, message.channel,
+            message.guild.name, message.guild.id,
         )
 
     @commands.Cog.listener()

@@ -77,9 +77,14 @@ des membres par serveur, et utilisation (commandes) par serveur.
 - **Accès** : les **owners** du bot voient toutes les données ; un
   **administrateur** d'un serveur où le bot est présent voit les données des
   serveurs qu'il administre. Les autres sont refusés.
-- **Analytics & contrôle** : les owners disposent de cartes analytics (serveurs,
-  membres, commandes, ping, uptime) et d'un panneau de **contrôle du bot**
-  (changer le statut, recharger les cogs). Interface au thème **néon**.
+- **Dashboard selon le statut** : détecté à la connexion. Les **owners** ont une
+  interface en trois pages — **Général** (analytics + contrôle du bot),
+  **Analytics** (sélecteur de serveur : vue agrégée par défaut ou par serveur)
+  et **Live** (console en direct recopiant toute la sortie du bot). Les
+  **administrateurs** voient les graphiques des serveurs qu'ils administrent.
+- **Journal d'actions** : chaque action du bot (commandes avec qui/où/quand,
+  automodération, arrivées/départs de serveurs…) est écrite dans la console et
+  consultable en direct sur la page **Live**. Interface au thème **néon**.
 - **Activation** : renseignez `OAUTH_CLIENT_ID` et `OAUTH_CLIENT_SECRET` dans le
   `.env` (sinon le panel ne démarre pas). Ajoutez `OAUTH_REDIRECT_URI` dans les
   *Redirects* OAuth2 de l'application Discord.
