@@ -54,7 +54,10 @@ class HelpOwner(commands.Cog):
         embed.set_footer(text=t(ctx, "ho.legend"))
         return embed
 
-    @commands.command(name="helpowner")
+    @commands.command(
+        name="helpowner",
+        description="Liste les commandes réservées aux owners du bot.",
+    )
     @checks.is_owner()
     async def helpowner(
         self, ctx: commands.Context, commande: str | None = None

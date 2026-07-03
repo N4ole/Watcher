@@ -200,10 +200,10 @@ https://github.com/N4ole/Watcher.git`.
 
 ## 13. Prochaines étapes possibles
 
-- Nettoyages d'audit restants (`docs/AUDIT.md`) : Q1/Q2 (listeners
-  `on_command_error` multiples, duplication des libellés de permissions),
-  F3/F4 (indicateur « MP non délivré », localisation native des descriptions
-  slash).
+- Améliorations mineures issues de l'audit fonctionnel (`docs/AUDIT.md`) :
+  repli générique dans les handlers d'erreur locaux, message i18n pour
+  `CheckFailure`, relever le plancher `discord.py` dans `requirements.txt`.
+- Localisation native des descriptions slash (`app_commands` locale).
 - Étendre les logs Discord aux événements non-commandes (automod,
   arrivées/départs) si souhaité.
 - Régénérer la documentation (`python scripts/gen_docs.py`) après ajout de

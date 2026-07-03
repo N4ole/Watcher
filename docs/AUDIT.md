@@ -1,168 +1,106 @@
-# Audit — Watcher (bot Discord)
+# Audit de fonctionnalité — Watcher
 
-Audit de **fonctionnalité**, **qualité de code** et **sécurité** réalisé sur
-l'état de la branche de développement (inclut kick/ban, logs Discord, console
-colorée, rapport d'erreurs, rename `Watcher`).
+Audit de l'état de `main` : test des commandes, ergonomie (user‑friendly),
+gestion d'erreurs, journalisation interne, script de déploiement,
+rangement des cogs et organisation du dépôt.
 
-Échelle de sévérité : 🔴 élevée · 🟠 moyenne · 🟡 faible · 🟢 bon point.
-
----
-
-## 1. Résumé exécutif
-
-Le bot est bien structuré (un fichier par commande, i18n centralisée,
-persistance JSON par domaine avec verrous, séparation nette
-`cogs`/`utils`/`web`). Aucun défaut **critique** (pas d'`eval`/`exec`,
-`subprocess`, désérialisation dangereuse ; secrets lus depuis l'environnement
-et jamais journalisés ; endpoints d'administration correctement protégés).
-
-Les points à traiter en priorité concernent le **panel web** :
-exposition réseau par défaut, absence de paramètre `state` OAuth, et une
-injection HTML (XSS stocké) via les noms de serveurs dans le tableau de bord.
+Échelle : 🟢 conforme · 🟡 amélioration mineure · 🟠 à corriger.
 
 ---
 
-## 2. Sécurité
+## 1. Résumé
 
-### 🟠 S1 — Panel web exposé sur toutes les interfaces, sans TLS
-`config.py` : `WEB_HOST` par défaut `0.0.0.0`, `OAUTH_REDIRECT_URI` en
-`http://…`, et le cookie de session est posé **sans l'attribut `Secure`**
-(`web_app.py::_set_session`, `httponly`/`SameSite=Lax` seulement).
-En déploiement public sans reverse-proxy TLS, le cookie de session et le
-`code` OAuth transitent en clair.
-- **Reco** : documenter/forcer un reverse-proxy HTTPS ; ajouter `secure=True`
-  au cookie quand la requête est en HTTPS ; envisager `WEB_HOST=127.0.0.1`
-  par défaut (opt-in explicite pour l'exposition publique).
+**53 commandes** chargées sans erreur (54 cogs). L'ensemble est cohérent et
+fonctionnel : commandes hybrides pour le public, owner en préfixe seul,
+i18n fr/en complet, gestion d'erreurs centralisée et conviviale,
+journalisation triée, déploiement automatique robuste. Aucun défaut
+bloquant. Quelques améliorations mineures listées en §8.
 
-### 🟠 S2 — Flux OAuth sans paramètre `state` (login CSRF)
-`web_app.py::_authorize_url` ne génère pas de `state`, et `/callback` ne le
-vérifie pas. Un attaquant peut monter une attaque de type *login CSRF*
-(forcer la victime à se connecter sous un compte contrôlé).
-- **Reco** : générer un `state` aléatoire (déjà `secrets` importé + `WEB_SECRET`
-  disponible), le stocker en cookie court, et le valider dans `/callback`.
+## 2. Commandes (test d'introspection)
 
-### 🟠 S3 — XSS stocké via les noms de serveurs (dashboard)
-`web_app.py` (JS) : la console live échappe correctement le contenu
-(`ln.msg.replace(/</g,'&lt;')`, 🟢), **mais** les cartes serveur insèrent le
-nom via `innerHTML` sans échappement :
-`card('<h2>'+g.name+'</h2>…')` (vues owner et admin). Un serveur au nom
-piégé (`<img src=x onerror=…>`) exécute du script dans le navigateur de
-l'owner/admin qui consulte le panel.
-- **Reco** : échapper `g.name` (fonction `esc()` HTML) ou construire le titre
-  via `textContent` plutôt que `innerHTML`.
+- **Descriptions** : toutes les commandes ont une description ; toutes les
+  commandes publiques ont leur clé i18n `cmddesc.<nom>` (rendu du help
+  traduit fr/en). 🟢
+- **Help paginé** : 5 pages (une par catégorie), aucun champ d'embed ne
+  dépasse la limite Discord de 1024 caractères. 🟢
+- **Propositions d'arguments (slash)** : sélecteur de membre là où c'est
+  pertinent (kick, ban, mute, warn, watch, userinfo…), et **choix** pour les
+  valeurs finies (on/off des anti‑*, fr/en de `langue`, on/off/status +
+  types de `logs`, txt/csv/pdf de `export`). 🟢
+- **Owner en préfixe uniquement** : aucune commande d'owner n'est exposée en
+  slash. 🟢
 
-### 🟡 S4 — `errors.py` renvoie `str(error)` des `CheckFailure`
-La branche `CheckFailure` renvoie le message brut de l'exception. Nos checks
-posent des messages maîtrisés (FR), mais une `CheckFailure` tierce pourrait
-divulguer un détail interne.
-- **Reco** : n'afficher que des messages i18n connus ; logguer le détail.
+## 3. Ergonomie (user‑friendly)
 
-### 🟢 Bons points sécurité
-- Endpoints `/, /api/control/*, /api/logs` gardés par `_require_owner`
-  (session + `guild_ids == "all"`).
-- `SameSite=Lax` limite le CSRF sur les POST d'administration.
-- Secrets (`DISCORD_TOKEN`, `OAUTH_CLIENT_SECRET`) uniquement via env,
-  jamais logués ; `bot.run(..., log_handler=None)`.
-- Permissions Discord vérifiées sur les commandes sensibles (`has_permissions`,
-  `bot_has_permissions`, `guild_only`) et garde-fous hiérarchie/auto-sanction
-  sur kick/ban.
+- **Rappels d'usage** : sur argument manquant, message clair avec la
+  signature (`❌ Argument manquant. Usage : §kick <member> [raison]`). 🟢
+- **Accusés d'action** : confirmations explicites (kick/ban/mute/logs…),
+  avec indicateur « MP non délivré » si l'utilisateur a fermé ses MP. 🟢
+- **Opérations longues** : `export` et `analyse` signalent l'activité
+  (`typing`) ; le PDF est généré hors boucle événementielle (thread). 🟢
+- **`logs status`** : vue lisible de l'état de chaque type de log. 🟢
 
----
+## 4. Gestion d'erreurs
 
-## 3. Qualité de code
+- **Centralisée** (`cogs/errors.py`) : messages traduits pour
+  `MissingPermissions`, `BotMissingPermissions`, `NoPrivateMessage`,
+  `PrivateMessageOnly`, `CheckFailure`, `MissingRequiredArgument`,
+  `Member/UserNotFound`, `BadArgument`, et repli générique. 🟢
+- **Libellés de permissions** unifiés via i18n (`dperm.*`), partagés par le
+  help et les erreurs. 🟢
+- **Rapport aux owners** (`errorreport`) : MP détaillé + traceback sur bug
+  inattendu, avec anti‑spam et anti‑récursion. 🟢
+- 🟡 Les commandes avec un handler `@cmd.error` **partiel** qui re‑`raise`
+  (logs, remindme, say, manage…) court‑circuitent `errors.py` : un type
+  d'erreur non prévu par le handler local reste sans message utilisateur
+  (l'owner est tout de même notifié). Impact faible (arguments concernés =
+  chaînes simples). Piste : repli générique dans les handlers locaux.
+- 🟡 `CheckFailure` renvoie `str(error)` brut ; maîtrisé aujourd'hui, mais
+  n'afficher que des messages i18n connus serait plus sûr.
 
-### 🟡 Q1 — Plusieurs listeners `on_command_error`
-`errors.py`, `errorreport.py`, `logs.py` (et complétions dans `actionlog.py`)
-écoutent le même événement. C'est volontaire et fonctionnel, mais à
-documenter pour éviter des doublons de traitement lors d'évolutions.
+## 5. Journalisation interne
 
-### 🟡 Q2 — Duplication des libellés de permissions
-`cogs/errors.py::_PERMS` redéfinit des traductions déjà présentes dans
-`i18n` (`perm.*`). Source unique souhaitable.
+- **Console colorée** par niveau (si TTY) + **fichiers triés** (`bot.log`,
+  `actions.log`, `errors.log`, rotation quotidienne 30 j). 🟢
+- Logger **`action`** dédié au fil des actions (commandes, sanctions,
+  arrivées/départs, automod) — 13 points d'appel ; le `LogRecord` n'est
+  jamais muté par le formateur couleur (fichiers/tampon web sans ANSI). 🟢
+- **Console « live »** du panel web alimentée par le même flux. 🟢
 
-### 🟡 Q3 — Paramètre `type` masquant le built-in
-`cogs/logs.py::logs(self, ctx, etat, type)` masque `type()`. Renommer en
-`categorie`/`kind` améliorerait la lisibilité.
+## 6. Script de mise à jour automatique (`scripts/deploy.sh`)
 
-### 🟡 Q4 — Écritures JSON non atomiques
-`storage.py` écrit directement dans le fichier cible. Un crash en cours
-d'écriture peut corrompre le JSON.
-- **Reco** : écrire dans un fichier temporaire puis `os.replace()` (atomique).
+Testé de bout en bout sur un clone en retard de plusieurs commits :
+- mise à jour `git reset --hard` vers la tête de la branche suivie ; 🟢
+- **préservation** de `data/*.json`, `logs/`, `.env` ; 🟢
+- **note de déploiement** `data/pending_deploy.json` (commits + PR), lue au
+  redémarrage par `updatenotify` pour prévenir les owners ; 🟢
+- **auto‑protection** : le script se recopie hors du dépôt et se
+  ré‑exécute, pour ne pas être écrasé par le `reset` pendant qu'il tourne ;
+  verrou anti‑concurrence ; idempotent. 🟢
 
-### 🟡 Q5 — Lectures disque répétées
-`get_setting`/`_enabled` relisent le fichier à chaque appel (dont sur chaque
-commande via le routage des logs). Acceptable à l'échelle actuelle ; un cache
-mémoire invalidé à l'écriture serait un plus si le trafic grandit.
+## 7. Rangement des cogs & organisation du dépôt
 
-### 🟢 Bons points qualité
-- Convention « un fichier = une commande » respectée.
-- i18n et catégories centralisées (`utils/i18n.py`, `utils/categories.py`).
-- Journalisation soignée : le `LogRecord` n'est pas muté par le formateur
-  couleur, les fichiers restent sans codes ANSI.
-- Verrous (`Lock`) par domaine dans `storage.py`.
+- **Convention respectée** : un fichier = une commande, sauf regroupements
+  liés justifiés (ban/unban, confine/unconfine, mute/unmute,
+  warn/unwarn/warns, watch/unwatch/watchlist, addowner/rmowner/owners). 🟢
+- **Cogs d'owner** isolés dans `cogs/owner/`. Cogs événementiels dédiés
+  (actionlog, errorreport, guildnotify, updatenotify, mention, errors,
+  webpanel). 🟢
+- **Séparation nette** : `cogs/` · `utils/` · `web/` · `scripts/` · `docs/`.
+  `.env.example`, `requirements.txt`, `.gitignore` présents ; `data/` gardé
+  par `.gitkeep`, contenu gitignoré. 🟢
+- 🟡 `requirements.txt` épingle `discord.py>=2.3.0` alors que le code cible
+  la série 2.7 ; relever le plancher (`>=2.4`) clarifierait le support.
 
----
+## 8. Améliorations mineures (par priorité)
 
-## 4. Fonctionnalité
+1. 🟡 Handlers d'erreur locaux : ajouter un repli générique pour ne jamais
+   laisser une erreur sans retour utilisateur (logs, remindme…).
+2. 🟡 `CheckFailure` : n'afficher que des messages i18n connus.
+3. 🟡 `requirements.txt` : relever le plancher `discord.py`.
 
-### 🟠 F1 — `ban`/`kick` limités aux membres présents
-Les deux commandes typent la cible en `discord.Member` : impossible de bannir
-par **ID** un utilisateur déjà parti (usage courant de modération).
-- **Reco** : accepter `discord.User`/ID (converti), garder `Member` pour les
-  contrôles de hiérarchie quand la personne est présente.
+## 9. Verdict
 
-### 🟡 F2 — Pas d'`unban` manuel
-Seul le ban **temporaire** se lève automatiquement ; aucun moyen de débannir
-manuellement via le bot (paire naturelle `ban`/`unban`).
-
-### 🟡 F3 — MP « best-effort » silencieux
-Si l'utilisateur a ses MP fermés, kick/ban n'informe pas le modérateur que le
-MP n'a pas pu être envoyé. Comportement voulu, mais un indicateur discret
-(« MP non délivré ») serait utile.
-
-### 🟡 F4 — Descriptions slash en français uniquement
-Les descriptions enregistrées auprès de Discord (UI slash) restent en
-français ; seul le rendu du `help` est bilingue. La localisation native des
-commandes slash (`app_commands` locale) pourrait être envisagée.
-
-### 🟢 Bons points fonctionnels
-- Bans temporaires **persistés** et repris au démarrage (`on_ready`).
-- MP **avant** sanction (le bot ne partage plus de serveur ensuite).
-- Logs Discord par type, catégorie masquée, activation indépendante.
-
----
-
-## 5. Plan d'action recommandé (par priorité)
-
-1. **S3** — échapper `g.name` dans le dashboard (rapide, supprime le XSS).
-2. **S1/S2** — cookie `Secure` conditionnel + `state` OAuth ; défaut
-   `WEB_HOST=127.0.0.1` documenté.
-3. **F1** — permettre le ban par ID (User), + **F2** commande `unban`.
-4. **Q4** — écritures JSON atomiques (`os.replace`).
-5. **Q1–Q3, Q5, S4, F3–F4** — nettoyages de fond au fil de l'eau.
-
-> Ce document reste l'état des lieux initial ; le suivi des corrections est
-> ci-dessous.
-
----
-
-## 6. Suivi des corrections
-
-| Réf. | Sujet | Statut |
-|------|-------|--------|
-| S1 | Cookie `Secure` conditionnel + `WEB_HOST=127.0.0.1` | ✅ Corrigé |
-| S2 | `state` OAuth (anti-CSRF) | ✅ Corrigé |
-| S3 | XSS noms de serveurs (`esc()`) | ✅ Corrigé |
-| S4 | `str(error)` des `CheckFailure` | ⏳ À faire |
-| Q1 | Listeners `on_command_error` multiples | ✅ Documenté (`cogs/errors.py`) |
-| Q2 | Duplication des libellés de permissions | ✅ Consolidé (`dperm.*` i18n) |
-| Q3 | Paramètre `type` masquant le built-in | ✅ Corrigé (`categorie`) |
-| Q4 | Écritures JSON atomiques | ✅ Corrigé (`_atomic_dump`) |
-| Q5 | Cache des réglages | ✅ Corrigé |
-| F1 | Ban par ID (`discord.User`) | ✅ Corrigé |
-| F2 | Commande `unban` | ✅ Corrigé |
-| F3 | Indicateur « MP non délivré » | ✅ Corrigé (kick/ban) |
-| F4 | Localisation native des descriptions slash | ⏳ À faire (nécessite un test de sync live) |
-
-Restent **S4** (faible) et **F4** (nécessite de valider la synchronisation
-slash sur un vrai bot ; risqué à introduire sans test en conditions réelles).
+🟢 **Sain et fonctionnel.** Aucune correction bloquante ; seulement des
+améliorations de confort. Le tronc (modération, automod, watch, logs,
+export, panel web, i18n, déploiement auto) est cohérent et testé.
