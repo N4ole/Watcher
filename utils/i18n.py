@@ -321,6 +321,17 @@ _CATALOG: dict[str, dict[str, str]] = {
     "watch.nick": {"fr": "{user} — pseudo modifié",
                    "en": "{user} — nickname changed"},
     "watch.none": {"fr": "*(aucun)*", "en": "*(none)*"},
+    "watch.resume": {
+        "fr": "🔄 **Reprise de la surveillance** de {user}.",
+        "en": "🔄 **Watch resumed** for {user}."},
+    "watch.resumed": {
+        "fr": "🔄 Surveillance de {user} **reprise** dans {channel}.",
+        "en": "🔄 Watch for {user} **resumed** in {channel}."},
+    "watch.activity": {"fr": "{user} — activité modifiée",
+                       "en": "{user} — activity changed"},
+    "watch.activity_desc": {"fr": "Activité : **{before}** → **{after}**",
+                            "en": "Activity: **{before}** → **{after}**"},
+    "watch.activity_none": {"fr": "aucune", "en": "none"},
     "watch.status": {"fr": "{user} — statut modifié",
                      "en": "{user} — status changed"},
     "watch.status_desc": {"fr": "Statut : **{before}** → **{after}**",
@@ -805,12 +816,39 @@ _CATALOG: dict[str, dict[str, str]] = {
     "cmddesc.watchlist": {"fr": "Liste les utilisateurs actuellement surveillés.",
                           "en": "List currently watched users."},
     "cmddesc.logs": {
-        "fr": "Active/désactive les logs Discord par type (on/off <type>).",
-        "en": "Enable/disable Discord logs by type (on/off <type>)."},
+        "fr": "Active/désactive les logs Discord par type, ou `status`.",
+        "en": "Enable/disable Discord logs by type, or `status`."},
+    "cmddesc.export": {
+        "fr": "Exporte le journal de modération (txt/csv/pdf) sur une période.",
+        "en": "Export the moderation log (txt/csv/pdf) over a period."},
+    # --- Export ---
+    "export.forbidden": {
+        "fr": "⛔ Réservé aux owners du bot et au propriétaire du serveur.",
+        "en": "⛔ Restricted to bot owners and the server owner."},
+    "export.bad_format": {
+        "fr": "❌ Format invalide. Choix : `txt`, `csv` ou `pdf`.",
+        "en": "❌ Invalid format. Choose: `txt`, `csv` or `pdf`."},
+    "export.bad_period": {
+        "fr": "❌ Période invalide. Exemples : `7d`, `30d`, `12h`, ou `all`.",
+        "en": "❌ Invalid period. Examples: `7d`, `30d`, `12h`, or `all`."},
+    "export.all": {"fr": "tout l'historique", "en": "full history"},
+    "export.no_data": {
+        "fr": "ℹ️ Aucune action de modération sur la période ({period}).",
+        "en": "ℹ️ No moderation action over the period ({period})."},
+    "export.header": {
+        "fr": "Export modération — {guild} — période : {period} — "
+              "{count} entrée(s) — généré le {when}",
+        "en": "Moderation export — {guild} — period: {period} — "
+              "{count} entr(y/ies) — generated on {when}"},
+    "export.done": {
+        "fr": "✅ Export de **{count}** action(s) sur {period}.",
+        "en": "✅ Exported **{count}** action(s) over {period}."},
     # --- Logs Discord ---
     "logs.usage": {
-        "fr": "Usage : `{prefix}logs <on|off> <type>`\nTypes : {types}.",
-        "en": "Usage: `{prefix}logs <on|off> <type>`\nTypes: {types}."},
+        "fr": "Usage : `{prefix}logs <on|off> <type>` ou `{prefix}logs status`"
+              "\nTypes : {types}.",
+        "en": "Usage: `{prefix}logs <on|off> <type>` or `{prefix}logs status`"
+              "\nTypes: {types}."},
     "logs.bad_type": {
         "fr": "❌ Type inconnu. Types disponibles : {types}.",
         "en": "❌ Unknown type. Available types: {types}."},
@@ -826,6 +864,13 @@ _CATALOG: dict[str, dict[str, str]] = {
                      "en": "✅ All logs have been disabled."},
     "logs.already_off": {"fr": "ℹ️ Les logs **{type}** ne sont pas activés.",
                          "en": "ℹ️ **{type}** logs are not enabled."},
+    "logs.status_title": {"fr": "📋 État des logs Discord",
+                          "en": "📋 Discord logs status"},
+    "logs.status_footer": {"fr": "{active}/{total} type(s) activé(s)",
+                           "en": "{active}/{total} type(s) enabled"},
+    "logs.st_off": {"fr": "❌ désactivé", "en": "❌ disabled"},
+    "logs.st_on_nochan": {"fr": "⚠️ activé (salon supprimé)",
+                          "en": "⚠️ enabled (channel deleted)"},
     "logs.entry_cmd": {"fr": "📋 Commande `{prefix}{cmd}`",
                        "en": "📋 Command `{prefix}{cmd}`"},
     "logs.entry_error": {"fr": "⚠️ Échec `{prefix}{cmd}`",

@@ -392,6 +392,20 @@ def get_modlog(guild_id: int, user_id: int) -> list[dict]:
     return _read_modlog().get(str(guild_id), {}).get(str(user_id), [])
 
 
+def get_guild_modlog(guild_id: int) -> list[dict]:
+    """Renvoie toutes les actions de modération d'un serveur.
+
+    Chaque entrée est complétée par la clé `user_id` (cible de l'action).
+    Trié par horodatage croissant.
+    """
+    result = []
+    for uid, entries in _read_modlog().get(str(guild_id), {}).items():
+        for entry in entries:
+            result.append({**entry, "user_id": int(uid)})
+    result.sort(key=lambda e: e.get("ts", 0))
+    return result
+
+
 # --------------------------------------------------------------------------- #
 # Rappels (reminders.json = liste de rappels)
 #   {"id", "user_id", "channel_id", "message", "due"}
