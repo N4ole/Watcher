@@ -61,6 +61,29 @@ if git diff --name-only "$LOCAL" "$REMOTE" | grep -q '^requirements.txt$'; then
     "$PYTHON" -m pip install -r requirements.txt --quiet
 fi
 
+# Note de déploiement : au redémarrage, le bot préviendra les owners en MP
+# (PR concernées, commits, version). Fichier gitignoré, préservé par le reset.
+mkdir -p "${REPO_ROOT}/data"
+"$PYTHON" - "$LOCAL" "$REMOTE" "$BRANCH" <<'PY' || log "Note de déploiement non écrite (non bloquant)."
+import datetime, json, pathlib, subprocess, sys
+old, new, branch = sys.argv[1:4]
+subjects = subprocess.run(
+    ["git", "log", "--pretty=format:%h\t%s", f"{old}..{new}"],
+    capture_output=True, text=True, check=False,
+).stdout.splitlines()
+pathlib.Path("data/pending_deploy.json").write_text(
+    json.dumps(
+        {
+            "old": old[:8], "new": new[:8], "branch": branch,
+            "time": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "commits": subjects,
+        },
+        ensure_ascii=False, indent=2,
+    ),
+    encoding="utf-8",
+)
+PY
+
 # Redémarre le service s'il existe, sinon prévient l'opérateur.
 if command -v systemctl >/dev/null 2>&1 \
     && systemctl list-unit-files "${SERVICE}.service" >/dev/null 2>&1; then

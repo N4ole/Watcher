@@ -24,6 +24,9 @@ OWNER_ID = int(_owner_id) if _owner_id and _owner_id.isdigit() else None
 VERSION = "0.20"
 BETA = True
 
+# URL du dépôt GitHub (liens de PR dans les notifications de mise à jour).
+REPO_URL = os.getenv("REPO_URL", "https://github.com/N4ole/Watcher")
+
 # --- Panel web (OAuth2 Discord) ------------------------------------------- #
 OAUTH_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET")

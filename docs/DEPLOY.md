@@ -13,6 +13,12 @@ si `requirements.txt` a changé, puis redémarre le bot.
 > sont **jamais** écrasés par le déploiement : la configuration et les
 > données runtime sont préservées.
 
+> 📬 **Notification** : à chaque mise à jour, `deploy.sh` écrit une note
+> (`data/pending_deploy.json`) que le bot lit au redémarrage pour envoyer un
+> **MP aux owners** (PR concernées, commits, version à jour), via le cog
+> `updatenotify`. Les liens de PR utilisent `REPO_URL` (`.env`,
+> défaut `https://github.com/N4ole/Watcher`).
+
 ## 1. Prérequis
 
 - Le dépôt est cloné sur le serveur et la branche de production est
