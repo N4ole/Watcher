@@ -18,6 +18,29 @@ from utils.i18n import t
 CATEGORY_NAME = "WATCHED USER"
 
 
+def _activity_str(member: discord.Member) -> str | None:
+    """Décrit l'activité principale d'un membre, ou None s'il n'en a pas."""
+    act = member.activity
+    if act is None:
+        return None
+    if isinstance(act, discord.CustomActivity):
+        emoji = f"{act.emoji} " if act.emoji else ""
+        return f"💬 {emoji}{act.name}" if act.name else "💬 (statut perso)"
+    if isinstance(act, discord.Spotify):
+        return f"🎧 {act.title} — {act.artist}"
+    if isinstance(act, discord.Streaming):
+        return f"📡 {act.name}"
+    if isinstance(act, discord.Game):
+        return f"🎮 {act.name}"
+    icons = {
+        discord.ActivityType.playing: "🎮",
+        discord.ActivityType.listening: "🎧",
+        discord.ActivityType.watching: "📺",
+        discord.ActivityType.competing: "🏆",
+    }
+    return f"{icons.get(act.type, '▶️')} {act.name}"
+
+
 def _fmt_duration(delta) -> str:
     """Formate une durée en 'Xh Ym Zs'."""
     total = int(delta.total_seconds())
@@ -52,6 +75,23 @@ class Watch(commands.Cog):
             return None
         return guild.get_channel(channel_id)
 
+    def _find_existing_channel(
+        self, guild: discord.Guild, member_id: int
+    ) -> discord.TextChannel | None:
+        """Retrouve un salon de surveillance existant via le marqueur du topic.
+
+        Permet de réutiliser un salon laissé par une surveillance précédente
+        (le salon n'est pas supprimé au `unwatch`) plutôt que d'en recréer un.
+        """
+        category = discord.utils.get(guild.categories, name=CATEGORY_NAME)
+        if category is None:
+            return None
+        marker = f"id: {member_id}"
+        for channel in category.text_channels:
+            if channel.topic and marker in channel.topic:
+                return channel
+        return None
+
     # ------------------------------------------------------------------ #
     # Commandes
     # ------------------------------------------------------------------ #
@@ -64,8 +104,22 @@ class Watch(commands.Cog):
     async def watch(self, ctx: commands.Context, member: discord.Member) -> None:
         guild = ctx.guild
 
-        if storage.get_channel_id(guild.id, member.id) is not None:
+        # Déjà surveillé activement (salon connu et existant) : rien à faire.
+        active = self._log_channel(guild, member.id)
+        if active is not None:
             await ctx.send(t(ctx, "watch.already", user=member.mention))
+            return
+
+        # Un salon de surveillance existe déjà (surveillance précédente) :
+        # on le réutilise et on signale la reprise, sans en recréer un.
+        existing = self._find_existing_channel(guild, member.id)
+        if existing is not None:
+            storage.add_watch(guild.id, member.id, existing.id)
+            await existing.send(t(guild, "watch.resume", user=member.mention))
+            await ctx.send(
+                t(ctx, "watch.resumed", user=member.mention,
+                  channel=existing.mention)
+            )
             return
 
         # Récupère (ou crée) la catégorie « WATCHED USER ».
@@ -372,27 +426,40 @@ class Watch(commands.Cog):
                         value=after.nick or t(g, "watch.none"), inline=True)
         await channel.send(embed=embed)
 
-    # --- Statut ---------------------------------------------------------- #
+    # --- Statut & activité ---------------------------------------------- #
     @commands.Cog.listener()
     async def on_presence_update(
         self, before: discord.Member, after: discord.Member
     ) -> None:
-        if before.status == after.status:
-            return
         channel = self._log_channel(after.guild, after.id)
         if channel is None:
             return
-
         g = after.guild
-        embed = discord.Embed(
-            description=t(g, "watch.status_desc",
-                          before=before.status, after=after.status),
-            color=discord.Color.greyple(),
-            timestamp=datetime.now(timezone.utc),
-        )
-        embed.set_author(name=t(g, "watch.status", user=after),
-                         icon_url=after.display_avatar.url)
-        await channel.send(embed=embed)
+        now = datetime.now(timezone.utc)
+
+        # Changement de statut (en ligne / absent / ne pas déranger / hors ligne).
+        if before.status != after.status:
+            embed = discord.Embed(
+                description=t(g, "watch.status_desc",
+                              before=before.status, after=after.status),
+                color=discord.Color.greyple(), timestamp=now,
+            )
+            embed.set_author(name=t(g, "watch.status", user=after),
+                             icon_url=after.display_avatar.url)
+            await channel.send(embed=embed)
+
+        # Changement d'activité (jeu, musique, stream, statut perso…).
+        before_act, after_act = _activity_str(before), _activity_str(after)
+        if before_act != after_act:
+            embed = discord.Embed(
+                description=t(g, "watch.activity_desc",
+                              before=before_act or t(g, "watch.activity_none"),
+                              after=after_act or t(g, "watch.activity_none")),
+                color=discord.Color.fuchsia(), timestamp=now,
+            )
+            embed.set_author(name=t(g, "watch.activity", user=after),
+                             icon_url=after.display_avatar.url)
+            await channel.send(embed=embed)
 
 
 async def setup(bot: commands.Bot) -> None:

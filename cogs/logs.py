@@ -22,6 +22,7 @@ SETTING = "logtypes"  # {token: channel_id}
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
+_STATUS = {"status", "statut", "état", "etat", "list", "liste", "info"}
 
 
 def _types_list() -> str:
@@ -36,6 +37,29 @@ class Logs(commands.Cog):
 
     def _enabled(self, guild_id: int) -> dict:
         return storage.get_setting(guild_id, SETTING, {}) or {}
+
+    async def _send_status(self, ctx: commands.Context) -> None:
+        """Affiche l'état (activé/désactivé) de chaque type de log."""
+        enabled = self._enabled(ctx.guild.id)
+        lines = []
+        for token, cat_key in categories.TYPE_TO_CAT.items():
+            channel_id = enabled.get(token)
+            if channel_id:
+                channel = ctx.guild.get_channel(channel_id)
+                state = channel.mention if channel \
+                    else t(ctx, "logs.st_on_nochan")
+            else:
+                state = t(ctx, "logs.st_off")
+            lines.append(f"**{t(ctx, cat_key)}** — {state}")
+        embed = discord.Embed(
+            title=t(ctx, "logs.status_title"),
+            description="\n".join(lines),
+            color=discord.Color.blurple(),
+        )
+        active = sum(1 for token in categories.TYPE_TO_CAT if enabled.get(token))
+        embed.set_footer(text=t(ctx, "logs.status_footer", active=active,
+                                total=len(categories.TYPE_TO_CAT)))
+        await ctx.send(embed=embed)
 
     async def _ensure_category(
         self, guild: discord.Guild
@@ -70,15 +94,26 @@ class Logs(commands.Cog):
 
     @commands.hybrid_command(
         name="logs",
-        description="Active/désactive les logs Discord par type (on/off <type>).",
+        description="Active/désactive les logs Discord par type, ou `status`.",
     )
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(manage_channels=True)
     async def logs(
-        self, ctx: commands.Context, etat: str, categorie: str
+        self, ctx: commands.Context, etat: str, categorie: str | None = None
     ) -> None:
         value = etat.lower()
+
+        # `logs status` : état de chaque type de log.
+        if value in _STATUS:
+            await self._send_status(ctx)
+            return
+
+        if categorie is None:
+            await ctx.send(t(ctx, "logs.usage",
+                             prefix=ctx.prefix or config.PREFIX,
+                             types=_types_list()))
+            return
         raw = categorie.lower().strip()
 
         if raw == "all":
