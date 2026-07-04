@@ -33,7 +33,7 @@ bloquant. Quelques améliorations mineures listées en §8.
 ## 3. Ergonomie (user‑friendly)
 
 - **Rappels d'usage** : sur argument manquant, message clair avec la
-  signature (`❌ Argument manquant. Usage : §kick <member> [raison]`). 🟢
+  signature (`❌ Argument manquant. Usage : $kick <member> [raison]`). 🟢
 - **Accusés d'action** : confirmations explicites (kick/ban/mute/logs…),
   avec indicateur « MP non délivré » si l'utilisateur a fermé ses MP. 🟢
 - **Opérations longues** : `export` et `analyse` signalent l'activité

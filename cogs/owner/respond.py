@@ -14,6 +14,7 @@ import logging
 import discord
 from discord.ext import commands
 
+import config
 from utils import checks
 from utils.i18n import t
 
@@ -85,7 +86,7 @@ class Respond(commands.Cog):
 
         # --- Réponse à un utilisateur précis ---
         if not cible.isdigit():
-            await ctx.send(t(ctx, "resp.bad_id", prefix=ctx.prefix or "§"))
+            await ctx.send(t(ctx, "resp.bad_id", prefix=ctx.prefix or config.PREFIX))
             return
         user_id = int(cible)
 
@@ -113,7 +114,7 @@ class Respond(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             await ctx.send(t(ctx, "error.owner_only"))
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(t(ctx, "resp.usage", prefix=ctx.prefix or "§"))
+            await ctx.send(t(ctx, "resp.usage", prefix=ctx.prefix or config.PREFIX))
         else:
             # Repli : jamais d'erreur silencieuse pour l'utilisateur
             # (errorreport prévient déjà les owners avec la traceback).
