@@ -20,7 +20,9 @@ d'administration (OAuth2 Discord), une gestion d'**owners du bot**, et un
 système de **déploiement automatique** depuis GitHub.
 
 - **Version actuelle : `0.20` — en bêta** (`config.VERSION` / `config.BETA`).
-- Commandes **hybrides** (préfixe `$` **et** slash `/`) pour le public ;
+- Commandes **hybrides** (préfixe **personnalisable par serveur** — commande
+  `prefixe`, défaut `!` via .env, persisté dans guild_settings — **et** slash
+  `/`) pour le public ;
   commandes d'**owner en préfixe uniquement**.
 
 ## 2. Stack & outils

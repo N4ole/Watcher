@@ -1,14 +1,14 @@
 # Système d'automodération
 
 Filtres de messages activables **par serveur**. Ils ignorent les bots et les
-**administrateurs**. L'état de chaque filtre est visible via `$protections`.
+**administrateurs**. L'état de chaque filtre est visible via `!protections`.
 
 ## Filtres activables
 | Commande | Effet |
 |----------|-------|
-| `$antipub <on/off>` | Supprime les messages contenant une **invitation Discord** |
-| `$antispam <on/off>` | Au-delà de 5 messages en 5 s : suppression + mute (timeout) 1 min |
-| `$antiinsulte <on/off>` | Supprime les messages contenant une **insulte** détectée |
+| `!antipub <on/off>` | Supprime les messages contenant une **invitation Discord** |
+| `!antispam <on/off>` | Au-delà de 5 messages en 5 s : suppression + mute (timeout) 1 min |
+| `!antiinsulte <on/off>` | Supprime les messages contenant une **insulte** détectée |
 
 ## Filtres toujours actifs
 - **Anti-majuscules** : message à plus de 75 % de majuscules (≥ 8 lettres).

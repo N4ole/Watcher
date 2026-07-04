@@ -1,7 +1,7 @@
 # Système de rappels (remindme)
 
 ## Commande
-- `$remindme <message> <temps>` — envoie un rappel en **message privé** après
+- `!remindme <message> <temps>` — envoie un rappel en **message privé** après
   le délai indiqué.
 
 Accessible à tous.

@@ -343,6 +343,19 @@ def set_setting(guild_id: int, key: str, value) -> None:
         _write_settings(data)
 
 
+def get_prefix(guild_id: int | None) -> str:
+    """Préfixe des commandes pour un serveur (réglage `prefix`, persisté).
+
+    Repli sur le préfixe par défaut (`config.PREFIX`, via .env) si le
+    serveur n'a rien personnalisé — et en MP (guild_id None).
+    """
+    import config  # import local : évite un cycle au chargement.
+
+    if guild_id is None:
+        return config.PREFIX
+    return get_setting(guild_id, "prefix", config.PREFIX) or config.PREFIX
+
+
 # --------------------------------------------------------------------------- #
 # Journal de modération (modlog.json = {guild_id: {user_id: [actions]}})
 #   action = {"type", "ts", "duration"(s|None), "detail", "moderator"}

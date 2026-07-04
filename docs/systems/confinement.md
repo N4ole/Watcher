@@ -4,8 +4,8 @@ Isole un utilisateur dans un salon privé et lui retire l'accès au reste du
 serveur.
 
 ## Commandes
-- `$confine <membre>` — confine l'utilisateur
-- `$unconfine <membre>` — le libère
+- `!confine <membre>` — confine l'utilisateur
+- `!unconfine <membre>` — le libère
 
 Réservées aux **administrateurs**.
 
