@@ -9,8 +9,8 @@ load_dotenv()
 # Token du bot (obligatoire).
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# Préfixe des commandes texte. "§" par défaut.
-PREFIX = os.getenv("COMMAND_PREFIX", "§")
+# Préfixe des commandes texte. "$" par défaut.
+PREFIX = os.getenv("COMMAND_PREFIX", "$")
 
 # ID du serveur de dev pour la synchro instantanée des commandes slash.
 _guild_id = os.getenv("GUILD_ID")

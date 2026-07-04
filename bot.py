@@ -15,7 +15,7 @@ COGS_DIR = Path(__file__).parent / "cogs"
 
 
 class Watcher(commands.Bot):
-    """Bot Discord supportant les commandes préfixe (§) et slash (/)."""
+    """Bot Discord supportant les commandes préfixe ($) et slash (/)."""
 
     def __init__(self) -> None:
         intents = discord.Intents.default()

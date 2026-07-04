@@ -3,9 +3,9 @@
 Journalise toute l'activité d'un utilisateur dans un salon dédié.
 
 ## Commandes
-- `§watch <membre>` — active la surveillance
-- `§unwatch <membre>` — l'arrête (le salon de log est conservé)
-- `§watchlist` — liste les utilisateurs surveillés
+- `$watch <membre>` — active la surveillance
+- `$unwatch <membre>` — l'arrête (le salon de log est conservé)
+- `$watchlist` — liste les utilisateurs surveillés
 
 Réservées aux **administrateurs**.
 

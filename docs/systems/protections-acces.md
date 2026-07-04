@@ -1,12 +1,12 @@
 # Système de protection d'accès (anti-bot / anti-raid)
 
 Protège l'entrée du serveur. Réglages activables par serveur, visibles via
-`§protections`.
+`$protections`.
 
-## Anti-bot — `§antibot <on/off>`
+## Anti-bot — `$antibot <on/off>`
 Quand activé, tout **bot** qui rejoint le serveur est automatiquement expulsé.
 
-## Anti-raid — `§antiraid <on/off>`
+## Anti-raid — `$antiraid <on/off>`
 Quand activé, chaque nouveau membre doit valider un **captcha** avant d'accéder
 au serveur (sans API externe) :
 
