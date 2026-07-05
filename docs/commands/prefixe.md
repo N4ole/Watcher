@@ -1,10 +1,10 @@
-# `!export`
+# `!prefixe`
 
-Exporte le journal de modération (txt/csv/pdf) sur une période.
+Affiche ou change le préfixe du bot sur ce serveur.
 
 - **Catégorie** : 👑 Propriétaire de serveur
 - **Permission** : Propriétaire du serveur
 - **Disponible en** : préfixe (`!`) et slash (`/`)
-- **Usage** : `!export <format> [periode]`
+- **Usage** : `!prefixe [nouveau]`
 
 > Légende : `<...>` argument obligatoire · `[...]` facultatif.

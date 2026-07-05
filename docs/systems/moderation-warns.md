@@ -4,9 +4,9 @@ Système de sanctions **progressives** : chaque avertissement fait monter d'un
 niveau et applique automatiquement une sanction.
 
 ## Commandes
-- `$warn <membre>` — avertit (monte d'un niveau)
-- `$unwarn <membre>` — retire un avertissement et lève les sanctions temporaires
-- `$warns <membre>` — affiche le nombre d'avertissements
+- `!warn <membre>` — avertit (monte d'un niveau)
+- `!unwarn <membre>` — retire un avertissement et lève les sanctions temporaires
+- `!warns <membre>` — affiche le nombre d'avertissements
 
 Réservées aux **administrateurs**.
 
@@ -25,7 +25,7 @@ précédent.
 ## Persistance
 - Compteur par serveur/membre : `data/warns.json`.
 - Chaque action est aussi enregistrée dans le **journal de modération**
-  (`data/modlog.json`), consultable via `$userstatus`.
+  (`data/modlog.json`), consultable via `!userstatus`.
 
 ## Permissions requises pour le bot
 Gérer les rôles, Exclure des membres (timeout), Bannir des membres — avec un
