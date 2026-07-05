@@ -1,6 +1,7 @@
 # Watcher
 
-Bot Discord en Python supportant à la fois les **commandes préfixe** (`§`) et
+Bot Discord en Python supportant à la fois les **commandes préfixe** (`!` par
+défaut, **personnalisable par serveur** via la commande `prefixe`) et
 les **commandes slash** (`/`), avec une architecture multi-fichiers (un fichier
 par commande).
 
@@ -62,7 +63,10 @@ lui (les commandes nécessitant un serveur restent, elles, réservées aux
 serveurs). En MP, les commandes des non-owners sont ignorées.
 
 Chaque commande utilise `@commands.hybrid_command`, ce qui la rend disponible
-**à la fois** en préfixe (`§ping`) et en slash (`/ping`) sans duplication.
+**à la fois** en préfixe (`!ping`) et en slash (`/ping`) sans duplication.
+Le préfixe est propre à chaque serveur : le propriétaire le change avec
+`prefixe <nouveau>` (ou `prefixe reset`), le choix est persisté et la
+mention du bot reste toujours utilisable en secours.
 
 Les commandes slash sont synchronisées **sur le serveur de dev** (`GUILD_ID`,
 mise à jour instantanée) **et globalement** (utilisables partout, y compris en
@@ -130,7 +134,7 @@ python main.py
 | Variable         | Description                                                      | Défaut |
 |------------------|------------------------------------------------------------------|--------|
 | `DISCORD_TOKEN`  | Token du bot (obligatoire)                                        | —      |
-| `COMMAND_PREFIX` | Préfixe des commandes texte                                       | `§`    |
+| `COMMAND_PREFIX` | Préfixe **par défaut** (chaque serveur peut le changer : `prefixe`) | `!`    |
 | `GUILD_ID`       | ID d'un serveur pour synchroniser les slash instantanément (dev) | global |
 | `OWNER_ID`       | ID Discord de l'owner principal du bot                           | —      |
 

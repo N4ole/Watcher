@@ -821,6 +821,26 @@ _CATALOG: dict[str, dict[str, str]] = {
     "cmddesc.export": {
         "fr": "Exporte le journal de modération (txt/csv/pdf) sur une période.",
         "en": "Export the moderation log (txt/csv/pdf) over a period."},
+    "cmddesc.prefixe": {
+        "fr": "Affiche ou change le préfixe du bot sur ce serveur.",
+        "en": "Show or change the bot prefix on this server."},
+    # --- Préfixe par serveur ---
+    "prefix.current": {
+        "fr": "ℹ️ Préfixe actuel : `{prefix}` (défaut : `{default}`).\n"
+              "Change-le avec `prefixe <nouveau>` ou `prefixe reset`.",
+        "en": "ℹ️ Current prefix: `{prefix}` (default: `{default}`).\n"
+              "Change it with `prefixe <new>` or `prefixe reset`."},
+    "prefix.set": {
+        "fr": "✅ Préfixe du serveur défini sur `{prefix}`.",
+        "en": "✅ Server prefix set to `{prefix}`."},
+    "prefix.reset": {
+        "fr": "✅ Préfixe réinitialisé au défaut : `{prefix}`.",
+        "en": "✅ Prefix reset to default: `{prefix}`."},
+    "prefix.invalid": {
+        "fr": "❌ Préfixe invalide : {max} caractères max, sans espace ni "
+              "`@`/`#`/`/`.",
+        "en": "❌ Invalid prefix: max {max} characters, no spaces and no "
+              "`@`/`#`/`/`."},
     # --- Export ---
     "export.forbidden": {
         "fr": "⛔ Réservé aux owners du bot et au propriétaire du serveur.",

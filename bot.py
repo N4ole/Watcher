@@ -14,8 +14,20 @@ log = logging.getLogger(__name__)
 COGS_DIR = Path(__file__).parent / "cogs"
 
 
+def _resolve_prefix(bot: commands.Bot, message: discord.Message):
+    """Préfixe dynamique : personnalisé par serveur, défaut en MP.
+
+    La mention du bot fonctionne toujours comme préfixe de secours.
+    """
+    from utils import storage  # import local : storage lit config.
+
+    guild_id = message.guild.id if message.guild else None
+    prefix = storage.get_prefix(guild_id)
+    return commands.when_mentioned_or(prefix)(bot, message)
+
+
 class Watcher(commands.Bot):
-    """Bot Discord supportant les commandes préfixe (§) et slash (/)."""
+    """Bot Discord : commandes préfixe (personnalisable par serveur) et slash."""
 
     def __init__(self) -> None:
         intents = discord.Intents.default()
@@ -33,7 +45,7 @@ class Watcher(commands.Bot):
         self.start_time = datetime.now(timezone.utc)
 
         super().__init__(
-            command_prefix=commands.when_mentioned_or(config.PREFIX),
+            command_prefix=_resolve_prefix,
             intents=intents,
             help_command=None,  # On fournit notre propre commande help.
         )

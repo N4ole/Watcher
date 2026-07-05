@@ -1,10 +1,10 @@
-# `!contactowner`
+# `!prefixe`
 
-Contacte les owners du bot (réservé au propriétaire du serveur).
+Affiche ou change le préfixe du bot sur ce serveur.
 
 - **Catégorie** : 👑 Propriétaire de serveur
 - **Permission** : Propriétaire du serveur
 - **Disponible en** : préfixe (`!`) et slash (`/`)
-- **Usage** : `!contactowner <message>`
+- **Usage** : `!prefixe [nouveau]`
 
 > Légende : `<...>` argument obligatoire · `[...]` facultatif.

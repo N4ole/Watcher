@@ -1,10 +1,10 @@
-# `!contactowner`
+# `!export`
 
-Contacte les owners du bot (réservé au propriétaire du serveur).
+Exporte le journal de modération (txt/csv/pdf) sur une période.
 
 - **Catégorie** : 👑 Propriétaire de serveur
 - **Permission** : Propriétaire du serveur
 - **Disponible en** : préfixe (`!`) et slash (`/`)
-- **Usage** : `!contactowner <message>`
+- **Usage** : `!export <format> [periode]`
 
 > Légende : `<...>` argument obligatoire · `[...]` facultatif.

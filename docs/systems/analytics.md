@@ -1,7 +1,7 @@
 # Système d'analytics (commande analyse)
 
 ## Commande
-- `§analyse` — génère des **courbes** d'activité du serveur sur **7 jours**.
+- `!analyse` — génère des **courbes** d'activité du serveur sur **7 jours**.
 
 Réservée aux **administrateurs**.
 

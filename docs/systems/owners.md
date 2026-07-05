@@ -10,13 +10,13 @@ Défini par `OWNER_ID` dans le `.env`. Il a tous les droits et **ne peut pas**
 Gérés dynamiquement, stockés dans `data/owners.json`.
 
 ## Commandes (réservées aux owners)
-- `§addowner <user>` / `§rmowner <user>` / `§owners` — gestion des owners
-- `§reload [cog]` — recharge un cog à chaud (ou `all`)
-- `§shutdown` — éteint le bot
-- `§say <message>` — fait parler le bot
-- `§serveurs` — détaille chaque serveur du bot (une page par serveur)
-- `§invite <serverid>` — génère une invitation vers un serveur du bot
-- `§helpowner` — liste les commandes d'owner (préfixe uniquement)
+- `!addowner <user>` / `!rmowner <user>` / `!owners` — gestion des owners
+- `!reload [cog]` — recharge un cog à chaud (ou `all`)
+- `!shutdown` — éteint le bot
+- `!say <message>` — fait parler le bot
+- `!serveurs` — détaille chaque serveur du bot (une page par serveur)
+- `!invite <serverid>` — génère une invitation vers un serveur du bot
+- `!helpowner` — liste les commandes d'owner (préfixe uniquement)
 
 ## Rôle automatique
 Quand un owner rejoint un serveur où le bot est présent, il reçoit

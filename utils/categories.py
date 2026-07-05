@@ -42,6 +42,7 @@ CATEGORIES: dict[str, tuple[str, str | None]] = {
     # Propriétaire de serveur
     "ContactOwner": ("cat.owner_server", "perm.server_owner"),
     "Export": ("cat.owner_server", "perm.server_owner"),
+    "Prefixe": ("cat.owner_server", "perm.server_owner"),
 }
 DEFAULT: tuple[str, str | None] = ("cat.general", None)
 ORDER = [
