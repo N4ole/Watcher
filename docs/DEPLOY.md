@@ -24,11 +24,39 @@ si `requirements.txt` a changé, puis redémarre le bot.
 - Le dépôt est cloné sur le serveur et la branche de production est
   suivie (par défaut `main`).
 - Python et `pip` sont installés (idéalement un virtualenv).
-- Le bot tourne comme un **service systemd** (voir §2).
+- Le bot tourne comme un **process Python autonome** (§2, recommandé — pas
+  besoin de systemd) ou, si vous préférez, comme un **service systemd**
+  (§2 bis, alternative avancée).
 
-## 2. Service systemd (exemple)
+## 2. Lancer le bot en process Python simple (sans systemd)
 
-Créez `/etc/systemd/system/watcher.service` :
+Le bot tourne directement via `python3 main.py`, géré par
+[`scripts/watcher-ctl.sh`](../scripts/watcher-ctl.sh) : démarrage, arrêt
+propre, et surtout **relance automatique en cas de plantage** (le bot est
+relancé après 2 secondes s'il s'arrête ou crashe).
+
+```bash
+cd /opt/watcher
+scripts/watcher-ctl.sh start      # démarre le bot (boucle de relance)
+scripts/watcher-ctl.sh status     # « En cours » ou « Arrêté »
+scripts/watcher-ctl.sh stop       # arrêt propre (TERM, puis KILL après 10s)
+scripts/watcher-ctl.sh restart    # utilisé automatiquement par deploy.sh
+```
+
+Détails :
+- La sortie du bot va dans `logs/runtime.log`.
+- Le PID de la boucle de relance est suivi dans `.watcher.pid` (gitignoré).
+- `deploy.sh` (§3) appelle **automatiquement** `watcher-ctl.sh restart`
+  après une mise à jour, dès lors qu'**aucun** service systemd
+  `${DEPLOY_SERVICE}` n'est configuré — rien à faire de plus pour que le
+  redémarrage après déploiement fonctionne.
+- Pour démarrer le bot automatiquement après un redémarrage du serveur,
+  ajoutez à la crontab : `@reboot cd /opt/watcher && scripts/watcher-ctl.sh start`.
+
+## 2 bis. Alternative : service systemd
+
+Si vous préférez déléguer la supervision du process à systemd plutôt qu'à
+`watcher-ctl.sh`, créez `/etc/systemd/system/watcher.service` :
 
 ```ini
 [Unit]
@@ -54,20 +82,24 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now watcher
 ```
 
+Tant qu'un service nommé `${DEPLOY_SERVICE}` (défaut `watcher`) existe,
+`deploy.sh` l'utilise en priorité (`systemctl restart`) plutôt que
+`watcher-ctl.sh`.
+
 ## 3. Déploiement manuel
 
 ```bash
 cd /opt/watcher
-DEPLOY_BRANCH=main DEPLOY_SERVICE=watcher scripts/deploy.sh
+scripts/deploy.sh
 ```
 
 Variables disponibles :
 
-| Variable         | Défaut     | Rôle                                        |
-|------------------|------------|---------------------------------------------|
-| `DEPLOY_BRANCH`  | `main`     | Branche GitHub à déployer                   |
-| `DEPLOY_SERVICE` | `watcher`  | Service systemd à redémarrer                |
-| `DEPLOY_PYTHON`  | `python3`  | Interpréteur utilisé pour `pip install`     |
+| Variable         | Défaut     | Rôle                                                     |
+|------------------|------------|-----------------------------------------------------------|
+| `DEPLOY_BRANCH`  | `main`     | Branche GitHub à déployer                                |
+| `DEPLOY_SERVICE` | `watcher`  | Service systemd à redémarrer (ignoré s'il n'existe pas — repli automatique sur `watcher-ctl.sh`) |
+| `DEPLOY_PYTHON`  | `python3`  | Interpréteur utilisé pour `pip install` et pour lancer `main.py` |
 
 ## 4. Lancement périodique « à chaque push » (installation clé en main)
 
@@ -90,12 +122,17 @@ L'installeur détecte automatiquement le **chemin du dépôt** et
 l'**utilisateur** courant (rien n'est codé en dur), rend les unités
 [`watcher-deploy.service`](../scripts/watcher-deploy.service) /
 [`watcher-deploy.timer`](../scripts/watcher-deploy.timer) (ou la ligne cron),
-et active le tout. Le déploiement ne redémarre le bot **que** s'il y a de
-nouveaux commits.
+et active le tout. Ces unités ne servent qu'à **exécuter `deploy.sh`
+périodiquement** (indépendant de la façon dont le bot lui-même tourne) : le
+déploiement ne redémarre le bot **que** s'il y a de nouveaux commits.
 
-Le redémarrage `systemctl` du bot nécessite les droits : autorisez
-l'utilisateur à redémarrer **uniquement** ce service, via sudoers (commande
-rappelée en fin d'installation) :
+> En mode « process Python simple » (§2), `watcher-ctl.sh` tourne avec le
+> même utilisateur que le bot : **aucun sudo n'est nécessaire**. La règle
+> sudoers ci-dessous ne concerne que le mode systemd (§2 bis).
+
+Si le bot tourne comme service systemd (§2 bis), le redémarrage `systemctl`
+nécessite les droits : autorisez l'utilisateur à redémarrer **uniquement**
+ce service, via sudoers (commande rappelée en fin d'installation) :
 
 ```sudoers
 # /etc/sudoers.d/watcher-deploy
