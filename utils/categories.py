@@ -22,6 +22,7 @@ CATEGORIES: dict[str, tuple[str, str | None]] = {
     "Choose": ("cat.util", None),
     "RemindMe": ("cat.util", None),
     "Giveaway": ("cat.util", "dperm.administrator"),
+    "Bump": ("cat.util", None),
     # Modération
     "Watch": ("cat.mod", "dperm.administrator"),
     "Welcome": ("cat.mod", "dperm.administrator"),

@@ -107,6 +107,13 @@ ensemble (`mute`/`unmute`, `ban`/`unban`, `confine`/`unconfine`,
 - **Giveaways** (`giveaway`, admin) : `giveaway <durée> <gagnants> <prix>`
   (réaction 🎉), `gend` (fin anticipée), `greroll` (nouveau tirage). Persistés
   (`giveaways.json`) et repris au démarrage (`on_ready`).
+- **Bump inter-serveurs** (`bump`) : `bumpenable <on/off> [salon]` (admin,
+  sélecteur de salon si omis) active le système et choisit le salon de
+  réception ; `bump` (public) diffuse une pub du serveur (nom, icône,
+  description, invitation permanente créée au besoin) dans le salon configuré
+  de **tous les autres** serveurs participants. Cooldown **6 h par serveur**,
+  ignore les bots. Réglages persistés (`bump_enabled`/`bump_channel`/
+  `bump_last`).
 - **Tickets** (`ticket`, admin) : `ticket <salon> <message>` poste un panneau
   avec un **bouton persistant** (`discord.ui.View`, `custom_id` stable,
   ré-enregistré via `bot.add_view` au chargement du cog). Un clic crée un

@@ -27,6 +27,8 @@ multi-fichiers (un fichier par commande).
 - **Bienvenue / au revoir** : messages d'arrivée/départ + **MP de bienvenue**,
   tous personnalisables.
 - **Giveaways** : `giveaway`, `gend`, `greroll` (réaction 🎉, persistés).
+- **Bump inter-serveurs** : `bump` diffuse ton serveur (nom, icône, description,
+  invitation) aux autres serveurs participants (cooldown 6 h, `bumpenable`).
 - **Tickets** : panneau à **bouton persistant** créant des salons privés.
 - **Export** : journal de modération en `txt` / `csv` / `pdf`.
 - **Panel web** d'administration (OAuth2 Discord, thème néon, console live).
@@ -153,6 +155,8 @@ python main.py
 | `choose <a \| b \| …>` | Choisit une option au hasard |
 | `giveaway <durée> <gagnants> <prix>` | Lance un giveaway (réaction 🎉) — *admin* |
 | `gend <id>` / `greroll <id>` | Fin anticipée / nouveau tirage — *admin* |
+| `bumpenable <on/off> [salon]` | Active le bump inter-serveurs + salon de réception — *admin* |
+| `bump` | Diffuse ton serveur aux autres serveurs participants (cooldown 6 h) |
 
 ### Modération (permission **Administrateur** sauf mention contraire)
 

@@ -1,6 +1,6 @@
 # Catégories
 
-- [🎲 Utilitaire](utilitaire.md) (9 commandes)
+- [🎲 Utilitaire](utilitaire.md) (11 commandes)
 - [👑 Owner du bot](owner-du-bot.md) (15 commandes)
 - [👑 Propriétaire de serveur](proprietaire-de-serveur.md) (3 commandes)
 - [📊 Infos](infos.md) (5 commandes)
