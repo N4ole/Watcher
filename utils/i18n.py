@@ -257,6 +257,51 @@ _CATALOG: dict[str, dict[str, str]] = {
         "fr": "❌ Utilise `{name} on` ou `{name} off`.",
         "en": "❌ Use `{name} on` or `{name} off`.",
     },
+    # --- Bump inter-serveurs ---
+    "bump.st_title": {"fr": "📢 Système de bump", "en": "📢 Bump system"},
+    "bump.st_on": {
+        "fr": "✅ **Activé** — salon de réception : {channel}.",
+        "en": "✅ **Enabled** — ads channel: {channel}.",
+    },
+    "bump.st_off": {"fr": "❌ **Désactivé** sur ce serveur.",
+                    "en": "❌ **Disabled** on this server."},
+    "bump.choose_channel": {
+        "fr": "📢 Choisis le salon qui recevra les publicités des autres "
+              "serveurs :",
+        "en": "📢 Choose the channel that will receive ads from other servers:",
+    },
+    "bump.enabled": {
+        "fr": "✅ Système de bump **activé**. Salon de réception : {channel}.",
+        "en": "✅ Bump system **enabled**. Ads channel: {channel}.",
+    },
+    "bump.disabled": {"fr": "🛑 Système de bump **désactivé**.",
+                      "en": "🛑 Bump system **disabled**."},
+    "bump.bad_channel": {"fr": "❌ Salon introuvable.",
+                         "en": "❌ Channel not found."},
+    "bump.not_enabled": {
+        "fr": "❌ Le système de bump n'est pas activé sur ce serveur. Un "
+              "administrateur doit d'abord le configurer avec `bumpenable`.",
+        "en": "❌ The bump system is not enabled on this server. An "
+              "administrator must first set it up with `bumpenable`.",
+    },
+    "bump.cooldown": {
+        "fr": "⏳ Bump déjà effectué récemment. Réessaie dans **{time}**.",
+        "en": "⏳ Bump already done recently. Try again in **{time}**.",
+    },
+    "bump.done": {
+        "fr": "📢 Serveur bumpé auprès de **{count}** serveur(s) participant(s) !",
+        "en": "📢 Server bumped to **{count}** participating server(s)!",
+    },
+    "bump.done_none": {
+        "fr": "📢 Bump effectué, mais aucun autre serveur participant pour "
+              "l'instant.",
+        "en": "📢 Bump done, but no other participating server for now.",
+    },
+    "bump.ad_no_desc": {"fr": "*(aucune description)*", "en": "*(no description)*"},
+    "bump.ad_members": {"fr": "Membres", "en": "Members"},
+    "bump.ad_invite": {"fr": "Rejoindre", "en": "Join"},
+    "bump.ad_footer": {"fr": "Publicité via le système de bump de Watcher",
+                       "en": "Ad via Watcher's bump system"},
     # --- Tickets ---
     "ticket.panel_footer": {
         "fr": "Clique sur le bouton pour ouvrir un ticket.",
@@ -509,8 +554,8 @@ _CATALOG: dict[str, dict[str, str]] = {
               "**`{code}`**\n(you have {minutes} minutes and {attempts} tries).",
     },
     "antiraid.verified": {
-        "fr": "✅ {user} vérifié, bienvenue !",
-        "en": "✅ {user} verified, welcome!",
+        "fr": "✅ {user} vérifié, bienvenue ! Tu as reçu le rôle **{role}**.",
+        "en": "✅ {user} verified, welcome! You received the **{role}** role.",
     },
     "antiraid.wrong": {
         "fr": "❌ {user} code incorrect, réessaie.",
@@ -1098,6 +1143,12 @@ _CATALOG: dict[str, dict[str, str]] = {
                          "en": "Enable/disable anti-spam (on/off)."},
     "cmddesc.avatar": {"fr": "Affiche l'avatar d'un utilisateur.",
                        "en": "Show a user's avatar."},
+    "cmddesc.bump": {
+        "fr": "Diffuse ton serveur aux autres serveurs participants.",
+        "en": "Advertise your server to other participating servers."},
+    "cmddesc.bumpenable": {
+        "fr": "Active/désactive le système de bump (choix du salon).",
+        "en": "Enable/disable the bump system (channel selection)."},
     "cmddesc.ticket": {
         "fr": "Crée un panneau de ticket (bouton) dans un salon.",
         "en": "Create a ticket panel (button) in a channel."},

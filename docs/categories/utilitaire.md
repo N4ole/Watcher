@@ -1,6 +1,8 @@
 # 🎲 Utilitaire
 
 - [`!8ball`](../commands/8ball.md) — Pose une question à la boule magique.
+- [`!bump`](../commands/bump.md) — Diffuse ton serveur aux autres serveurs participants.
+- [`!bumpenable`](../commands/bumpenable.md) — Active/désactive le système de bump (choix du salon).
 - [`!choose`](../commands/choose.md) — Choisit une option parmi plusieurs (séparées par « | »).
 - [`!coinflip`](../commands/coinflip.md) — Lance une pièce : pile ou face.
 - [`!gend`](../commands/gend.md) — Termine immédiatement un giveaway (par ID de message). — 🔒 *Administrateur*

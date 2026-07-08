@@ -15,6 +15,8 @@
 - [`!bienvenue`](bienvenue.md)
 - [`!bonjour`](bonjour.md)
 - [`!botinfo`](botinfo.md)
+- [`!bump`](bump.md)
+- [`!bumpenable`](bumpenable.md)
 - [`!central`](central.md)
 - [`!choose`](choose.md)
 - [`!clear`](clear.md)
