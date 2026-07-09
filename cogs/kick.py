@@ -4,8 +4,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from utils import checks, storage
-from utils.i18n import t
+from utils import checks, replies, storage
+from utils.i18n import t, t_lang
 
 log = logging.getLogger("action")
 
@@ -29,34 +29,30 @@ class Kick(commands.Cog):
 
         # Garde-fous : soi-même et hiérarchie des rôles.
         if member.id == ctx.author.id:
-            await ctx.send(t(ctx, "kick.self"))
+            await replies.reply(ctx, "kick.self", kind="error")
             return
         if not checks.can_act_on(ctx.author, member):
-            await ctx.send(t(ctx, "kick.hierarchy"))
+            await replies.reply(ctx, "kick.hierarchy", kind="error")
             return
 
         # Prévenir l'utilisateur en MP AVANT l'expulsion (après, le bot ne
         # partage plus forcément de serveur avec lui). Sans invitation.
-        dm = discord.Embed(
-            title=t(member, "kick.dm_title"),
-            description=t(member, "kick.dm_desc", server=ctx.guild.name),
-            color=discord.Color.orange(),
+        dm_spec = (
+            replies.Embed("warn", color=discord.Color.orange())
+            .title("kick.dm_title")
+            .desc("kick.dm_desc", server=ctx.guild.name)
+            .field("mod.reason_label", reason, inline=False)
         )
-        dm.add_field(name=t(member, "mod.reason_label"), value=reason,
-                     inline=False)
-        dm_sent = True
-        try:
-            await member.send(embed=dm)
-        except (discord.HTTPException, discord.Forbidden):
-            dm_sent = False  # MP fermés : on expulse quand même.
+        dm_sent = await replies.reply_dm(member, ctx.guild, "", spec=dm_spec) \
+            is not None
 
         try:
             await member.kick(reason=f"{ctx.author} : {reason}")
         except discord.Forbidden:
-            await ctx.send(t(ctx, "kick.forbidden"))
+            await replies.reply(ctx, "kick.forbidden", kind="error")
             return
         except discord.HTTPException as exc:
-            await ctx.send(t(ctx, "kick.failed", error=exc))
+            await replies.reply(ctx, "kick.failed", kind="error", error=str(exc))
             return
 
         storage.add_modlog(
@@ -67,10 +63,11 @@ class Kick(commands.Cog):
             member, member.id, ctx.author, ctx.author.id,
             ctx.guild.name, ctx.guild.id, reason,
         )
-        confirm = t(ctx, "kick.done", user=str(member), reason=reason)
-        if not dm_sent:
-            confirm += f"\n{t(ctx, 'mod.dm_failed')}"
-        await ctx.send(confirm)
+        spec = replies.Embed("success").desc_fn(
+            lambda l: t_lang(l, "kick.done", user=str(member), reason=reason)
+            + ("" if dm_sent else "\n" + t_lang(l, "mod.dm_failed"))
+        )
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:

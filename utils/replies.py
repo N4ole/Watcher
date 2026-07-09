@@ -57,6 +57,7 @@ class Embed:
         self._title_literal: str | None = None
         self._desc: tuple | None = None
         self._desc_literal: str | None = None
+        self._desc_fn = None
         self._fields: list[tuple] = []
         self._footer: tuple | None = None
         self._thumb: str | None = None
@@ -79,6 +80,11 @@ class Embed:
     def desc_text(self, text: str) -> "Embed":
         """Description littérale (donnée, non traduite)."""
         self._desc_literal = text
+        return self
+
+    def desc_fn(self, fn) -> "Embed":
+        """Description calculée par langue : `fn(lang) -> str`."""
+        self._desc_fn = fn
         return self
 
     def field(self, name_key: str, value: str, *, inline: bool = True,
@@ -129,6 +135,8 @@ class Embed:
             embed.title = self._title_literal
         if self._desc:
             embed.description = t_lang(lang, self._desc[0], **self._desc[1])
+        elif self._desc_fn is not None:
+            embed.description = self._desc_fn(lang)
         elif self._desc_literal is not None:
             embed.description = self._desc_literal
         for name_key, name_kwargs, value, value_kwargs, inline in self._fields:
