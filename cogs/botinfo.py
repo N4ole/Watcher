@@ -1,12 +1,11 @@
 """Commande `botinfo` : informations générales sur le bot."""
 from datetime import datetime, timezone
 
-import discord
 from discord.ext import commands
 
 import config
+from utils import replies
 from utils.duration import human
-from utils.i18n import t
 
 
 class BotInfo(commands.Cog):
@@ -23,33 +22,23 @@ class BotInfo(commands.Cog):
         uptime = datetime.now(timezone.utc) - self.bot.start_time
         members = sum((g.member_count or 0) for g in self.bot.guilds)
 
-        embed = discord.Embed(
-            title="🤖 Watcher",
-            description=t(ctx, "bi.desc"),
-            color=discord.Color.blurple(),
+        spec = (
+            replies.Embed("info")
+            .title_text("🤖 Watcher")
+            .desc("bi.desc")
+            .thumbnail(self.bot.user.display_avatar.url if self.bot.user else None)
         )
-        if self.bot.user:
-            embed.set_thumbnail(url=self.bot.user.display_avatar.url)
-        version = t(ctx, "bi.version_val", version=config.VERSION) \
-            if config.BETA else config.VERSION
-        embed.add_field(name=t(ctx, "bi.version"), value=version, inline=True)
-        embed.add_field(
-            name=t(ctx, "bi.servers"), value=str(len(self.bot.guilds)), inline=True
-        )
-        embed.add_field(name=t(ctx, "f.members"), value=str(members), inline=True)
-        embed.add_field(
-            name=t(ctx, "bi.ping"),
-            value=f"{round(self.bot.latency * 1000)} ms", inline=True,
-        )
-        embed.add_field(name=t(ctx, "bi.uptime"), value=human(uptime), inline=True)
-        embed.add_field(
-            name=t(ctx, "bi.commands"), value=str(len(self.bot.commands)),
-            inline=True,
-        )
-        embed.add_field(
-            name=t(ctx, "bi.prefix"), value=f"`{config.PREFIX}`", inline=True
-        )
-        await ctx.send(embed=embed)
+        if config.BETA:
+            spec.field_t("bi.version", "bi.version_val", version=config.VERSION)
+        else:
+            spec.field("bi.version", config.VERSION)
+        spec.field("bi.servers", str(len(self.bot.guilds)))
+        spec.field("f.members", str(members))
+        spec.field("bi.ping", f"{round(self.bot.latency * 1000)} ms")
+        spec.field("bi.uptime", human(uptime))
+        spec.field("bi.commands", str(len(self.bot.commands)))
+        spec.field("bi.prefix", f"`{config.PREFIX}`")
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:

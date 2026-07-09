@@ -54,6 +54,7 @@ class Embed:
         self.kind = kind
         self.color = color
         self._title: tuple | None = None
+        self._title_literal: str | None = None
         self._desc: tuple | None = None
         self._desc_literal: str | None = None
         self._fields: list[tuple] = []
@@ -64,6 +65,11 @@ class Embed:
 
     def title(self, key: str, **kwargs) -> "Embed":
         self._title = (key, kwargs)
+        return self
+
+    def title_text(self, text: str) -> "Embed":
+        """Titre littéral (donnée, non traduit — ex. nom du bot/serveur)."""
+        self._title_literal = text
         return self
 
     def desc(self, key: str, **kwargs) -> "Embed":
@@ -119,6 +125,8 @@ class Embed:
         embed = discord.Embed(color=color, timestamp=self._timestamp)
         if self._title:
             embed.title = t_lang(lang, self._title[0], **self._title[1])
+        elif self._title_literal is not None:
+            embed.title = self._title_literal
         if self._desc:
             embed.description = t_lang(lang, self._desc[0], **self._desc[1])
         elif self._desc_literal is not None:
