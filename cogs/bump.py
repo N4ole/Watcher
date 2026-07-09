@@ -26,6 +26,7 @@ COOLDOWN = 6 * 3600  # 6 heures, en secondes
 K_ENABLED = "bump_enabled"
 K_CHANNEL = "bump_channel"
 K_LAST = "bump_last"
+K_COUNT = "bump_count"  # total de bumps du serveur (compteur persistant)
 
 _ON = {"on", "activer", "enable", "true", "1"}
 _OFF = {"off", "désactiver", "desactiver", "disable", "false", "0"}
@@ -151,25 +152,54 @@ class Bump(commands.Cog):
                 t(ctx, "toggle.usage", name="bumpenable")))
 
     # ------------------------------------------------------------------ #
-    # Bump
+    # Bump — rendu de la publicité
     # ------------------------------------------------------------------ #
-    def _ad_embed(self, guild: discord.Guild, invite: str | None) -> discord.Embed:
+    def _bot_invite(self) -> str:
+        """Lien d'ajout du bot (bouton « Ajouter le bot »)."""
+        return discord.utils.oauth_url(
+            self.bot.user.id, scopes=("bot", "applications.commands")
+        )
+
+    def _ad_embed(
+        self, source: discord.Guild, dest: discord.Guild,
+        author: discord.abc.User, bump_count: int, when,
+    ) -> discord.Embed:
+        """Embed de pub, traduit dans la langue du serveur destinataire (`dest`).
+
+        Les données décrivent le serveur `source` (celui qui bump) ; les
+        libellés sont dans la langue de `dest` (i18n par serveur).
+        """
         embed = discord.Embed(
-            title=f"📢 {guild.name}",
-            description=guild.description or t(guild, "bump.ad_no_desc"),
+            title=t(dest, "bump.ad_title", server=source.name),
+            description=source.description or t(dest, "bump.ad_no_desc"),
             color=discord.Color.blurple(),
+            timestamp=when,
         )
-        if guild.icon:
-            embed.set_thumbnail(url=guild.icon.url)
-        embed.add_field(
-            name=t(guild, "bump.ad_members"),
-            value=str(guild.member_count or 0), inline=True,
-        )
-        if invite:
-            embed.add_field(name=t(guild, "bump.ad_invite"),
-                            value=invite, inline=False)
-        embed.set_footer(text=t(guild, "bump.ad_footer"))
+        if source.icon:
+            embed.set_thumbnail(url=source.icon.url)
+        embed.add_field(name=t(dest, "bump.f_id"),
+                        value=f"`{source.id}`", inline=True)
+        embed.add_field(name=t(dest, "bump.f_members"),
+                        value=f"**{source.member_count or 0}**", inline=True)
+        embed.add_field(name=t(dest, "bump.f_bumps"),
+                        value=f"**{bump_count}**", inline=True)
+        embed.add_field(name=t(dest, "bump.f_by"),
+                        value=f"{author.mention} (`{author}`)", inline=False)
+        embed.set_footer(text=t(dest, "bump.ad_footer"))
         return embed
+
+    def _ad_view(self, dest: discord.Guild, invite: str) -> discord.ui.View:
+        """Boutons « Rejoindre le serveur » et « Ajouter le bot » (liens)."""
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(
+            label=t(dest, "bump.btn_join"), emoji="🚀",
+            style=discord.ButtonStyle.link, url=invite,
+        ))
+        view.add_item(discord.ui.Button(
+            label=t(dest, "bump.btn_addbot"), emoji="⭐",
+            style=discord.ButtonStyle.link, url=self._bot_invite(),
+        ))
+        return view
 
     @commands.hybrid_command(
         name="bump",
@@ -196,10 +226,20 @@ class Bump(commands.Cog):
             return
 
         await ctx.defer()
-        invite = await _resolve_invite(ctx.guild)
-        ad = self._ad_embed(ctx.guild, invite)
 
-        # Diffuse aux autres serveurs participants.
+        # Invitation du serveur source (permanente si possible, sinon créée).
+        # Sans invitation, la pub n'a pas de carte ni de bouton : on abandonne.
+        invite = await _resolve_invite(ctx.guild)
+        if invite is None:
+            await ctx.send(embed=embeds.error(t(ctx, "bump.no_invite")))
+            return
+
+        # Compteur de bumps du serveur (persistant), incrémenté à ce bump.
+        bump_count = int(storage.get_setting(ctx.guild.id, K_COUNT, 0) or 0) + 1
+        storage.set_setting(ctx.guild.id, K_COUNT, bump_count)
+        now = discord.utils.utcnow()
+
+        # Diffuse aux autres serveurs participants (dans leur langue).
         sent = 0
         for guild in self.bot.guilds:
             if guild.id == ctx.guild.id:
@@ -214,20 +254,29 @@ class Bump(commands.Cog):
             if not channel.permissions_for(guild.me).send_messages:
                 continue
             try:
-                await channel.send(embed=ad)
+                # `content=invite` : Discord déplie la carte d'invitation
+                # (aperçu du serveur + bouton Rejoindre) ; l'embed suit dessous.
+                await channel.send(
+                    content=invite,
+                    embed=self._ad_embed(ctx.guild, guild, ctx.author,
+                                         bump_count, now),
+                    view=self._ad_view(guild, invite),
+                )
                 sent += 1
             except discord.HTTPException:
                 continue
 
         # Cooldown consommé une fois le bump effectué.
         storage.set_setting(ctx.guild.id, K_LAST, time.time())
-        log.info("Bump de %s (%s) par %s — %d serveur(s) touché(s)",
-                 ctx.guild.name, ctx.guild.id, ctx.author, sent)
+        log.info("Bump de %s (%s) par %s — %d serveur(s) touché(s), total %d",
+                 ctx.guild.name, ctx.guild.id, ctx.author, sent, bump_count)
 
         if sent:
-            await ctx.send(embed=embeds.success(t(ctx, "bump.done", count=sent)))
+            await ctx.send(embed=embeds.success(
+                t(ctx, "bump.done", count=sent, total=bump_count)))
         else:
-            await ctx.send(embed=embeds.info(t(ctx, "bump.done_none")))
+            await ctx.send(embed=embeds.info(
+                t(ctx, "bump.done_none", total=bump_count)))
 
 
 async def setup(bot: commands.Bot) -> None:

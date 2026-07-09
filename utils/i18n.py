@@ -288,18 +288,36 @@ _CATALOG: dict[str, dict[str, str]] = {
         "fr": "⏳ Bump déjà effectué récemment. Réessaie dans **{time}**.",
         "en": "⏳ Bump already done recently. Try again in **{time}**.",
     },
+    "bump.no_invite": {
+        "fr": "❌ Je n'ai pas pu créer d'invitation. Donne-moi la permission "
+              "**Créer une invitation** puis réessaie.",
+        "en": "❌ I couldn't create an invite. Grant me the **Create Invite** "
+              "permission and try again.",
+    },
     "bump.done": {
-        "fr": "📢 Serveur bumpé auprès de **{count}** serveur(s) participant(s) !",
-        "en": "📢 Server bumped to **{count}** participating server(s)!",
+        "fr": "📢 Serveur bumpé auprès de **{count}** serveur(s) participant(s) ! "
+              "(total : {total} bumps)",
+        "en": "📢 Server bumped to **{count}** participating server(s)! "
+              "(total: {total} bumps)",
     },
     "bump.done_none": {
-        "fr": "📢 Bump effectué, mais aucun autre serveur participant pour "
-              "l'instant.",
-        "en": "📢 Bump done, but no other participating server for now.",
+        "fr": "📢 Bump effectué (total : {total} bumps), mais aucun autre "
+              "serveur participant pour l'instant.",
+        "en": "📢 Bump done (total: {total} bumps), but no other participating "
+              "server for now.",
     },
-    "bump.ad_no_desc": {"fr": "*(aucune description)*", "en": "*(no description)*"},
-    "bump.ad_members": {"fr": "Membres", "en": "Members"},
-    "bump.ad_invite": {"fr": "Rejoindre", "en": "Join"},
+    # Publicité (embed diffusé) — libellés dans la langue du serveur receveur.
+    "bump.ad_title": {
+        "fr": "🎉 Le serveur {server} a été bump !",
+        "en": "🎉 The server {server} has been bumped!",
+    },
+    "bump.ad_no_desc": {"fr": "Aucune description.", "en": "No description."},
+    "bump.f_id": {"fr": "🆔 ID du serveur", "en": "🆔 Server ID"},
+    "bump.f_members": {"fr": "👥 Membres", "en": "👥 Members"},
+    "bump.f_bumps": {"fr": "📊 Total de bumps", "en": "📊 Total bumps"},
+    "bump.f_by": {"fr": "🙋 Bumpé par", "en": "🙋 Bumped by"},
+    "bump.btn_join": {"fr": "Rejoindre le serveur", "en": "Join the server"},
+    "bump.btn_addbot": {"fr": "Ajouter le bot", "en": "Add the bot"},
     "bump.ad_footer": {"fr": "Publicité via le système de bump de Watcher",
                        "en": "Ad via Watcher's bump system"},
     # --- Tickets ---
