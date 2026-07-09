@@ -1,9 +1,8 @@
 """Commande `status` : version, ping, nombre de serveurs et mode debug."""
-import discord
 from discord.ext import commands
 
 import config
-from utils.i18n import t
+from utils import replies
 
 
 class Status(commands.Cog):
@@ -17,21 +16,14 @@ class Status(commands.Cog):
         description="Version, ping et nombre de serveurs.",
     )
     async def status(self, ctx: commands.Context) -> None:
-        embed = discord.Embed(
-            title=t(ctx, "st.title"),
-            color=discord.Color.blurple(),
-        )
-        version = t(ctx, "bi.version_val", version=config.VERSION) \
-            if config.BETA else config.VERSION
-        embed.add_field(name=t(ctx, "bi.version"), value=version, inline=True)
-        embed.add_field(
-            name=t(ctx, "bi.ping"),
-            value=f"{round(self.bot.latency * 1000)} ms", inline=True,
-        )
-        embed.add_field(
-            name=t(ctx, "bi.servers"), value=str(len(self.bot.guilds)), inline=True
-        )
-        await ctx.send(embed=embed)
+        spec = replies.Embed("info").title("st.title")
+        if config.BETA:
+            spec.field_t("bi.version", "bi.version_val", version=config.VERSION)
+        else:
+            spec.field("bi.version", config.VERSION)
+        spec.field("bi.ping", f"{round(self.bot.latency * 1000)} ms")
+        spec.field("bi.servers", str(len(self.bot.guilds)))
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:

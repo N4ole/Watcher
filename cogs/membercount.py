@@ -1,8 +1,7 @@
 """Commande `membercount` : nombre de membres du serveur."""
-import discord
 from discord.ext import commands
 
-from utils.i18n import t
+from utils import replies
 
 
 class MemberCount(commands.Cog):
@@ -20,13 +19,10 @@ class MemberCount(commands.Cog):
         guild = ctx.guild
         bots = sum(1 for m in guild.members if m.bot)
         humans = (guild.member_count or 0) - bots
-        embed = discord.Embed(
-            title=t(ctx, "mc.title"),
-            description=t(ctx, "mc.desc", total=guild.member_count,
-                          humans=humans, bots=bots),
-            color=discord.Color.green(),
+        await replies.reply(
+            ctx, "mc.desc", kind="success", title_key="mc.title",
+            total=guild.member_count, humans=humans, bots=bots,
         )
-        await ctx.send(embed=embed)
 
 
 async def setup(bot: commands.Bot) -> None:

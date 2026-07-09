@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from utils.i18n import t
+from utils import replies
 
 
 def _format_uptime(delta) -> str:
@@ -35,17 +35,15 @@ class Uptime(commands.Cog):
     )
     async def uptime(self, ctx: commands.Context) -> None:
         delta = datetime.now(timezone.utc) - self.bot.start_time
-        embed = discord.Embed(
-            title=t(ctx, "uptime.title"),
-            description=t(ctx, "uptime.desc", duration=_format_uptime(delta)),
-            color=discord.Color.green(),
+        spec = (
+            replies.Embed("success")
+            .title("uptime.title")
+            .desc("uptime.desc", duration=_format_uptime(delta))
+            .field("uptime.started",
+                   discord.utils.format_dt(self.bot.start_time, style="F"),
+                   inline=False)
         )
-        embed.add_field(
-            name=t(ctx, "uptime.started"),
-            value=discord.utils.format_dt(self.bot.start_time, style="F"),
-            inline=False,
-        )
-        await ctx.send(embed=embed)
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:

@@ -1,9 +1,8 @@
 """Commande admin `protections` : état de toutes les protections du serveur."""
-import discord
 from discord.ext import commands
 
-from utils import checks, storage
-from utils.i18n import t
+from utils import checks, replies, storage
+from utils.i18n import t_lang
 
 # Protections activables via commande (clé de réglage -> clé de libellé i18n).
 _TOGGLES = {
@@ -27,27 +26,27 @@ class Protections(commands.Cog):
     )
     @checks.admin()
     async def protections(self, ctx: commands.Context) -> None:
-        embed = discord.Embed(
-            title=t(ctx, "prot.title"),
-            color=discord.Color.blurple(),
-        )
+        # État figé des réglages ; les libellés se traduisent à la volée.
+        states = {
+            key: storage.get_setting(ctx.guild.id, key, False)
+            for key in _TOGGLES
+        }
 
-        lines = []
-        for key, label_key in _TOGGLES.items():
-            active = storage.get_setting(ctx.guild.id, key, False)
-            state = t(ctx, "prot.on") if active else t(ctx, "prot.off")
-            lines.append(f"{t(ctx, label_key)} : **{state}**")
-        embed.add_field(
-            name=t(ctx, "prot.toggleable"), value="\n".join(lines), inline=False
-        )
+        def toggle_lines(lang: str) -> str:
+            out = []
+            for key, label_key in _TOGGLES.items():
+                state = t_lang(lang, "prot.on" if states[key] else "prot.off")
+                out.append(f"{t_lang(lang, label_key)} : **{state}**")
+            return "\n".join(out)
 
-        embed.add_field(
-            name=t(ctx, "prot.always"),
-            value=t(ctx, "prot.always_val"),
-            inline=False,
+        spec = (
+            replies.Embed("info")
+            .title("prot.title")
+            .field_fn("prot.toggleable", toggle_lines, inline=False)
+            .field_t("prot.always", "prot.always_val", inline=False)
+            .footer("prot.footer")
         )
-        embed.set_footer(text=t(ctx, "prot.footer"))
-        await ctx.send(embed=embed)
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:

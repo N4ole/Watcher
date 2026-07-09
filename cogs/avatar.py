@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 
-from utils.i18n import t
+from utils import replies
 
 
 class Avatar(commands.Cog):
@@ -30,14 +30,14 @@ class Avatar(commands.Cog):
             for fmt in formats
         )
 
-        embed = discord.Embed(
-            title=t(ctx, "avatar.title", user=member),
-            description=links,
-            color=discord.Color.blurple(),
+        spec = (
+            replies.Embed("info")
+            .title("avatar.title", user=str(member))
+            .desc_text(links)
+            .image(avatar.url)
+            .footer("f.requested_by", user=str(ctx.author))
         )
-        embed.set_image(url=avatar.url)
-        embed.set_footer(text=t(ctx, "f.requested_by", user=ctx.author))
-        await ctx.send(embed=embed)
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:
