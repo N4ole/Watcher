@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from utils import checks, storage
-from utils.i18n import t
+from utils import checks, replies, storage
+from utils.i18n import t_lang
 
 _LABEL_KEYS = {
     "warn": "us.warns_label",
@@ -38,15 +38,16 @@ def _fmt_duration(seconds: float) -> str:
     return " ".join(parts)
 
 
+def _label(lang: str, action_type: str) -> str:
+    key = _LABEL_KEYS.get(action_type)
+    return t_lang(lang, key) if key else action_type
+
+
 class UserStatus(commands.Cog):
     """Récapitulatif des actions de modération reçues par un utilisateur."""
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-
-    def _label(self, ctx, action_type: str) -> str:
-        key = _LABEL_KEYS.get(action_type)
-        return t(ctx, key) if key else action_type
 
     @commands.hybrid_command(
         name="userstatus",
@@ -57,33 +58,33 @@ class UserStatus(commands.Cog):
         self, ctx: commands.Context, member: discord.Member
     ) -> None:
         actions = storage.get_modlog(ctx.guild.id, member.id)
-
-        embed = discord.Embed(
-            title=t(ctx, "us.title", user=member),
-            color=discord.Color.orange(),
-        )
-        embed.set_thumbnail(url=member.display_avatar.url)
-
-        # État actuel.
         warns = storage.get_warns(ctx.guild.id, member.id)
-        etats = [t(ctx, "us.warns_now", count=warns)]
-        if member.timed_out_until is not None and (
-            member.timed_out_until > datetime.now(timezone.utc)
-        ):
-            etats.append(
-                t(ctx, "us.muted_until")
-                + discord.utils.format_dt(member.timed_out_until, style="R")
-            )
+        muted_until = (
+            member.timed_out_until
+            if member.timed_out_until is not None
+            and member.timed_out_until > datetime.now(timezone.utc)
+            else None
+        )
         confined = any(
             uid == member.id
             for gid, uid, _ in storage.get_confinements()
             if gid == ctx.guild.id
         )
-        if confined:
-            etats.append(t(ctx, "us.confined_now"))
-        embed.add_field(
-            name=t(ctx, "us.current"), value="\n".join(etats), inline=False
-        )
+
+        spec = replies.Embed("warn", color=discord.Color.orange())
+        spec.title("us.title", user=str(member))
+        spec.thumbnail(member.display_avatar.url)
+
+        # État actuel (traduit à la volée).
+        def current(lang: str) -> str:
+            etats = [t_lang(lang, "us.warns_now", count=warns)]
+            if muted_until is not None:
+                etats.append(t_lang(lang, "us.muted_until")
+                             + discord.utils.format_dt(muted_until, style="R"))
+            if confined:
+                etats.append(t_lang(lang, "us.confined_now"))
+            return "\n".join(etats)
+        spec.field_fn("us.current", current, inline=False)
 
         # Compteurs par type + durée totale de mute.
         counts: dict[str, int] = {}
@@ -93,43 +94,43 @@ class UserStatus(commands.Cog):
             if action["type"] == "mute" and action.get("duration"):
                 total_mute += action["duration"]
 
-        if counts:
+        def totals(lang: str) -> str:
+            if not counts:
+                return t_lang(lang, "us.no_sanction")
             summary = "\n".join(
-                f"{self._label(ctx, typ)} : **{n}**"
+                f"{_label(lang, typ)} : **{n}**"
                 for typ, n in sorted(counts.items())
             )
             if total_mute:
-                summary += "\n" + t(ctx, "us.mute_time",
-                                    duration=_fmt_duration(total_mute))
-            embed.add_field(name=t(ctx, "us.total"), value=summary, inline=False)
-        else:
-            embed.add_field(
-                name=t(ctx, "us.total"), value=t(ctx, "us.no_sanction"),
-                inline=False,
-            )
+                summary += "\n" + t_lang(lang, "us.mute_time",
+                                         duration=_fmt_duration(total_mute))
+            return summary
+        spec.field_fn("us.total", totals, inline=False)
 
         # Détail des dernières actions (10 max).
         if actions:
-            lines = []
-            for action in actions[-10:]:
-                ts = discord.utils.format_dt(
-                    datetime.fromtimestamp(action["ts"], tz=timezone.utc),
-                    style="f",
-                )
-                label = self._label(ctx, action["type"]).split(" ", 1)[-1]
-                extra = f" — {action['detail']}" if action.get("detail") else ""
-                if action.get("duration"):
-                    extra += f" ({_fmt_duration(action['duration'])})"
-                mod = (
-                    f" {t(ctx, 'us.by')} <@{action['moderator']}>"
-                    if action.get("moderator") else ""
-                )
-                lines.append(f"• {ts} — {label}{extra}{mod}")
-            embed.add_field(
-                name=t(ctx, "us.recent"), value="\n".join(lines), inline=False
-            )
+            recent = actions[-10:]
 
-        # Notes de dossier (libres, ajoutées via la commande `note`).
+            def recent_lines(lang: str) -> str:
+                lines = []
+                for action in recent:
+                    ts = discord.utils.format_dt(
+                        datetime.fromtimestamp(action["ts"], tz=timezone.utc),
+                        style="f",
+                    )
+                    label = _label(lang, action["type"]).split(" ", 1)[-1]
+                    extra = f" — {action['detail']}" if action.get("detail") else ""
+                    if action.get("duration"):
+                        extra += f" ({_fmt_duration(action['duration'])})"
+                    mod = (
+                        f" {t_lang(lang, 'us.by')} <@{action['moderator']}>"
+                        if action.get("moderator") else ""
+                    )
+                    lines.append(f"• {ts} — {label}{extra}{mod}")
+                return "\n".join(lines)
+            spec.field_fn("us.recent", recent_lines, inline=False)
+
+        # Notes de dossier (texte libre : donnée non traduite).
         notes = storage.get_notes(ctx.guild.id, member.id)
         if notes:
             note_lines = []
@@ -142,13 +143,12 @@ class UserStatus(commands.Cog):
                     f" — <@{note['moderator']}>" if note.get("moderator") else ""
                 )
                 note_lines.append(f"**{i}.** {note['text']} ({ts}{mod})")
-            # L'embed limite un champ à 1024 caractères : on tronque au besoin.
             value = "\n".join(note_lines)
             if len(value) > 1024:
                 value = value[:1013] + "\n…"
-            embed.add_field(name=t(ctx, "us.notes"), value=value, inline=False)
+            spec.field("us.notes", value, inline=False)
 
-        await ctx.send(embed=embed)
+        await replies.reply_rich(ctx, spec)
 
 
 async def setup(bot: commands.Bot) -> None:
