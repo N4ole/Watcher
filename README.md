@@ -74,8 +74,10 @@ Documentation détaillée dans [`docs/`](docs/README.md), sur trois axes :
 - **Par catégorie** — [`docs/categories/`](docs/categories/README.md)
 - **Par système** — [`docs/systems/`](docs/systems/README.md)
 
-Régénérer les fiches par commande/catégorie après un changement :
-`python -m scripts.gen_docs`.
+Régénérer après un changement de commandes :
+- fiches par commande/catégorie : `python -m scripts.gen_docs` ;
+- [`commande.json`](commande.json) (liste des commandes avec description et
+  arguments) : `python -m scripts.gen_commands`.
 
 Le bot est **bilingue** : `langue <fr/en>` change la langue **par serveur** ;
 les messages passent par le catalogue centralisé

@@ -36,7 +36,8 @@ bot** (dont blacklist de serveurs).
 - **Persistance** : fichiers **JSON** par domaine (pas de base de données),
   un `Lock` par fichier, écritures **atomiques** (`os.replace`).
 - **Config** : `.env` via `python-dotenv` (`config.py`).
-- **Docs générées** : `scripts/gen_docs.py`.
+- **Docs générées** : `scripts/gen_docs.py` (fiches Markdown) et
+  `scripts/gen_commands.py` (`commande.json` : liste des commandes).
 
 ## 3. Architecture
 
@@ -52,7 +53,8 @@ cogs/owner/        Commandes réservées aux owners du bot (préfixe seul,
                    masquées du help public).
 utils/             Modules partagés (voir §5).
 web/               Panel aiohttp + OAuth2 + console live.
-scripts/           gen_docs.py (génération de la documentation).
+scripts/           gen_docs.py (docs Markdown), gen_commands.py
+                   (commande.json).
 docs/              AUDIT.md, OAUTH_SETUP.md + docs générées.
 data/              JSON runtime (gitignored : data/*.json).
 logs/              Journaux fichiers (gitignored).
