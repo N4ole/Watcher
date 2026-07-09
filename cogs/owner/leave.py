@@ -4,8 +4,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from utils import checks, embeds
-from utils.i18n import t
+from utils import checks, replies
 
 log = logging.getLogger("action")
 
@@ -23,31 +22,32 @@ class Leave(commands.Cog):
     @checks.is_owner()
     async def leave(self, ctx: commands.Context, guild_id: str) -> None:
         if not guild_id.isdigit():
-            await ctx.send(embed=embeds.error(t(ctx, "leave.bad_id")))
+            await replies.reply(ctx, "leave.bad_id", kind="error")
             return
         guild = self.bot.get_guild(int(guild_id))
         if guild is None:
-            await ctx.send(embed=embeds.error(t(ctx, "leave.not_found")))
+            await replies.reply(ctx, "leave.not_found", kind="error")
             return
         name = guild.name
         try:
             await guild.leave()
         except discord.HTTPException as exc:
-            await ctx.send(embed=embeds.error(t(ctx, "leave.failed", error=exc)))
+            await replies.reply(ctx, "leave.failed", kind="error",
+                                error=str(exc))
             return
         log.info("Bot retiré du serveur %s (%s) par %s", name, guild_id,
                  ctx.author)
-        await ctx.send(embed=embeds.success(
-            t(ctx, "leave.done", name=name, id=guild_id)))
+        await replies.reply(ctx, "leave.done", kind="success",
+                            name=name, id=guild_id)
 
     @leave.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.CheckFailure):
-            await ctx.send(embed=embeds.error(t(ctx, "error.owner_only")))
+            await replies.reply(ctx, "error.owner_only", kind="error")
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(embed=embeds.error(t(ctx, "leave.usage")))
+            await replies.reply(ctx, "leave.usage", kind="error")
         else:
-            await ctx.send(embed=embeds.error(t(ctx, "error.generic")))
+            await replies.reply(ctx, "error.generic", kind="error")
 
 
 async def setup(bot: commands.Bot) -> None:

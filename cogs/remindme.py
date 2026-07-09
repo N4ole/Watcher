@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from utils import embeds, storage
+from utils import replies, storage
 from utils.duration import human, parse_duration
 from utils.i18n import t
 
@@ -39,18 +39,19 @@ class RemindMe(commands.Cog):
         user = self.bot.get_user(reminder["user_id"]) or None
         channel = self.bot.get_channel(reminder["channel_id"])
         source = getattr(channel, "guild", None)
-        text = t(source, "remind.fire", message=reminder["message"])
-        sent = False
+        sent = None
         if user is not None:
+            sent = await replies.reply_dm(
+                user, source, "remind.fire", kind="info",
+                message=reminder["message"],
+            )
+        # Repli sur le salon d'origine (avec ping) si le MP échoue.
+        if sent is None and channel is not None:
             try:
-                await user.send(text)
-                sent = True
-            except discord.HTTPException:
-                sent = False
-        # Repli sur le salon d'origine si le MP échoue.
-        if not sent and channel is not None:
-            try:
-                await channel.send(f"<@{reminder['user_id']}> {text}")
+                await channel.send(
+                    f"<@{reminder['user_id']}> "
+                    + t(source, "remind.fire", message=reminder["message"])
+                )
             except discord.HTTPException:
                 pass
         storage.remove_reminder(reminder["id"])
@@ -64,7 +65,7 @@ class RemindMe(commands.Cog):
     ) -> None:
         delta = parse_duration(temps)
         if delta is None:
-            await ctx.send(embed=embeds.error(t(ctx, "remind.bad_duration")))
+            await replies.reply(ctx, "remind.bad_duration", kind="error")
             return
 
         due = datetime.now(timezone.utc) + delta
@@ -72,15 +73,15 @@ class RemindMe(commands.Cog):
             ctx.author.id, ctx.channel.id, message, due.timestamp()
         )
         self.bot.loop.create_task(self._schedule(reminder))
-        await ctx.send(embed=embeds.success(
-            t(ctx, "remind.set", duration=human(delta),
-              when=discord.utils.format_dt(due, style="R"))
-        ))
+        await replies.reply(
+            ctx, "remind.set", kind="success", duration=human(delta),
+            when=discord.utils.format_dt(due, style="R"),
+        )
 
     @remindme.error
     async def _error(self, ctx: commands.Context, error) -> None:
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(embed=embeds.error(t(ctx, "remind.usage")))
+            await replies.reply(ctx, "remind.usage", kind="error")
         else:
             # Repli : jamais d'erreur silencieuse pour l'utilisateur
             # (errorreport prévient déjà les owners avec la traceback).

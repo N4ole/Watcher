@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from utils import badwords, checks
-from utils import appchoices, embeds, storage
+from utils import appchoices, replies, storage
 from utils.i18n import t
 
 log = logging.getLogger("action")
@@ -31,13 +31,13 @@ class AntiInsulte(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antiinsulte", True)
-            await ctx.send(embed=embeds.success(t(ctx, "antiinsulte.on")))
+            await replies.reply(ctx, "antiinsulte.on", kind="success")
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antiinsulte", False)
-            await ctx.send(embed=embeds.info(t(ctx, "antiinsulte.off")))
+            await replies.reply(ctx, "antiinsulte.off", kind="info")
         else:
-            await ctx.send(embed=embeds.error(
-                t(ctx, "toggle.usage", name="antiinsulte")))
+            await replies.reply(ctx, "toggle.usage", kind="error",
+                                name="antiinsulte")
 
     async def _handle(self, message: discord.Message) -> None:
         if message.author.bot or message.guild is None:

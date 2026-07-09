@@ -216,9 +216,36 @@ if checks.is_admin(message.author):   # exemption admins
 
 Tout texte affiché passe par `t(source, "clef", **kwargs)`. Ajouter une
 chaîne = entrée `{"fr": ..., "en": ...}` dans `_CATALOG` (`utils/i18n.py`).
-Langue résolue **par serveur** (réglage `lang`) et **par compte** côté web.
+Langue résolue **par serveur** (réglage `lang`, français par défaut) et **par
+compte** côté web. `t_lang(lang, clef, **kwargs)` force une langue précise.
 Les descriptions de commandes du help sont traduites via `cmddesc.<nom>`
 (repli sur la description du décorateur).
+
+### 7 bis. Réponses traduisibles (bouton de traduction, IMPORTANT)
+
+**`utils/replies.py` est le point d'entrée centralisé des réponses du bot.**
+Au lieu de `ctx.send(embed=embeds.success(t(ctx, "clef")))`, on écrit :
+
+```python
+from utils import replies
+await replies.reply(ctx, "clef", kind="success", **kwargs)   # salon
+await replies.reply_dm(user, guild, "clef", kind="info", **kwargs)  # MP
+```
+
+- `reply()` rend un embed dans la langue **par défaut du serveur** et attache
+  un **bouton de traduction** (`TranslateView`). Un clic bascule le message
+  fr⇄en **en place** (édition, pas de nouveau message) ; le bouton affiche le
+  drapeau de l'**autre** langue (message fr → 🇬🇧 ; message en → 🇫🇷).
+- La traduction reconstruit l'embed à partir de la **clé i18n** (+ kwargs) via
+  `t_lang` : toute commande passant par `reply()` a le bouton **automatiquement**.
+- `kind` ∈ `success|error|info|warn|fun` (couleur). `title_key` pour un titre
+  traduit. Le **gestionnaire d'erreurs global** (`cogs/errors.py`) utilise
+  `reply()` → tous les messages d'erreur ont le bouton.
+- `langue <fr/en>` ne fait que **définir la langue par défaut du serveur**
+  (persistée) ; elle ne traduit pas un message précis — c'est le rôle du bouton.
+- Les embeds **riches multi-champs** (userinfo, help, serverinfo, botinfo, la
+  pub `bump`…) gardent leur mise en page dédiée ; ils peuvent adopter le
+  système via une vue de traduction spécifique si besoin.
 
 ## 8. Journalisation
 

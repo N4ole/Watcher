@@ -1501,17 +1501,32 @@ def _resolve_lang(source) -> str:
     return lang if lang in LANGS else DEFAULT
 
 
-def t(source, key: str, **kwargs) -> str:
-    """Traduit `key` selon la langue de `source`, avec formatage `kwargs`."""
+def t_lang(lang: str, key: str, **kwargs) -> str:
+    """Traduit `key` dans une langue explicite ('fr'/'en'), formatage `kwargs`.
+
+    Utilisé par le système de bouton de traduction, qui doit rendre un même
+    message dans une langue précise indépendamment du serveur.
+    """
+    if lang not in LANGS:
+        lang = DEFAULT
     entry = _CATALOG.get(key)
     if entry is None:
         return key
-    lang = _resolve_lang(source)
     template = entry.get(lang) or entry.get(DEFAULT) or key
     try:
         return template.format(**kwargs) if kwargs else template
     except (KeyError, IndexError):
         return template
+
+
+def t(source, key: str, **kwargs) -> str:
+    """Traduit `key` selon la langue de `source`, avec formatage `kwargs`."""
+    return t_lang(_resolve_lang(source), key, **kwargs)
+
+
+def other_lang(lang: str) -> str:
+    """Renvoie l'autre langue (fr <-> en)."""
+    return "en" if lang == "fr" else "fr"
 
 
 def get_lang(source) -> str:

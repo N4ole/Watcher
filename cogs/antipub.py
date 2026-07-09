@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import appchoices, checks, embeds, storage
+from utils import appchoices, checks, replies, storage
 from utils.i18n import t
 
 log = logging.getLogger("action")
@@ -39,13 +39,12 @@ class AntiPub(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antipub", True)
-            await ctx.send(embed=embeds.success(t(ctx, "antipub.on")))
+            await replies.reply(ctx, "antipub.on", kind="success")
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antipub", False)
-            await ctx.send(embed=embeds.info(t(ctx, "antipub.off")))
+            await replies.reply(ctx, "antipub.off", kind="info")
         else:
-            await ctx.send(embed=embeds.error(
-                t(ctx, "toggle.usage", name="antipub")))
+            await replies.reply(ctx, "toggle.usage", kind="error", name="antipub")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:

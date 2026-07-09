@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import discord
 from discord.ext import commands
 
-from utils import checks, embeds, storage
+from utils import checks, replies, storage
 from utils.i18n import t
 
 log = logging.getLogger(__name__)
@@ -189,13 +189,12 @@ class Confine(commands.Cog):
         await ctx.defer()
         channel = await self.apply_confinement(ctx.guild, member)
         if channel is None:
-            await ctx.send(embed=embeds.warn(
-                t(ctx, "confine.already", user=member.mention)))
+            await replies.reply(ctx, "confine.already", kind="warn",
+                                user=member.mention)
             return
         storage.add_modlog(ctx.guild.id, member.id, "confine", ctx.author.id)
-        await ctx.send(embed=embeds.success(
-            t(ctx, "confine.done", user=member.mention, channel=channel.mention)
-        ))
+        await replies.reply(ctx, "confine.done", kind="success",
+                            user=member.mention, channel=channel.mention)
 
     @commands.hybrid_command(
         name="unconfine",
@@ -210,8 +209,8 @@ class Confine(commands.Cog):
         removed = await self.remove_confinement(ctx.guild, member)
         if removed:
             storage.add_modlog(ctx.guild.id, member.id, "unconfine", ctx.author.id)
-        await ctx.send(embed=embeds.success(
-            t(ctx, "unconfine.done", user=member.mention)))
+        await replies.reply(ctx, "unconfine.done", kind="success",
+                            user=member.mention)
 
 
 async def setup(bot: commands.Bot) -> None:

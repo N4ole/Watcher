@@ -13,7 +13,7 @@ import logging
 from discord.ext import commands
 
 import config
-from utils import checks
+from utils import checks, replies
 from utils.i18n import t
 
 log = logging.getLogger(__name__)
@@ -46,38 +46,40 @@ class Errors(commands.Cog):
             return
 
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send(t(ctx, "error.missing_perms",
-                             perms=_perms(ctx, error.missing_permissions)))
+            await replies.reply(ctx, "error.missing_perms", kind="error",
+                                 perms=_perms(ctx, error.missing_permissions))
         elif isinstance(error, commands.BotMissingPermissions):
-            await ctx.send(t(ctx, "error.bot_missing_perms",
-                             perms=_perms(ctx, error.missing_permissions)))
+            await replies.reply(ctx, "error.bot_missing_perms", kind="error",
+                                 perms=_perms(ctx, error.missing_permissions))
         elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send(t(ctx, "error.no_dm"))
+            await replies.reply(ctx, "error.no_dm", kind="error")
         elif isinstance(error, commands.PrivateMessageOnly):
-            await ctx.send(t(ctx, "error.dm_only"))
+            await replies.reply(ctx, "error.dm_only", kind="error")
         elif isinstance(error, checks.OwnerOnly):
-            await ctx.send(t(ctx, "error.owner_only"))
+            await replies.reply(ctx, "error.owner_only", kind="error")
         elif isinstance(error, checks.ServerOwnerOnly):
-            await ctx.send(t(ctx, "co.not_owner"))
+            await replies.reply(ctx, "co.not_owner", kind="error")
         elif isinstance(error, commands.CheckFailure):
             # Message i18n uniquement : ne jamais relayer str(error) brut.
-            await ctx.send(t(ctx, "error.check_failure"))
+            await replies.reply(ctx, "error.check_failure", kind="error")
         elif isinstance(error, commands.MissingRequiredArgument):
             usage = (
                 f"{config.PREFIX}{ctx.command.qualified_name} "
                 f"{ctx.command.signature}"
             )
-            await ctx.send(t(ctx, "error.missing_argument", usage=usage))
+            await replies.reply(ctx, "error.missing_argument", kind="error",
+                                 usage=usage)
         elif isinstance(error, (commands.MemberNotFound, commands.UserNotFound)):
-            await ctx.send(t(ctx, "error.member_not_found"))
+            await replies.reply(ctx, "error.member_not_found", kind="error")
         elif isinstance(error, commands.BadArgument):
-            await ctx.send(t(ctx, "error.bad_argument", error=error))
+            await replies.reply(ctx, "error.bad_argument", kind="error",
+                                 error=str(error))
         else:
             log.exception(
                 "Erreur non gérée dans la commande %s",
                 ctx.command, exc_info=error,
             )
-            await ctx.send(t(ctx, "error.generic"))
+            await replies.reply(ctx, "error.generic", kind="error")
 
 
 async def setup(bot: commands.Bot) -> None:

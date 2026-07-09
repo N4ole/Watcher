@@ -14,7 +14,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import appchoices, checks, embeds, storage
+from utils import appchoices, checks, embeds, replies, storage
 from utils.duration import human
 from utils.i18n import t
 
@@ -126,9 +126,13 @@ class Bump(commands.Cog):
             enabled = storage.get_setting(ctx.guild.id, K_ENABLED, False)
             chan_id = storage.get_setting(ctx.guild.id, K_CHANNEL)
             channel = ctx.guild.get_channel(chan_id) if chan_id else None
-            state = t(ctx, "bump.st_on", channel=channel.mention) if (
-                enabled and channel) else t(ctx, "bump.st_off")
-            await ctx.send(embed=embeds.info(state, title=t(ctx, "bump.st_title")))
+            if enabled and channel:
+                await replies.reply(ctx, "bump.st_on", kind="info",
+                                    title_key="bump.st_title",
+                                    channel=channel.mention)
+            else:
+                await replies.reply(ctx, "bump.st_off", kind="info",
+                                    title_key="bump.st_title")
             return
 
         value = etat.lower()
@@ -136,20 +140,21 @@ class Bump(commands.Cog):
             if salon is not None:
                 storage.set_setting(ctx.guild.id, K_ENABLED, True)
                 storage.set_setting(ctx.guild.id, K_CHANNEL, salon.id)
-                await ctx.send(embed=embeds.success(
-                    t(ctx, "bump.enabled", channel=salon.mention)))
+                await replies.reply(ctx, "bump.enabled", kind="success",
+                                    channel=salon.mention)
             else:
-                # Demande à l'admin de choisir le salon de réception.
+                # Demande à l'admin de choisir le salon de réception (vue
+                # dédiée : pas de bouton de traduction sur ce message-ci).
                 await ctx.send(
                     embed=embeds.info(t(ctx, "bump.choose_channel")),
                     view=BumpChannelView(ctx.author.id),
                 )
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, K_ENABLED, False)
-            await ctx.send(embed=embeds.info(t(ctx, "bump.disabled")))
+            await replies.reply(ctx, "bump.disabled", kind="info")
         else:
-            await ctx.send(embed=embeds.error(
-                t(ctx, "toggle.usage", name="bumpenable")))
+            await replies.reply(ctx, "toggle.usage", kind="error",
+                                name="bumpenable")
 
     # ------------------------------------------------------------------ #
     # Bump — rendu de la publicité
@@ -213,16 +218,17 @@ class Bump(commands.Cog):
 
         # Le système doit être activé sur ce serveur.
         if not storage.get_setting(ctx.guild.id, K_ENABLED, False):
-            await ctx.send(embed=embeds.error(t(ctx, "bump.not_enabled")))
+            await replies.reply(ctx, "bump.not_enabled", kind="error")
             return
 
         # Cooldown de 6 h par serveur.
         last = float(storage.get_setting(ctx.guild.id, K_LAST, 0) or 0)
         remaining = COOLDOWN - (time.time() - last)
         if remaining > 0:
-            await ctx.send(embed=embeds.warn(
-                t(ctx, "bump.cooldown",
-                  time=human(timedelta(seconds=int(remaining))))))
+            await replies.reply(
+                ctx, "bump.cooldown", kind="warn",
+                time=human(timedelta(seconds=int(remaining))),
+            )
             return
 
         await ctx.defer()
@@ -231,7 +237,7 @@ class Bump(commands.Cog):
         # Sans invitation, la pub n'a pas de carte ni de bouton : on abandonne.
         invite = await _resolve_invite(ctx.guild)
         if invite is None:
-            await ctx.send(embed=embeds.error(t(ctx, "bump.no_invite")))
+            await replies.reply(ctx, "bump.no_invite", kind="error")
             return
 
         # Compteur de bumps du serveur (persistant), incrémenté à ce bump.
@@ -272,11 +278,11 @@ class Bump(commands.Cog):
                  ctx.guild.name, ctx.guild.id, ctx.author, sent, bump_count)
 
         if sent:
-            await ctx.send(embed=embeds.success(
-                t(ctx, "bump.done", count=sent, total=bump_count)))
+            await replies.reply(ctx, "bump.done", kind="success",
+                                count=sent, total=bump_count)
         else:
-            await ctx.send(embed=embeds.info(
-                t(ctx, "bump.done_none", total=bump_count)))
+            await replies.reply(ctx, "bump.done_none", kind="info",
+                                total=bump_count)
 
 
 async def setup(bot: commands.Bot) -> None:

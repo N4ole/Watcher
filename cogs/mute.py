@@ -9,7 +9,7 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
-from utils import checks, embeds, storage
+from utils import checks, replies, storage
 from utils.duration import parse_duration
 from utils.i18n import t
 
@@ -33,19 +33,19 @@ class Mute(commands.Cog):
     ) -> None:
         delta = parse_duration(duree)
         if delta is None:
-            await ctx.send(embed=embeds.error(t(ctx, "mute.bad_duration")))
+            await replies.reply(ctx, "mute.bad_duration", kind="error")
             return
         if delta > MAX_TIMEOUT:
-            await ctx.send(embed=embeds.error(t(ctx, "mute.too_long")))
+            await replies.reply(ctx, "mute.too_long", kind="error")
             return
 
         try:
             await member.timeout(delta, reason=f"Mute par {ctx.author}")
         except discord.Forbidden:
-            await ctx.send(embed=embeds.error(t(ctx, "mute.forbidden")))
+            await replies.reply(ctx, "mute.forbidden", kind="error")
             return
         except discord.HTTPException as exc:
-            await ctx.send(embed=embeds.error(t(ctx, "mute.failed", error=exc)))
+            await replies.reply(ctx, "mute.failed", kind="error", error=str(exc))
             return
 
         storage.add_modlog(
@@ -77,19 +77,20 @@ class Mute(commands.Cog):
     @checks.admin()
     async def unmute(self, ctx: commands.Context, member: discord.Member) -> None:
         if member.timed_out_until is None:
-            await ctx.send(embed=embeds.warn(
-                t(ctx, "unmute.not_muted", user=member.mention)))
+            await replies.reply(ctx, "unmute.not_muted", kind="warn",
+                                user=member.mention)
             return
 
         try:
             await member.timeout(None, reason=f"Unmute par {ctx.author}")
         except discord.HTTPException as exc:
-            await ctx.send(embed=embeds.error(t(ctx, "unmute.failed", error=exc)))
+            await replies.reply(ctx, "unmute.failed", kind="error",
+                                error=str(exc))
             return
 
         storage.add_modlog(ctx.guild.id, member.id, "unmute", ctx.author.id)
-        await ctx.send(embed=embeds.success(
-            t(ctx, "unmute.done", user=member.mention)))
+        await replies.reply(ctx, "unmute.done", kind="success",
+                            user=member.mention)
 
 
 async def setup(bot: commands.Bot) -> None:

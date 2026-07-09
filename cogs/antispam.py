@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import appchoices, checks, embeds, storage
+from utils import appchoices, checks, replies, storage
 from utils.i18n import t
 
 log = logging.getLogger("action")
@@ -43,16 +43,17 @@ class AntiSpam(commands.Cog):
         value = etat.lower()
         if value in _ON:
             storage.set_setting(ctx.guild.id, "antispam", True)
-            await ctx.send(embed=embeds.success(t(
-                ctx, "antispam.on", max=MAX_MESSAGES, window=int(WINDOW),
+            await replies.reply(
+                ctx, "antispam.on", kind="success", max=MAX_MESSAGES,
+                window=int(WINDOW),
                 minutes=int(MUTE_DURATION.total_seconds() // 60),
-            )))
+            )
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antispam", False)
-            await ctx.send(embed=embeds.info(t(ctx, "antispam.off")))
+            await replies.reply(ctx, "antispam.off", kind="info")
         else:
-            await ctx.send(embed=embeds.error(
-                t(ctx, "toggle.usage", name="antispam")))
+            await replies.reply(ctx, "toggle.usage", kind="error",
+                                name="antispam")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:

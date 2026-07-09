@@ -15,7 +15,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import appchoices, checks, embeds, storage
+from utils import appchoices, checks, replies, storage
 from utils.i18n import t
 
 log = logging.getLogger(__name__)
@@ -110,14 +110,14 @@ class AntiRaid(commands.Cog):
         if value in _ON:
             await self._ensure_setup(ctx.guild)
             storage.set_setting(ctx.guild.id, "antiraid", True)
-            await ctx.send(embed=embeds.success(
-                t(ctx, "antiraid.on", channel=CHANNEL_NAME)))
+            await replies.reply(ctx, "antiraid.on", kind="success",
+                                channel=CHANNEL_NAME)
         elif value in _OFF:
             storage.set_setting(ctx.guild.id, "antiraid", False)
-            await ctx.send(embed=embeds.info(t(ctx, "antiraid.off")))
+            await replies.reply(ctx, "antiraid.off", kind="info")
         else:
-            await ctx.send(embed=embeds.error(
-                t(ctx, "toggle.usage", name="antiraid")))
+            await replies.reply(ctx, "toggle.usage", kind="error",
+                                name="antiraid")
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:

@@ -11,8 +11,7 @@ import logging
 from discord.ext import commands
 
 import config
-from utils import checks, embeds, storage
-from utils.i18n import t
+from utils import checks, replies, storage
 
 log = logging.getLogger("action")
 
@@ -39,16 +38,14 @@ class Prefixe(commands.Cog):
 
         # Sans argument : afficher le préfixe actuel.
         if nouveau is None:
-            await ctx.send(embed=embeds.info(
-                t(ctx, "prefix.current", prefix=current,
-                  default=config.PREFIX)))
+            await replies.reply(ctx, "prefix.current", kind="info",
+                                prefix=current, default=config.PREFIX)
             return
 
         nouveau = nouveau.strip()
         if (not nouveau or len(nouveau) > MAX_LEN or " " in nouveau
                 or nouveau in _FORBIDDEN):
-            await ctx.send(embed=embeds.error(
-                t(ctx, "prefix.invalid", max=MAX_LEN)))
+            await replies.reply(ctx, "prefix.invalid", kind="error", max=MAX_LEN)
             return
 
         # `reset`/`default` : retour au préfixe par défaut.
@@ -58,8 +55,8 @@ class Prefixe(commands.Cog):
                 "Préfixe réinitialisé (%s) sur %s (%s) par %s",
                 config.PREFIX, ctx.guild.name, ctx.guild.id, ctx.author,
             )
-            await ctx.send(embed=embeds.success(
-                t(ctx, "prefix.reset", prefix=config.PREFIX)))
+            await replies.reply(ctx, "prefix.reset", kind="success",
+                                prefix=config.PREFIX)
             return
 
         storage.set_setting(ctx.guild.id, "prefix", nouveau)
@@ -67,8 +64,7 @@ class Prefixe(commands.Cog):
             "Préfixe changé en '%s' sur %s (%s) par %s",
             nouveau, ctx.guild.name, ctx.guild.id, ctx.author,
         )
-        await ctx.send(embed=embeds.success(
-            t(ctx, "prefix.set", prefix=nouveau)))
+        await replies.reply(ctx, "prefix.set", kind="success", prefix=nouveau)
 
 
 async def setup(bot: commands.Bot) -> None:
