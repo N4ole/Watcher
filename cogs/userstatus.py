@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks, replies, storage
-from utils.i18n import t_lang
+from utils.i18n import t
 
 _LABEL_KEYS = {
     "warn": "us.warns_label",
@@ -38,9 +38,9 @@ def _fmt_duration(seconds: float) -> str:
     return " ".join(parts)
 
 
-def _label(lang: str, action_type: str) -> str:
+def _label(action_type: str) -> str:
     key = _LABEL_KEYS.get(action_type)
-    return t_lang(lang, key) if key else action_type
+    return t(None, key) if key else action_type
 
 
 class UserStatus(commands.Cog):
@@ -76,13 +76,13 @@ class UserStatus(commands.Cog):
         spec.thumbnail(member.display_avatar.url)
 
         # État actuel (traduit à la volée).
-        def current(lang: str) -> str:
-            etats = [t_lang(lang, "us.warns_now", count=warns)]
+        def current() -> str:
+            etats = [t(None, "us.warns_now", count=warns)]
             if muted_until is not None:
-                etats.append(t_lang(lang, "us.muted_until")
+                etats.append(t(None, "us.muted_until")
                              + discord.utils.format_dt(muted_until, style="R"))
             if confined:
-                etats.append(t_lang(lang, "us.confined_now"))
+                etats.append(t(None, "us.confined_now"))
             return "\n".join(etats)
         spec.field_fn("us.current", current, inline=False)
 
@@ -94,16 +94,16 @@ class UserStatus(commands.Cog):
             if action["type"] == "mute" and action.get("duration"):
                 total_mute += action["duration"]
 
-        def totals(lang: str) -> str:
+        def totals() -> str:
             if not counts:
-                return t_lang(lang, "us.no_sanction")
+                return t(None, "us.no_sanction")
             summary = "\n".join(
-                f"{_label(lang, typ)} : **{n}**"
+                f"{_label(typ)} : **{n}**"
                 for typ, n in sorted(counts.items())
             )
             if total_mute:
-                summary += "\n" + t_lang(lang, "us.mute_time",
-                                         duration=_fmt_duration(total_mute))
+                summary += "\n" + t(None, "us.mute_time",
+                                    duration=_fmt_duration(total_mute))
             return summary
         spec.field_fn("us.total", totals, inline=False)
 
@@ -111,19 +111,19 @@ class UserStatus(commands.Cog):
         if actions:
             recent = actions[-10:]
 
-            def recent_lines(lang: str) -> str:
+            def recent_lines() -> str:
                 lines = []
                 for action in recent:
                     ts = discord.utils.format_dt(
                         datetime.fromtimestamp(action["ts"], tz=timezone.utc),
                         style="f",
                     )
-                    label = _label(lang, action["type"]).split(" ", 1)[-1]
+                    label = _label(action["type"]).split(" ", 1)[-1]
                     extra = f" — {action['detail']}" if action.get("detail") else ""
                     if action.get("duration"):
                         extra += f" ({_fmt_duration(action['duration'])})"
                     mod = (
-                        f" {t_lang(lang, 'us.by')} <@{action['moderator']}>"
+                        f" {t(None, 'us.by')} <@{action['moderator']}>"
                         if action.get("moderator") else ""
                     )
                     lines.append(f"• {ts} — {label}{extra}{mod}")

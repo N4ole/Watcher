@@ -13,7 +13,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks, replies, storage
-from utils.i18n import t, t_lang
+from utils.i18n import t
 
 CATEGORY_NAME = "WATCHED USER"
 
@@ -168,12 +168,12 @@ class Watch(commands.Cog):
             await replies.reply(ctx, "watchlist.empty", kind="info")
             return
 
-        def lines(lang: str) -> str:
+        def lines() -> str:
             out = []
             for user_id, channel_id in watches.items():
                 channel = ctx.guild.get_channel(channel_id)
                 target = (channel.mention if channel
-                          else t_lang(lang, "watch.deleted", id=channel_id))
+                          else t(None, "watch.deleted", id=channel_id))
                 out.append(f"• <@{user_id}> → {target}")
             return "\n".join(out)
 

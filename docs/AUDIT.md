@@ -12,7 +12,7 @@ organisation du dépôt.
 
 **53 commandes** chargées sans erreur (54 cogs). L'ensemble est cohérent et
 fonctionnel : commandes hybrides pour le public, owner en préfixe seul,
-i18n fr/en complet, gestion d'erreurs centralisée et conviviale,
+textes français centralisés, gestion d'erreurs centralisée et conviviale,
 journalisation triée. Aucun défaut bloquant. Quelques améliorations
 mineures listées en §7.
 
@@ -20,12 +20,12 @@ mineures listées en §7.
 
 - **Descriptions** : toutes les commandes ont une description ; toutes les
   commandes publiques ont leur clé i18n `cmddesc.<nom>` (rendu du help
-  traduit fr/en). 🟢
+  en français). 🟢
 - **Help paginé** : 5 pages (une par catégorie), aucun champ d'embed ne
   dépasse la limite Discord de 1024 caractères. 🟢
 - **Propositions d'arguments (slash)** : sélecteur de membre là où c'est
   pertinent (kick, ban, mute, warn, watch, userinfo…), et **choix** pour les
-  valeurs finies (on/off des anti‑*, fr/en de `langue`, on/off/status +
+  valeurs finies (on/off des anti‑*, on/off/status +
   types de `logs`, txt/csv/pdf de `export`). 🟢
 - **Owner en préfixe uniquement** : aucune commande d'owner n'est exposée en
   slash. 🟢

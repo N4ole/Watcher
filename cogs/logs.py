@@ -29,7 +29,7 @@ _STATUS = {"status", "statut", "état", "etat", "list", "liste", "info"}
 _CAT_CHOICES = [
     app_commands.Choice(name=t(None, cat_key), value=token)
     for token, cat_key in categories.TYPE_TO_CAT.items()
-] + [app_commands.Choice(name="Tous / All", value="all")]
+] + [app_commands.Choice(name="Tous", value="all")]
 
 
 def _types_list() -> str:
@@ -105,7 +105,7 @@ class Logs(commands.Cog):
     )
     @app_commands.choices(
         etat=appchoices.onoff() + [
-            app_commands.Choice(name="Statut / Status", value="status"),
+            app_commands.Choice(name="Statut", value="status"),
         ],
         categorie=_CAT_CHOICES,
     )

@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 
 from utils import replies
-from utils.i18n import t_lang
+from utils.i18n import t
 
 _STATUS_KEYS = {
     discord.Status.online: "status.online",
@@ -39,21 +39,14 @@ class UserInfo(commands.Cog):
 
         # Identité.
         spec.field("ui.name", str(member))
-        spec.field_fn("ui.nick",
-                      lambda l, m=member: m.nick or t_lang(l, "ui.none"))
+        spec.field("ui.nick", member.nick or t(None, "ui.none"))
         spec.field("f.id", f"`{member.id}`")
-        spec.field_fn(
-            "ui.bot",
-            lambda l, m=member: t_lang(l, "ui.yes" if m.bot else "ui.no"),
-        )
+        spec.field("ui.bot", t(None, "ui.yes" if member.bot else "ui.no"))
 
         # Statut et activité.
         status_key = _STATUS_KEYS.get(member.status)
-        spec.field_fn(
-            "ui.status",
-            lambda l, k=status_key, s=member.status: (
-                t_lang(l, k) if k else str(s)),
-        )
+        spec.field("ui.status",
+                   t(None, status_key) if status_key else str(member.status))
         if member.activity is not None:
             spec.field("ui.activity", str(member.activity.name))
 
@@ -73,11 +66,9 @@ class UserInfo(commands.Cog):
         # Rôles (hors @everyone).
         roles = [r.mention for r in reversed(member.roles)
                  if r.name != "@everyone"]
-        spec.field_fn(
-            "ui.roles",
-            lambda l, r=roles: ", ".join(r) if r else t_lang(l, "ui.none"),
-            inline=False, count=len(roles),
-        )
+        spec.field("ui.roles",
+                   ", ".join(roles) if roles else t(None, "ui.none"),
+                   inline=False, count=len(roles))
         spec.field("ui.top_role", member.top_role.mention)
         spec.footer("f.requested_by", user=str(ctx.author))
         await replies.reply_rich(ctx, spec)

@@ -33,7 +33,6 @@
 - [`!helpowner`](helpowner.md)
 - [`!invite`](invite.md)
 - [`!kick`](kick.md)
-- [`!langue`](langue.md)
 - [`!leave`](leave.md)
 - [`!logs`](logs.md)
 - [`!membercount`](membercount.md)

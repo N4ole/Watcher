@@ -1,7 +1,7 @@
 # Watcher
 
 Bot Discord de **modération et d'utilitaires** en Python (`discord.py`),
-**bilingue** (français par défaut, anglais). Il supporte à la fois les
+entièrement en **français**. Il supporte à la fois les
 **commandes préfixe** (`!` par défaut, **personnalisable par serveur** via la
 commande `prefixe`) et les **commandes slash** (`/`), avec une architecture
 multi-fichiers (un fichier par commande).
@@ -46,7 +46,7 @@ Watcher/
 ├── .env.example     # Modèle de configuration
 ├── utils/           # Modules communs
 │   ├── storage.py       # Persistance (JSON par domaine, écritures atomiques)
-│   ├── i18n.py          # Catalogue de traductions fr/en (t(ctx, clé))
+│   ├── i18n.py          # Catalogue des textes en français (t(ctx, clé))
 │   ├── checks.py        # Vérifications de permissions (source unique)
 │   ├── categories.py    # Mapping cog → catégorie (help ET logs)
 │   ├── logchannels.py   # Résolution des salons de logs (source unique)
@@ -79,9 +79,8 @@ Régénérer après un changement de commandes :
 - [`commande.json`](commande.json) (liste des commandes avec description et
   arguments) : `python -m scripts.gen_commands`.
 
-Le bot est **bilingue** : `langue <fr/en>` change la langue **par serveur** ;
-les messages passent par le catalogue centralisé
-[`utils/i18n.py`](utils/i18n.py). Chaque commande publique utilise
+Le bot est entièrement en **français** : tous les messages passent par le
+catalogue centralisé [`utils/i18n.py`](utils/i18n.py). Chaque commande publique utilise
 `@commands.hybrid_command` (disponible en `!ping` **et** `/ping`). Le préfixe
 est propre à chaque serveur (`prefixe <nouveau>` / `prefixe reset`) ; la
 mention du bot reste toujours utilisable en secours. Les slash sont
@@ -183,7 +182,6 @@ python main.py
 | `antibot` / `antiraid` / `antipub` / `antispam` / `antiinsulte` `<on/off>` | Automodération |
 | `protections` | État de toutes les protections |
 | `analyse` | Courbes d'activité du serveur sur 7 jours |
-| `langue <fr/en>` | Langue du bot pour ce serveur |
 
 ### Propriétaire du serveur
 

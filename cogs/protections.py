@@ -2,7 +2,7 @@
 from discord.ext import commands
 
 from utils import checks, replies, storage
-from utils.i18n import t_lang
+from utils.i18n import t
 
 # Protections activables via commande (clé de réglage -> clé de libellé i18n).
 _TOGGLES = {
@@ -32,11 +32,11 @@ class Protections(commands.Cog):
             for key in _TOGGLES
         }
 
-        def toggle_lines(lang: str) -> str:
+        def toggle_lines() -> str:
             out = []
             for key, label_key in _TOGGLES.items():
-                state = t_lang(lang, "prot.on" if states[key] else "prot.off")
-                out.append(f"{t_lang(lang, label_key)} : **{state}**")
+                state = t(None, "prot.on" if states[key] else "prot.off")
+                out.append(f"{t(None, label_key)} : **{state}**")
             return "\n".join(out)
 
         spec = (

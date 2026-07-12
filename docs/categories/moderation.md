@@ -13,7 +13,6 @@
 - [`!confine`](../commands/confine.md) — Isole un utilisateur dans un salon de confinement. — 🔒 *Administrateur*
 - [`!delnote`](../commands/delnote.md) — Supprime une note du dossier d'un utilisateur (par numéro). — 🔒 *Administrateur*
 - [`!kick`](../commands/kick.md) — Expulse un utilisateur du serveur (avec raison). — 🔒 *Expulser des membres*
-- [`!langue`](../commands/langue.md) — Choisit la langue du bot pour ce serveur (fr/en). — 🔒 *Administrateur*
 - [`!logs`](../commands/logs.md) — Active/désactive les logs Discord par type, ou `status`. — 🔒 *Administrateur*
 - [`!move`](../commands/move.md) — Déplace un membre vers un autre salon vocal. — 🔒 *Déplacer des membres*
 - [`!mute`](../commands/mute.md) — Coupe la parole à un utilisateur pour une durée (ex: 5m, 1h30m). — 🔒 *Administrateur*

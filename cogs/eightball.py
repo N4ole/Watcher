@@ -7,9 +7,8 @@ from utils import replies
 from utils.i18n import EIGHTBALL
 
 
-def _answer(lang: str, idx: int) -> str:
-    answers = EIGHTBALL.get(lang) or EIGHTBALL["fr"]
-    return answers[idx % len(answers)]
+def _answer(idx: int) -> str:
+    return EIGHTBALL[idx % len(EIGHTBALL)]
 
 
 class EightBall(commands.Cog):
@@ -25,11 +24,11 @@ class EightBall(commands.Cog):
     async def eightball(self, ctx: commands.Context, *, question: str) -> None:
         # Indice figé : la réponse reste « la même » quand on traduit le message
         # (on ne re-tire pas au sort à chaque bascule de langue).
-        idx = random.randrange(len(EIGHTBALL["fr"]))
+        idx = random.randrange(len(EIGHTBALL))
         spec = (
             replies.Embed("fun")
             .title("8ball.title")
-            .desc_fn(lambda l, i=idx: f"🎱 {_answer(l, i)}")
+            .desc_text(f"🎱 {_answer(idx)}")
             .field("8ball.question", question[:1024], inline=False)
         )
         await replies.reply_rich(ctx, spec)

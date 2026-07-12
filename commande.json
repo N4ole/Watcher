@@ -2,7 +2,7 @@
   "bot": "Watcher",
   "version": "0.20",
   "prefixe_defaut": "!",
-  "total": 79,
+  "total": 78,
   "commandes": [
     {
       "nom": "8ball",
@@ -453,18 +453,6 @@
         },
         {
           "nom": "raison",
-          "obligatoire": false
-        }
-      ]
-    },
-    {
-      "nom": "langue",
-      "description": "Choisit la langue du bot pour ce serveur (fr/en).",
-      "categorie": "🛡️ Modération",
-      "permission": "Administrateur",
-      "arguments": [
-        {
-          "nom": "langue",
           "obligatoire": false
         }
       ]

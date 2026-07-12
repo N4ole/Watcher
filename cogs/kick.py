@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from utils import checks, replies, storage
-from utils.i18n import t, t_lang
+from utils.i18n import t
 
 log = logging.getLogger("action")
 
@@ -64,8 +64,8 @@ class Kick(commands.Cog):
             ctx.guild.name, ctx.guild.id, reason,
         )
         spec = replies.Embed("success").desc_fn(
-            lambda l: t_lang(l, "kick.done", user=str(member), reason=reason)
-            + ("" if dm_sent else "\n" + t_lang(l, "mod.dm_failed"))
+            lambda: t(None, "kick.done", user=str(member), reason=reason)
+            + ("" if dm_sent else "\n" + t(None, "mod.dm_failed"))
         )
         await replies.reply_rich(ctx, spec)
 

@@ -12,7 +12,7 @@ dépôt. À lire **en premier**.
 ## 1. Résumé du projet
 
 **Watcher** est un bot Discord de **modération et d'utilitaires**, en Python
-(`discord.py`), entièrement **bilingue** (français par défaut, anglais). Il
+(`discord.py`), entièrement en **français**. Il
 fournit : modération (kick/ban/mute/warn/confine + modération vocale), notes de
 dossier, automodération (anti-raid, anti-spam, anti-pub, anti-insulte,
 anti-caps/emoji, anti-bot), surveillance d'utilisateurs (`watch`), logs Discord
@@ -143,9 +143,10 @@ ensemble (`mute`/`unmute`, `ban`/`unban`, `confine`/`unconfine`,
   **blacklist de serveurs**, owners ; compteur de tickets dans les réglages).
   **Écritures atomiques** (`_atomic_dump`), **cache mémoire des réglages**
   (invalidé à l'écriture), un `Lock` par fichier.
-- `i18n.py` — `t(source, key, **kwargs)` résout la langue via `source`
-  (Context/guild/id → réglage `lang`, français par défaut). Grand `_CATALOG`
-  fr/en, `EIGHTBALL`, `get_lang`. Descriptions du help via `cmddesc.<nom>`.
+- `i18n.py` — `t(source, key, **kwargs)` renvoie le texte **français** d'une
+  clé (le 1er argument est conservé par compatibilité mais ignoré : le bot est
+  unilingue). Grand `_CATALOG` (français), liste `EIGHTBALL`. Descriptions du
+  help via `cmddesc.<nom>`.
 - `categories.py` — **source unique** du mapping cog → catégorie
   (`cat.*`) + permissions, partagé par le **help** ET les **logs**
   (`TYPE_TO_CAT` / `CAT_TO_TYPE` / `resolve_type`).
@@ -205,23 +206,28 @@ if checks.is_admin(message.author):   # exemption admins
 - `web_app.py` — app aiohttp : OAuth2 Discord (**avec `state` anti-CSRF**),
   sessions en mémoire (cookie httponly + **`Secure` conditionnel** en HTTPS),
   page de login (consentement cookies **bloquant**), dashboard owner à 3
-  pages (Général / Analytics / Live), pages légales bilingues. Les noms de
-  serveurs sont **échappés** (`esc()`) à l'affichage (anti-XSS).
+  pages (Général / Analytics / Live), pages légales (français). Les noms de
+  serveurs sont **échappés** (`esc()`) à l'affichage (anti-XSS). **Panel
+  entièrement en français** (pas de sélecteur de langue).
 - `logbuffer.py` — tampon circulaire des logs pour la console « live ».
-- `prefs.py` — langue par **compte** web. `stats.py` — instantanés/historique.
+- `stats.py` — instantanés/historique.
 - **Écoute sur `127.0.0.1` par défaut** (`WEB_HOST`) : exposition publique
   volontaire (derrière un reverse-proxy HTTPS).
 
-## 7. Internationalisation
+## 7. Textes (français)
 
-Tout texte affiché passe par `t(source, "clef", **kwargs)`. Ajouter une
-chaîne = entrée `{"fr": ..., "en": ...}` dans `_CATALOG` (`utils/i18n.py`).
-Langue résolue **par serveur** (réglage `lang`, français par défaut) et **par
-compte** côté web. `t_lang(lang, clef, **kwargs)` force une langue précise.
-Les descriptions de commandes du help sont traduites via `cmddesc.<nom>`
-(repli sur la description du décorateur).
+Le bot est **unilingue (français)**. Tout texte affiché passe par
+`t(source, "clef", **kwargs)`. Ajouter une chaîne = entrée
+`"clef": "texte français"` dans `_CATALOG` (`utils/i18n.py`). Le 1er argument
+de `t()` (`source`) est conservé par compatibilité mais **ignoré**. Les
+descriptions de commandes du help utilisent `cmddesc.<nom>` (repli sur la
+description du décorateur).
 
-### 7 bis. Réponses traduisibles (bouton de traduction, IMPORTANT)
+> ⚠️ **Plus de système de traduction** : il n'y a plus de langue anglaise, plus
+> de bouton de traduction, plus de commande `langue`. Ne réintroduis ni
+> `t_lang`, ni `get_lang`, ni de clés `{"fr": ..., "en": ...}`.
+
+### 7 bis. Réponses centralisées (`utils/replies.py`, IMPORTANT)
 
 **`utils/replies.py` est le point d'entrée centralisé des réponses du bot.**
 Au lieu de `ctx.send(embed=embeds.success(t(ctx, "clef")))`, on écrit :
@@ -232,20 +238,13 @@ await replies.reply(ctx, "clef", kind="success", **kwargs)   # salon
 await replies.reply_dm(user, guild, "clef", kind="info", **kwargs)  # MP
 ```
 
-- `reply()` rend un embed dans la langue **par défaut du serveur** et attache
-  un **bouton de traduction** (`TranslateView`). Un clic bascule le message
-  fr⇄en **en place** (édition, pas de nouveau message) ; le bouton affiche le
-  drapeau de l'**autre** langue (message fr → 🇬🇧 ; message en → 🇫🇷).
-- La traduction reconstruit l'embed à partir de la **clé i18n** (+ kwargs) via
-  `t_lang` : toute commande passant par `reply()` a le bouton **automatiquement**.
-- `kind` ∈ `success|error|info|warn|fun` (couleur). `title_key` pour un titre
-  traduit. Le **gestionnaire d'erreurs global** (`cogs/errors.py`) utilise
-  `reply()` → tous les messages d'erreur ont le bouton.
-- `langue <fr/en>` ne fait que **définir la langue par défaut du serveur**
-  (persistée) ; elle ne traduit pas un message précis — c'est le rôle du bouton.
-- Les embeds **riches multi-champs** (userinfo, help, serverinfo, botinfo, la
-  pub `bump`…) gardent leur mise en page dédiée ; ils peuvent adopter le
-  système via une vue de traduction spécifique si besoin.
+- `reply()` rend un embed **en français** à partir d'une clé i18n. `kind` ∈
+  `success|error|info|warn|fun` (couleur), `title_key` pour un titre.
+- `reply_rich(ctx, spec)` construit un embed **riche multi-champs** via la spec
+  `replies.Embed` (`.title/.desc/.field/.field_t/.field_fn/.desc_fn/.footer…`).
+  `field_fn`/`desc_fn` prennent une closure **sans argument** (`() -> str`).
+- Le **gestionnaire d'erreurs global** (`cogs/errors.py`) utilise `reply()` →
+  tous les messages d'erreur passent par ce point unique.
 
 ## 8. Journalisation
 
@@ -295,9 +294,9 @@ https://github.com/N4ole/Watcher.git`.
 
 - Tronc complet et fusionné sur `main` : modération (dont kick/ban/unban,
   ban par ID, modération vocale), automod, watch, logs Discord (dont hors
-  commande), bienvenue, giveaways, tickets, export, panel web durci, i18n
-  fr/en, console colorée + logs fichiers, rapport d'erreurs, notifications
-  owners join/leave, blacklist de serveurs.
+  commande), bienvenue, giveaways, tickets, export, panel web durci, textes
+  français centralisés, console colorée + logs fichiers, rapport d'erreurs,
+  notifications owners join/leave, blacklist de serveurs.
 - **Version `0.20` (bêta)**, affichée dans `botinfo`, `status`, `central` et
   le statut Discord.
 - Le repo n'a **pas** de checks CI configurés.

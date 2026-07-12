@@ -17,7 +17,6 @@ from aiohttp import web
 from utils import checks
 import config
 from web import logbuffer
-from web import prefs
 from web import stats
 
 DISCORD_API = "https://discord.com/api"
@@ -161,9 +160,7 @@ def build_app(bot) -> web.Application:
         _set_session(
             response,
             {"user": {"id": user["id"], "username": user.get("username")},
-             "guild_ids": guild_ids,
-             # Langue mémorisée pour ce compte (persistée côté serveur).
-             "lang": prefs.get_lang(user["id"])},
+             "guild_ids": guild_ids},
             secure=_is_secure(request),
         )
         # Le `state` a servi : on retire son cookie.
@@ -199,7 +196,6 @@ def build_app(bot) -> web.Application:
             "is_owner": is_owner,
             "user": session["user"],
             "guilds": guilds_data,
-            "lang": session.get("lang", "fr"),
         }
         if is_owner:
             payload["servers_history"] = stats.get_snapshots()
@@ -260,19 +256,6 @@ def build_app(bot) -> web.Application:
         last = lines[-1]["id"] if lines else after
         return web.json_response({"lines": lines, "last": last})
 
-    async def set_lang(request: web.Request) -> web.Response:
-        # Enregistre la langue pour le compte connecté (persistée côté serveur).
-        session = _get_session(request)
-        if session is None:
-            return web.json_response({"error": "unauthorized"}, status=401)
-        body = await request.json()
-        lang = (body.get("lang") or "").lower()
-        if lang not in prefs.LANGS:
-            return web.json_response({"error": "invalid"}, status=400)
-        prefs.set_lang(session["user"]["id"], lang)
-        session["lang"] = lang
-        return web.json_response({"ok": True, "lang": lang})
-
     async def privacy(_request: web.Request) -> web.Response:
         return web.Response(text=_PRIVACY_HTML, content_type="text/html")
 
@@ -286,7 +269,6 @@ def build_app(bot) -> web.Application:
     app.router.add_get("/api/stats", api_stats)
     app.router.add_post("/api/control/presence", control_presence)
     app.router.add_post("/api/control/reload", control_reload)
-    app.router.add_post("/api/lang", set_lang)
     app.router.add_get("/api/logs", api_logs)
     # Pages publiques (accessibles sans connexion).
     app.router.add_get("/privacy", privacy)
@@ -349,21 +331,13 @@ _NEON_CSS = """
  .gated{opacity:.35;pointer-events:none;filter:grayscale(.6)}
 """
 
-# Consentement cookies + gestion de la langue sur les pages publiques.
-# La persistance de la langue (localStorage) n'a lieu qu'avec le consentement.
+# Consentement cookies (bloquant) sur les pages publiques.
 _CONSENT_JS = """
 function getConsent(){return localStorage.getItem('cookieConsent');}
-function persistLang(l){if(getConsent()==='yes')localStorage.setItem('lang',l);}
-function startLang(){return getConsent()==='yes'?
- (localStorage.getItem('lang')||'fr'):'fr';}
-var _lang=startLang();
-function getLang(){return _lang;}
-function toggleLang(){applyLang(getLang()==='fr'?'en':'fr');}
 function setGate(on){document.querySelectorAll('.gate-consent').forEach(
  function(e){if(on){e.classList.add('gated');e.setAttribute('aria-disabled','true');}
  else{e.classList.remove('gated');e.removeAttribute('aria-disabled');}});}
 function cookieChoice(v){localStorage.setItem('cookieConsent',v);
- if(v==='no'){localStorage.removeItem('lang');}else{persistLang(_lang);}
  var bn=document.getElementById('cookie-banner');if(bn)bn.classList.remove('show');
  setGate(false);}
 function initConsent(){if(getConsent()===null){
@@ -376,19 +350,18 @@ document.addEventListener('click',function(ev){
 },true);
 """
 
-# Modale de consentement (bilingue, bloquante), masquée par défaut.
+# Modale de consentement (bloquante), masquée par défaut.
 _COOKIE_BANNER = """
  <div id="cookie-banner">
   <div id="cookie-card">
    <div class="ico">🍪</div>
-   <h2 data-fr="Cookies & confidentialité" data-en="Cookies & privacy"></h2>
-   <p data-fr="Ce site peut mémoriser votre langue dans votre navigateur. Choisissez avant de continuer : votre choix est nécessaire pour vous connecter."
-      data-en="This site can store your language in your browser. Please choose before continuing: your choice is required to log in."></p>
+   <h2>Cookies & confidentialité</h2>
+   <p>Ce site utilise un cookie de session strictement nécessaire pour vous
+      garder connecté. Choisissez avant de continuer : votre choix est
+      nécessaire pour vous connecter.</p>
    <div class="row">
-    <button class="btn" onclick="cookieChoice('yes')"
-     data-fr="Accepter" data-en="Accept"></button>
-    <button class="btn decline" onclick="cookieChoice('no')"
-     data-fr="Refuser" data-en="Decline"></button>
+    <button class="btn" onclick="cookieChoice('yes')">Accepter</button>
+    <button class="btn decline" onclick="cookieChoice('no')">Refuser</button>
    </div>
   </div>
  </div>"""
@@ -399,27 +372,18 @@ _LOGIN_HTML = """<!DOCTYPE html>
 <style>""" + _NEON_CSS + """
  body{display:flex;height:100vh;align-items:center;justify-content:center}
  .card{padding:44px;text-align:center;max-width:420px;position:relative}
- #lang{position:absolute;top:16px;right:16px}
 </style></head>
 <body><div class="card">
- <button class="btn" id="lang" onclick="toggleLang()">English</button>
  <h1>▚ Watcher ▞</h1>
- <p data-fr="Panneau d'administration. Connecte-toi avec Discord pour accéder aux statistiques et au contrôle du bot."
-    data-en="Admin panel. Log in with Discord to access the bot's statistics and controls."></p>
- <a class="btn gate-consent" href="/login" data-fr="Se connecter avec Discord"
-    data-en="Log in with Discord"></a>
+ <p>Panneau d'administration. Connecte-toi avec Discord pour accéder aux
+    statistiques et au contrôle du bot.</p>
+ <a class="btn gate-consent" href="/login">Se connecter avec Discord</a>
  <p style="margin-top:26px;font-size:.85em;opacity:.75">
-   <a href="/privacy" data-fr="Politique de confidentialité"
-      data-en="Privacy Policy"></a> ·
-   <a href="/terms" data-fr="Conditions d'utilisation"
-      data-en="Terms of Service"></a></p>
+   <a href="/privacy">Politique de confidentialité</a> ·
+   <a href="/terms">Conditions d'utilisation</a></p>
 </div>""" + _COOKIE_BANNER + """
 <script>""" + _CONSENT_JS + """
-function applyLang(l){_lang=l;document.documentElement.lang=l;persistLang(l);
- document.querySelectorAll('[data-fr]').forEach(function(e){
-   e.textContent=e.getAttribute('data-'+l);});
- var b=document.getElementById('lang');if(b)b.textContent=(l==='fr'?'English':'Français');}
-applyLang(_lang);initConsent();
+initConsent();
 </script>
 </body></html>"""
 
@@ -449,12 +413,11 @@ _DASHBOARD_HTML = """<!DOCTYPE html>
 <body>
  <header><h1>▚ Watcher ▞</h1>
    <span class="row"><span id="who"></span>
-   <button class="btn" id="lang" onclick="toggleLang()">English</button>
    <a class="btn" href="/logout" id="logout"></a></span></header>
  <nav class="tabs" id="tabs" style="display:none"></nav>
  <div id="content"></div>
 <script>
-const T={fr:{lang:'English',logout:'Déconnexion',analytics:'Analytics',
+const L={logout:'Déconnexion',analytics:'Analytics',
  servers:'Serveurs',members:'Membres',commands:'Commandes',ping:'Ping',
  uptime:'Uptime',control:'Contrôle du bot',statusPh:'Statut (ex: $help)',
  setStatus:'Définir le statut',reloadCogs:'Recharger les cogs',
@@ -466,28 +429,14 @@ const T={fr:{lang:'English',logout:'Déconnexion',analytics:'Analytics',
  expired:'Session expirée.',reconnect:'Se reconnecter',
  tGeneral:'Général',tAnalytics:'Analytics',tLive:'Live',
  selServer:'Serveur :',selAll:'Général (tous les serveurs)',
- liveTitle:'Console en direct',liveClear:'Effacer',liveAuto:'Défilement auto'},
- en:{lang:'Français',logout:'Log out',analytics:'Analytics',servers:'Servers',
- members:'Members',commands:'Commands',ping:'Ping',uptime:'Uptime',
- control:'Bot control',statusPh:'Status (e.g. $help)',setStatus:'Set status',
- reloadCogs:'Reload cogs',statusOk:'✅ Status updated',cogsOk:'cogs reloaded',
- err:'❌ Error',serversEvo:'Server count over time',serversLbl:'Servers',
- membersTotal:'Members (total)',membersLbl:'Members',membersEvo:'Members over time',
- cmdUsed:'Commands used',cmdPerDay:'Commands per day',
- noData:'No data available yet.',expired:'Session expired.',
- reconnect:'Log in again',tGeneral:'General',tAnalytics:'Analytics',tLive:'Live',
- selServer:'Server:',selAll:'General (all servers)',
- liveTitle:'Live console',liveClear:'Clear',liveAuto:'Auto-scroll'}};
-let CUR='fr';let L=T[CUR];let DATA=null;let charts=[];let liveTimer=null;let liveLast=0;
-function applyHeader(){document.documentElement.lang=CUR;L=T[CUR];
- document.getElementById('lang').textContent=L.lang;
+ liveTitle:'Console en direct',liveClear:'Effacer',liveAuto:'Défilement auto'};
+let DATA=null;let charts=[];let liveTimer=null;let liveLast=0;
+function applyHeader(){document.documentElement.lang='fr';
  document.getElementById('logout').textContent=L.logout;}
 applyHeader();
-function toggleLang(){const nl=CUR==='fr'?'en':'fr';
- post('/api/lang',{lang:nl}).then(function(){location.reload();});}
 function fmtUptime(s){const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),
- m=Math.floor(s%3600/60);const u=CUR==='fr'?'j':'d';
- return (d?d+u+' ':'')+(h?h+'h ':'')+m+'m';}
+ m=Math.floor(s%3600/60);
+ return (d?d+'j ':'')+(h?h+'h ':'')+m+'m';}
 function tsLabels(p){return p.map(x=>new Date(x.ts*1000).toLocaleString());}
 const NEON={cyan:'#00eaff',magenta:'#ff2bd6',purple:'#9d4bff',
  green:'#39ff14',yellow:'#f5ff3d'};
@@ -610,7 +559,7 @@ async function load(){
  const r=await fetch('/api/stats');
  if(!r.ok){document.getElementById('content').innerHTML=
    '<p>'+L.expired+' <a href="/login">'+L.reconnect+'</a></p>';return;}
- DATA=await r.json();CUR=DATA.lang||'fr';applyHeader();
+ DATA=await r.json();
  document.getElementById('who').textContent='@'+(DATA.user.username||'');
  if(DATA.is_owner){show('general');}
  else{
@@ -633,7 +582,7 @@ load();
 # --------------------------------------------------------------------------- #
 # Pages légales publiques
 # --------------------------------------------------------------------------- #
-def _legal_page(title: str, fr_body: str, en_body: str) -> str:
+def _legal_page(title: str, body: str) -> str:
     return (
         "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"utf-8\">"
         f"<title>Watcher — {title}</title><style>" + _NEON_CSS + """
@@ -641,22 +590,14 @@ def _legal_page(title: str, fr_body: str, en_body: str) -> str:
  h1{margin-bottom:4px}
  h2{margin-top:28px}
  .card{padding:28px;position:relative}
- #lang{position:absolute;top:20px;right:20px}
  footer{margin-top:30px;font-size:.85em;opacity:.7;text-align:center}
-</style></head><body><div class="card">
- <button class="btn" id="lang" onclick="toggleLang()">English</button>
- <div id="fr">""" + fr_body + """</div>
- <div id="en" style="display:none">""" + en_body + """</div>
- <footer><a href="/">Accueil / Home</a> ·
- <a href="/privacy">Confidentialité / Privacy</a> ·
- <a href="/terms">Conditions / Terms</a></footer>
+</style></head><body><div class="card">""" + body + """
+ <footer><a href="/">Accueil</a> ·
+ <a href="/privacy">Confidentialité</a> ·
+ <a href="/terms">Conditions</a></footer>
 </div>""" + _COOKIE_BANNER + """
 <script>""" + _CONSENT_JS + """
-function applyLang(l){_lang=l;document.documentElement.lang=l;persistLang(l);
- document.getElementById('fr').style.display=(l==='fr'?'':'none');
- document.getElementById('en').style.display=(l==='en'?'':'none');
- document.getElementById('lang').textContent=(l==='fr'?'English':'Français');}
-applyLang(_lang);initConsent();
+initConsent();
 </script>
 </body></html>"""
     )
@@ -694,10 +635,7 @@ _PRIVACY_BODY = """
  serveurs afin de vérifier vos droits d'accès. Aucune de ces informations
  n'est revendue ni transmise à des tiers.</p>
  <p>Un cookie de session strictement nécessaire est utilisé pour vous garder
- connecté. Une fois connecté, votre <strong>choix de langue est mémorisé côté
- serveur, rattaché à votre compte</strong>. Sur les pages publiques, la
- mémorisation de la langue dans votre navigateur (stockage local) n'a lieu
- qu'avec votre <strong>consentement</strong>.</p>
+ connecté. Aucun autre stockage n'est effectué dans votre navigateur.</p>
 
  <h2>3. Finalités</h2>
  <p>Les données servent uniquement au fonctionnement du Bot (modération,
@@ -765,98 +703,6 @@ _TERMS_BODY = """
  acceptation de la version en vigueur.</p>
 """
 
-_PRIVACY_BODY_EN = """
- <h1>Privacy Policy</h1>
- <p><em>Last updated: 2026.</em></p>
- <p>This policy describes the data processed by the Discord bot “Watcher”
- (“the Bot”) and how it is used.</p>
 
- <h2>1. Data collected</h2>
- <p>Depending on the features enabled by a server's administrators, the Bot may
- store:</p>
- <ul>
-   <li><strong>Discord identifiers</strong> (users, servers, channels, roles)
-   required to run commands;</li>
-   <li><strong>Moderation data</strong>: warnings, mutes, confinements and the
-   history of sanctions;</li>
-   <li><strong>Aggregated statistics</strong>: message counts, joins and
-   leaves, member counts (for activity charts);</li>
-   <li><strong>Server settings</strong> (enabled protections);</li>
-   <li><strong>Reminders</strong> you schedule;</li>
-   <li>When an administrator enables <strong>watching</strong> of a user, the
-   content of their messages, reactions, nickname and status changes, and voice
-   activity are copied into a private channel of the relevant server.</li>
- </ul>
- <p>The Bot only accesses message content for the automoderation and watching
- features described above.</p>
-
- <h2>2. Web panel login</h2>
- <p>The admin panel uses Discord authentication (OAuth2). The Bot then reads
- your identifier, username and the list of your servers to verify your access
- rights. None of this information is sold or shared with third parties.</p>
- <p>A strictly necessary session cookie keeps you logged in. Once logged in,
- your <strong>language choice is stored server-side, tied to your account</strong>.
- On public pages, storing the language in your browser (local storage) only
- happens with your <strong>consent</strong>.</p>
-
- <h2>3. Purposes</h2>
- <p>Data is used solely to operate the Bot (moderation, statistics, reminders)
- and is not used for advertising.</p>
-
- <h2>4. Retention</h2>
- <p>Data is kept as long as necessary for the service. Activity statistics are
- automatically purged after 60 days. An administrator can delete data related
- to a feature by disabling it (e.g. <code>unwatch</code>, <code>unwarn</code>).</p>
-
- <h2>5. Sharing</h2>
- <p>Data is not shared with third parties. It remains stored by the Bot's host
- and, for watching, within the relevant Discord server.</p>
-
- <h2>6. Your rights</h2>
- <p>You may request deletion of your data by contacting a server administrator
- or the Bot operator. Removing the Bot from a server stops any further
- collection for that server.</p>
-
- <h2>7. Contact</h2>
- <p>For any question about this data, contact the Bot operator through the
- support server or the <code>contactowner</code> command.</p>
-"""
-
-_TERMS_BODY_EN = """
- <h1>Terms of Service</h1>
- <p><em>Last updated: 2026.</em></p>
- <p>By adding or using the “Watcher” bot (“the Bot”), you accept these terms.</p>
-
- <h2>1. Service</h2>
- <p>The Bot provides moderation, utility and statistics features for Discord
- servers. It is provided “as is”, without warranty of availability or absence
- of errors.</p>
-
- <h2>2. Acceptable use</h2>
- <ul>
-   <li>Comply with the <a href="https://discord.com/terms">Discord Terms</a> and
-   <a href="https://discord.com/guidelines">Community Guidelines</a>;</li>
-   <li>Do not use the Bot to harass, spy abusively, or break the law;</li>
-   <li>Watching and moderation features must be used responsibly and in
-   compliance with applicable law and transparency towards your members.</li>
- </ul>
-
- <h2>3. Liability</h2>
- <p>The Bot operator cannot be held liable for damages resulting from the use
- or unavailability of the Bot, nor for how server administrators use it.</p>
-
- <h2>4. Availability</h2>
- <p>The service may be modified, suspended or discontinued at any time without
- notice.</p>
-
- <h2>5. Data</h2>
- <p>Data processing is described in the
- <a href="/privacy">Privacy Policy</a>.</p>
-
- <h2>6. Changes</h2>
- <p>These terms may change. Continued use of the Bot constitutes acceptance of
- the version in force.</p>
-"""
-
-_PRIVACY_HTML = _legal_page("Confidentialité / Privacy", _PRIVACY_BODY, _PRIVACY_BODY_EN)
-_TERMS_HTML = _legal_page("Conditions / Terms", _TERMS_BODY, _TERMS_BODY_EN)
+_PRIVACY_HTML = _legal_page("Confidentialité", _PRIVACY_BODY)
+_TERMS_HTML = _legal_page("Conditions", _TERMS_BODY)
