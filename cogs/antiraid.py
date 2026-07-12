@@ -9,7 +9,6 @@ Une fois le captcha validé, le membre perd « Non vérifié » et reçoit le r�
 import asyncio
 import logging
 import random
-import string
 
 import discord
 from discord import app_commands

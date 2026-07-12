@@ -168,7 +168,7 @@ class Ban(commands.Cog):
         try:
             await ctx.guild.ban(
                 cible, reason=f"{ctx.author} : {reason}",
-                delete_message_days=0,
+                delete_message_seconds=0,
             )
         except discord.Forbidden:
             await replies.reply(ctx, "ban.forbidden", kind="error")

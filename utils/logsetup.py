@@ -15,7 +15,6 @@ une trace durable et organisée de l'activité du bot. Les logs sont :
   d'un historique glissant (30 jours par défaut).
 """
 import logging
-import sys
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
